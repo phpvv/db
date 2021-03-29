@@ -1,0 +1,26 @@
+{
+    "name": "phpvv/db",
+    "description": "VV database abstraction layer with query builder and DB structure models",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Volodymyr Sarnytskyi",
+            "email": "v00v4n@gmail.com"
+        }
+    ],
+    "autoload": {
+        "classmap": ["Db.php"],
+        "psr-4": {
+            "VV\\Db\\": "Db"
+        }
+    },
+    "require": {
+        "php": "^8.0",
+        "phpvv/runtime": "^0.2.0",
+        "phpvv/exception": "^0.2.0"
+    },
+    "require-dev": {
+        "jetbrains/phpstorm-attributes": "^1.0"
+    }
+}
