@@ -23,12 +23,12 @@ use VV\Db\Sql\Expression;
 final class Sql {
 
     /**
-     * @param string|Expression $expression
-     * @param array             $params
+     * @param string|int|Expression $expression
+     * @param array                 $params
      *
      * @return Expression
      */
-    public static function expression(string|Expression $expression, array $params = []): Expression {
+    public static function expression(string|int|Expression $expression, array $params = []): Expression {
         if (is_object($expression)) {
             if (!$expression instanceof Expression) {
                 throw new \InvalidArgumentException('Wrong object type');
@@ -54,13 +54,13 @@ final class Sql {
     }
 
     /**
-     * @param string $sql
+     * @param string|int $sql
      * @param array  $params
      *
      * @return Sql\Plain
      */
     #[Pure]
-    public static function plain(string $sql, array $params = []): Sql\Plain {
+    public static function plain(string|int $sql, array $params = []): Sql\Plain {
         return new \VV\Db\Sql\Plain($sql, $params);
     }
 
