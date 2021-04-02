@@ -62,16 +62,6 @@ abstract class ModificatoryStringifier extends QueryStringifier {
         return ' RETURNING ' . implode(', ', $exprs) . ' INTO ' . implode(', ', $vars);
     }
 
-    /**
-     * @param PlainSql $vals
-     * @param          $params
-     *
-     * @return string
-     */
-    protected function strStdValuesClause(PlainSql $vals, &$params) {
-        return ' VALUES ' . $vals->embed($params);
-    }
-
     protected function strValueToSave($value, $field, &$params) {
         if ($value instanceof \VV\Db\Sql\Expression) {
             $tmparams = [];

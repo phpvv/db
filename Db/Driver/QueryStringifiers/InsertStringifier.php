@@ -72,7 +72,6 @@ class InsertStringifier extends ModificatoryStringifier {
             }
         }
 
-
         return $this->valuesPart;
     }
 
@@ -113,10 +112,8 @@ class InsertStringifier extends ModificatoryStringifier {
         $query = $this->insertQuery();
         $this->applyInsertedIdClause($query->insertedIdClause());
 
-        $vals = $this->valuesPart()[0];
-
         return $this->strStdInsertIntoClause($params)
-               . $this->strStdValuesClause($vals, $params)
+               . $this->strStdValuesClause($params)
                . $this->strOnDupKeyClause($query->onDupKeyClause(), $params)
                . $this->strReturnIntoClause($query->returnIntoClause(), $params);
     }
@@ -195,11 +192,36 @@ class InsertStringifier extends ModificatoryStringifier {
         return $values;
     }
 
+
+    /**
+     * @return bool
+     */
+    protected function isSelectValues(): bool {
+        $valuesClause = $this->insertQuery()->valuesClause();
+        if (!$valuesClause->items()) return false;
+
+        return $valuesClause->items()[0] instanceof Sql\SelectQuery;
+    }
+
     /**
      * @return bool
      */
     protected function isStdFieldsValues() {
         return !$this->insertQuery()->valuesClause()->isEmpty();
+    }
+
+    /**
+     * @param $params
+     *
+     * @return string
+     */
+    protected function strStdValuesClause(&$params) {
+        $str = ' '. $this->valuesPart()[0]->embed($params);
+        if ($this->isSelectValues()) {
+            return $str;
+        }
+
+        return ' VALUES' . $str;
     }
 
     /**
