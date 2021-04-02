@@ -23,7 +23,7 @@ class InsertValues extends ItemList {
     /**
      * Add field(s)
      *
-     * @param string[]|\VV\Db\Param[]|Sql\Expression[] ...$values
+     * @param string|\VV\Db\Param|Sql\Expression ...$values
      *
      * @return $this
      */

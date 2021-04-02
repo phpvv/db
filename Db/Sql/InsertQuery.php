@@ -64,9 +64,7 @@ class InsertQuery extends ModificatoryQuery {
     }
 
     /**
-     * Sets fields list to sql
-     *
-     * @param string[]|array|Sql\Expression[]|Clauses\InsertFields $fields
+     * @param string|Sql\Expression|Clauses\InsertFields ...$fields
      *
      * @return $this
      */
@@ -81,7 +79,7 @@ class InsertQuery extends ModificatoryQuery {
     /**
      * Add valuses
      *
-     * @param array|string[]|\VV\Db\Sql\SelectQuery[]|Clauses\InsertValues[] ...$values
+     * @param string|\VV\Db\Sql\SelectQuery|Clauses\InsertValues ...$values
      *
      * @return $this
      */
