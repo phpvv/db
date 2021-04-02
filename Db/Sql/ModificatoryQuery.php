@@ -108,6 +108,9 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
      */
     public function exec(Transaction $transaction = null): \VV\Db\Result {
         if ($transaction) $this->setConnection($transaction->connection());
+        elseif ($this->connection()->isInTransaction()) {
+            throw new \LogicException('Statement execution outside current transaction');
+        }
 
         return $this->_result();
     }
