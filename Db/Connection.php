@@ -11,7 +11,8 @@
 namespace VV\Db;
 
 use JetBrains\PhpStorm\Pure;
-use VV\Db\Driver\QueryStringifiers\QueryStringifier;
+use VV\Db\Sql\Stringifiers\Factory as SqlStringifiersFactory;
+use VV\Db\Sql\Stringifiers\QueryStringifier;
 use VV\Db\Exceptions\ConnectionError;
 use VV\Db\Sql\Query;
 
@@ -23,26 +24,18 @@ use VV\Db\Sql\Query;
 final class Connection {
 
     private Driver\Driver $driver;
-
-    private ?Driver\Connection $driverConnection = null;
-
-    private bool $autoConnect = true;
-
     private ?string $host = null;
-
     private ?string $user = null;
-
     private ?string $passwd = null;
-
     private ?string $scheme = null;
-
     private ?string $charset = null;
 
-    private ?Transaction $transaction = null;
-
-    private bool $underExecution = false;
-
+    private bool $autoConnect = true;
+    private ?Driver\Connection $driverConnection = null;
     private ?ConnectionError $connectionError = null;
+    private ?Transaction $transaction = null;
+    private bool $underExecution = false;
+    private ?SqlStringifiersFactory $sqlStringifiersFactory = null;
 
     /**
      * Constructor
@@ -562,13 +555,29 @@ final class Connection {
      * @return QueryStringifier
      */
     private function stringifierForQuery(Query $query): QueryStringifier {
+        $factory = $this->sqlStringifiersFactory();
+
         return match (true) {
-            $query instanceof Sql\SelectQuery => $this->driver->createSelectStringifier($query),
-            $query instanceof Sql\InsertQuery => $this->driver->createInsertStringifier($query),
-            $query instanceof Sql\UpdateQuery => $this->driver->createUpdateStringifier($query),
-            $query instanceof Sql\DeleteQuery => $this->driver->createDeleteStringifier($query),
+            $query instanceof Sql\SelectQuery => $factory->createSelectStringifier($query),
+            $query instanceof Sql\InsertQuery => $factory->createInsertStringifier($query),
+            $query instanceof Sql\UpdateQuery => $factory->createUpdateStringifier($query),
+            $query instanceof Sql\DeleteQuery => $factory->createDeleteStringifier($query),
             default => throw new \LogicException('Unknown query type'),
         };
+    }
+
+    private function sqlStringifiersFactory(): SqlStringifiersFactory {
+        $factory = &$this->sqlStringifiersFactory;
+        if (!$factory) $factory = $this->driver->sqlStringifiersFactory();
+        if (!$factory) {
+            $factory = match ($this->driver->dbms()) {
+                Driver\Driver::DBMS_MYSQL => new \VV\Db\Sql\Stringifiers\Mysql\Factory,
+                Driver\Driver::DBMS_ORACLE => new \VV\Db\Sql\Stringifiers\Oracle\Factory,
+                Driver\Driver::DBMS_POSTGRES => new \VV\Db\Sql\Stringifiers\Postgres\Factory,
+            };
+        }
+
+        return $factory;
     }
 
     private function hash(): string {

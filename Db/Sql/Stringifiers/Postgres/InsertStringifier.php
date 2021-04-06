@@ -1,0 +1,51 @@
+<?php declare(strict_types=1);
+
+/*
+ * This file is part of the VV package.
+ *
+ * (c) Volodymyr Sarnytskyi <v00v4n@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace VV\Db\Sql\Stringifiers\Postgres;
+
+use VV\Db\Sql\Clauses\InsertedId;
+
+/**
+ * Class InsertStringifier
+ *
+ * @package VV\Db\Postgres\QueryStringifiers
+ */
+class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
+
+    use CommonUtils;
+
+    private ?\VV\Db\Param $insertedIdParam = null;
+
+    private ?string $insertedIdField = null;
+
+    public function supportedClausesIds() {
+        return parent::supportedClausesIds()
+               | \VV\Db\Sql\InsertQuery::C_RETURN_INS_ID;
+    }
+
+    protected function applyInsertedIdClause(InsertedId $retinsId) {
+        if ($retinsId->isEmpty()) return;
+
+        $this->insertedIdParam = ($retinsId->param() ?: \VV\Db\Param::chr())->setForInsertedId();
+        $this->insertedIdField = $retinsId->pk() ?: $this->insertQuery()->mainTablePk();
+    }
+
+    protected function strStdInsert(&$params) {
+        $sql = parent::strStdInsert($params);
+
+        if ($this->insertedIdParam) {
+            $params[] = $this->insertedIdParam;
+            $sql .= " RETURNING $this->insertedIdField AS _insertedid";
+        }
+
+        return $sql;
+    }
+
+}

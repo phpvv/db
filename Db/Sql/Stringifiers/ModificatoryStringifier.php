@@ -8,9 +8,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Driver\QueryStringifiers;
+namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Driver\QueryStringifiers\PlainSql as PlainSql;
+use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 use VV\Db\Model\Field;
 use VV\Db\Param;
 use VV\Db\Sql;
@@ -54,7 +54,7 @@ abstract class ModificatoryStringifier extends QueryStringifier {
         $vars = $exprs = [];
         foreach ($items as $item) {
             $exprs[] = $this->strExpr($item->expr(), $params);
-            /** @var \VV\Db\Driver\QueryStringifiers\ExpressoinStringifier $exprStringifier */
+            /** @var \VV\Db\Sql\Stringifiers\ExpressoinStringifier $exprStringifier */
             $exprStringifier = $this->exprStringifier();
             $vars[] = $exprStringifier->strParam($item->param(), $params);
         }
@@ -125,7 +125,7 @@ abstract class ModificatoryStringifier extends QueryStringifier {
      * @param mixed $value
      * @param mixed $field
      *
-     * @return \VV\Db\Driver\QueryStringifiers\PlainSql|null
+     * @return \VV\Db\Sql\Stringifiers\PlainSql|null
      */
     protected function exprValueToSave($value, $field) {
         return null;

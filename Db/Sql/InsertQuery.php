@@ -18,6 +18,11 @@ use VV\Db\Sql\Clauses\DatasetClauseFieldTrait;
  * Class InsertQuery
  *
  * @package VV\Db\Sql
+ *
+ * @property-read Clauses\Dataset      $dataset
+ * @property-read Clauses\InsertFields $fields
+ * @property-read Clauses\InsertValues $values
+ * @property-read mixed               $insertedId     Execute query and return last insert id
  */
 class InsertQuery extends ModificatoryQuery {
 
