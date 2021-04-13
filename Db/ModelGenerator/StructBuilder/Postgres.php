@@ -78,16 +78,24 @@ SQL;
 
                 $dataType = $row['data_type'];
                 $type = $typed($dataType);
+                $intSize = match ($dataType) {
+                    'bigint' => 8,
+                    'integer' => 4,
+                    'smallint' => 2,
+                    default => null,
+                };
+
                 $objectInfo->addColumn(
-                    $name = $row['column_name'],
-                    $type,
-                    $row['character_maximum_length'],
-                    $precision,
-                    $row['numeric_scale'],
-                    $default,
-                    $row['is_nullable'] == 'NO',
-                    false,
-                    in_array($name, $pks)
+                    name: $name = $row['column_name'],
+                    type: $type,
+                    length: $row['character_maximum_length'],
+                    intSize: $intSize,
+                    precision: $precision,
+                    scale: $row['numeric_scale'],
+                    default: $default,
+                    notnull: $row['is_nullable'] == 'NO',
+                    unsigned: false,
+                    inpk: in_array($name, $pks)
                 );
             }
 

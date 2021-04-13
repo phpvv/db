@@ -194,7 +194,7 @@ abstract class Db {
      *
      * @return static
      */
-    public static function instance(): self {
+    public static function instance(): static {
         static $instances = [];
 
         $instance = &$instances[static::class];

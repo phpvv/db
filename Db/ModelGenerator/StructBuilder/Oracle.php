@@ -71,15 +71,16 @@ SQL
                 }
 
                 $objectInfo->addColumn(
-                    strtolower($name = $row['column_name']),
-                    $typed($row['data_type']),
-                    (int)$row['data_length'],
-                    (int)$row['data_precision'],
-                    (int)$row['data_scale'],
-                    $default,
-                    $row['nullable'] == 'N',
-                    false,
-                    in_array($name, $pks)
+                    name: strtolower($name = $row['column_name']),
+                    type: $typed($row['data_type']),
+                    length: (int)$row['data_length'],
+                    intSize: null,
+                    precision: (int)$row['data_precision'],
+                    scale: (int)$row['data_scale'],
+                    default: $default,
+                    notnull: $row['nullable'] == 'N',
+                    unsigned: false,
+                    inpk: in_array($name, $pks)
                 );
             }
 

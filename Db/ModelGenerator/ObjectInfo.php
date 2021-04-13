@@ -70,6 +70,7 @@ class ObjectInfo {
         string $name,
         string $type,
         ?int $length,
+        ?int $intSize,
         ?int $precision,
         ?int $scale,
         ?string $default,
@@ -77,7 +78,17 @@ class ObjectInfo {
         bool $unsigned,
         bool $inpk
     ) {
-        $this->columns[$name] = [$type, $length, $precision, $scale, $default, $notnull, $unsigned, 'pk' => $inpk];
+        $this->columns[$name] = [
+            $type,
+            $length,
+            $intSize,
+            $precision,
+            $scale,
+            $default,
+            $notnull,
+            $unsigned,
+            'pk' => $inpk,
+        ];
     }
 
     public function addForeignKey(string $name, array $fromColumns, string $toTable, array $toColumns) {

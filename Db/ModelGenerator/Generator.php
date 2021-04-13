@@ -166,18 +166,18 @@ PHP
         foreach ($object->columns() as $k => $v) {
             $data = [];
             foreach ($v as $ck => $cv) {
-                if (is_int($ck)) {
-                    if (!$data) {
-                        $data[] = "Field::T_$cv";
-                    } elseif (is_int($cv) || is_float($cv)) {
-                        $data[] = $cv;
-                    } elseif (is_bool($cv)) {
-                        $data[] = $cv ? 'true' : 'false';
-                    } elseif ((string)$cv === '') {
-                        $data[] = 'null';
-                    } else {
-                        $data[] = "'" . str_replace("'", "\\'", $cv) . "'";
-                    }
+                if (!is_int($ck)) continue;
+
+                if (!$data) {
+                    $data[] = "Field::T_$cv";
+                } elseif (is_int($cv) || is_float($cv)) {
+                    $data[] = $cv;
+                } elseif (is_bool($cv)) {
+                    $data[] = $cv ? 'true' : 'false';
+                } elseif ((string)$cv === '') {
+                    $data[] = 'null';
+                } else {
+                    $data[] = "'" . str_replace("'", "\\'", $cv) . "'";
                 }
             }
 

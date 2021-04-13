@@ -44,16 +44,27 @@ class Mysql implements \VV\Db\ModelGenerator\StructBuilder {
 
                 $l = explode(',', $m[2]);
 
+                $dataType = $m[1];
+                $type = $typed($dataType);
+                $intSize = match ($dataType) {
+                    'bigint' => 8,
+                    'int' => 4,
+                    'smallint' => 2,
+                    'tinyint' => 1,
+                    default => null,
+                };
+
                 $objectInfo->addColumn(
-                    $row['Field'],
-                    $typed($m[1]),
-                    $l[0],
-                    $l[0],
-                    $l[1] ?? null,
-                    $row['Default'],
-                    $row['Null'] == 'NO',
-                    $m[3] == 'unsigned',
-                    $row['Key'] == 'PRI',
+                    name: $row['Field'],
+                    type: $type,
+                    length: (int)$l[0],
+                    intSize: $intSize,
+                    precision: (int)$l[0],
+                    scale: $l[1] ?? null,
+                    default: $row['Default'],
+                    notnull: $row['Null'] == 'NO',
+                    unsigned: $m[3] == 'unsigned',
+                    inpk: $row['Key'] == 'PRI',
                 );
             }
 

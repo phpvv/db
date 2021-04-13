@@ -19,51 +19,45 @@ class Field {
 
     /** Short strings: VARCHAR, CHAR */
     const T_CHR = 1;
-
     /** Numeric fields like INT, FLOAT, NUMBER, DECIMAL... */
     const T_NUM = 2;
-
     /** Large text object like mysql TEXT or oracle CLOB */
     const T_TEXT = 3;
-
     /** Large binary object */
     const T_BLOB = 4;
-
     /** Raw short binary data like mysql BINARY, VARBINARY or orcale RAW */
     const T_BIN = 5;
-
-    /** Datetime */
+    /** Date and Time */
     const T_DATETIME = 6;
-
     /** Date */
     const T_DATE = 7;
-
     /** Time */
     const T_TIME = 8;
-
+    /** Boolean */
     const T_BOOL = 9;
 
     private string $name;
-
     private int $type;
-
     private ?int $length;
-
+    private ?int $intSize;
     private ?int $precision;
-
     private ?int $scale;
-
     private ?string $default;
-
     private bool $notnull;
-
     private bool $unsigned;
 
     public function __construct(string $name, array $data) {
         $this->name = $name;
-
-        static $props = ['type', 'length', 'precision', 'scale', 'default', 'notnull', 'unsigned'];
-        foreach ($props as $k => $v) $this->$v = $data[$k];
+        [
+            $this->type,
+            $this->length,
+            $this->intSize,
+            $this->precision,
+            $this->scale,
+            $this->default,
+            $this->notnull,
+            $this->unsigned
+        ] = $data;
     }
 
     /**
@@ -85,6 +79,13 @@ class Field {
      */
     public function length(): int {
         return $this->length;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function intSize(): ?int {
+        return $this->intSize;
     }
 
     /**
