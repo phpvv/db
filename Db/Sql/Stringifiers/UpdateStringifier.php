@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Driver\QueryStringifiers;
+namespace VV\Db\Sql\Stringifiers;
 
 use VV\Db\Driver\Driver;
 use VV\Db\Sql;
@@ -27,10 +27,10 @@ class UpdateStringifier extends ModificatoryStringifier {
      * Update constructor.
      *
      * @param UpdateQuery $updateQuery
-     * @param Driver      $driver
+     * @param Driver      $factory
      */
-    public function __construct(UpdateQuery $updateQuery, Driver $driver) {
-        parent::__construct($driver);
+    public function __construct(UpdateQuery $updateQuery, Factory $factory) {
+        parent::__construct($factory);
         $this->updateQuery = $updateQuery;
     }
 

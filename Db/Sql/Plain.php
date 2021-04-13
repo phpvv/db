@@ -19,9 +19,8 @@ class Plain implements Expression {
 
     use AliasFieldTrait;
 
-    private $sql;
-
-    private $params = [];
+    private string $sql;
+    private array $params;
 
     /**
      * @param string $sql

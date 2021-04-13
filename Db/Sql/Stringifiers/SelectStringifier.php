@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Driver\QueryStringifiers;
+namespace VV\Db\Sql\Stringifiers;
 
 use VV\Db\Driver\Driver;
 use VV\Db\Sql;
@@ -27,10 +27,10 @@ class SelectStringifier extends QueryStringifier {
      * Select constructor.
      *
      * @param SelectQuery $selectQuery
-     * @param Driver      $driver
+     * @param Driver      $factory
      */
-    public function __construct(SelectQuery $selectQuery, Driver $driver) {
-        parent::__construct($driver);
+    public function __construct(SelectQuery $selectQuery, Factory $factory) {
+        parent::__construct($factory);
         $this->selectQuery = $selectQuery;
     }
 

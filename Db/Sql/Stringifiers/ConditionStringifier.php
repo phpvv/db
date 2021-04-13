@@ -8,9 +8,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Driver\QueryStringifiers;
+namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Driver\QueryStringifiers\PlainSql as PlainSql;
+use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 use VV\Db\Sql;
 
 /**

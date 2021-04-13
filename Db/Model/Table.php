@@ -55,7 +55,7 @@ abstract class Table extends DataObject {
         $insert = $this->connection()->insert()->into($this);
         if (!$data) return $insert;
 
-        return $insert->set($data)->insertedId;
+        return $insert->set($data)->insertedId();
     }
 
     /**

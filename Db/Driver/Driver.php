@@ -15,12 +15,12 @@ namespace VV\Db\Driver;
  *
  * @package VV\Db
  */
-interface Driver extends QueryStringifiers\Factory {
+interface Driver {
 
-    public const DBMS_MSSQL = 'mssql';
     public const DBMS_MYSQL = 'mysql';
     public const DBMS_POSTGRES = 'postgres';
     public const DBMS_ORACLE = 'oracle';
+    public const DBMS_MSSQL = 'mssql';
 
     /**
      * Creates connection
@@ -41,4 +41,11 @@ interface Driver extends QueryStringifiers\Factory {
      * @return string
      */
     public function dbms(): string;
+
+    /**
+     * Returns Sql Stringifiers Factory
+     *
+     * @return \VV\Db\Sql\Stringifiers\Factory|null
+     */
+    public function sqlStringifiersFactory(): ?\VV\Db\Sql\Stringifiers\Factory;
 }
