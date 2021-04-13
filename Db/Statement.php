@@ -144,7 +144,7 @@ final class Statement {
      * @param $params
      */
     protected function castParamList(&$params): void {
-        foreach ($params as $k => &$param) {
+        foreach ($params as &$param) {
             if ($param instanceof Param) {
                 $param->setValue($this->castParam($param->value()));
             } else {
@@ -160,17 +160,17 @@ final class Statement {
      */
     protected function castParam(mixed $param): mixed {
         return match (true) {
-            $param instanceof \DateTime => $this->formatDateTime($param),
+            $param instanceof \DateTimeInterface => $this->formatDateTime($param),
             default => $param,
         };
     }
 
     /**
-     * @param \DateTime $datetime
+     * @param \DateTimeInterface $datetime
      *
      * @return string
      */
-    protected function formatDateTime(\DateTime $datetime): string {
+    protected function formatDateTime(\DateTimeInterface $datetime): string {
         return $datetime->format(self::DATETIME_FORMAT);
     }
 }

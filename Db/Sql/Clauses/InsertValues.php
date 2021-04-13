@@ -35,7 +35,7 @@ class InsertValues extends ItemList {
                 $values = $values[0];
             }
 
-            $allowedObjTypes = [\VV\Db\Param::class, Sql\Expression::class, \DateTime::class];
+            $allowedObjTypes = [\VV\Db\Param::class, Sql\Expression::class, \DateTimeInterface::class];
             foreach ($values as $i => &$v) {
                 if (is_object($v)) {
                     if (!\VV\instOf($v, ...$allowedObjTypes)) {

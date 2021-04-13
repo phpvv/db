@@ -70,7 +70,7 @@ class Param implements Expression {
                || (is_object($param)
                    && (
                        $param instanceof \VV\Db\Param
-                       || $param instanceof \DateTime
+                       || $param instanceof \DateTimeInterface
                    )
                );
     }
