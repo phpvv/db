@@ -18,13 +18,11 @@ namespace VV\Db\Model;
 abstract class ObjectList {
 
     protected const SUBNS = '';
-
+    protected const SUFFIX = '';
     protected const DFLT_PREFIXES = [];
 
     private \VV\Db $db;
-
     private string $ns;
-
     /** @var DbObject[] */
     private array $objects = [];
 
@@ -63,7 +61,7 @@ abstract class ObjectList {
     public function getByCamel(string $camelName): ?DbObject {
         $item = &$this->objects[$camelName];
         if ($item === null) {
-            $class = $this->ns . ucfirst($camelName);
+            $class = $this->ns . ucfirst($camelName) . $this->suffix();
             if (!class_exists($class)) {
                 $item = false;
             } else {
@@ -77,7 +75,14 @@ abstract class ObjectList {
     /**
      * @return string
      */
-    public function subns() {
+    public function subns(): string {
         return static::SUBNS;
+    }
+
+    /**
+     * @return string
+     */
+    public function suffix(): string {
+        return static::SUFFIX;
     }
 }

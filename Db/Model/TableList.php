@@ -18,7 +18,7 @@ namespace VV\Db\Model;
  */
 abstract class TableList extends \VV\Db\Model\ObjectList {
 
-    protected const SUBNS = 'Table';
-
+    protected const SUBNS = 'Tables';
+    protected const SUFFIX = 'Table';
     protected const DFLT_PREFIXES = Table::DFLT_PREFIXES;
 }

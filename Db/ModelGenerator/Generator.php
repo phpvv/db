@@ -15,41 +15,27 @@ use VV\Db\Driver\Driver;
 
 class Generator {
 
-    protected string $dir;
+    private \VV\Db\Connection $connection;
+    private string $ns;
+    private string $dir;
+    private array $dataObjectsGetterPhpdoc;
+    private array $todel;
 
-    protected string $mdl;
+    private string $dfltTop = <<<CODE
+        <?php declare(strict_types=1);
 
-    protected \VV\Db $db;
-
-    protected \VV\Db\Connection $connection;
-
-    protected string $ns;
-
-    protected string $dfltTop = <<<PHP
-<?php declare(strict_types=1);
-
-/** Created by VV Db Model Generator */
-PHP;
-
-    protected $dataObjectsGetterPhpdoc;
-
-    protected $todel;
+        /** Created by VV Db Model Generator */
+        CODE;
 
     public function __construct(\VV\Db $db) {
-        // todo: accept \VV\Db\Connection and other options insteadof only \VV\Db instance ()
-        $this->db = $db;
-
         $connection = $this->connection = $db->connection();
         if (!$connection->isConnected()) $connection->connect();
 
         $reflect = new \ReflectionObject($db);
         $this->ns = $reflect->getName();
 
-        $this->dir = $dir = dirname($reflect->getFileName()) . \VV\DS . ($mdl = $reflect->getShortName()) . \VV\DS;
-
-        $this->mdl = strtolower($mdl);
-
-        if (!file_exists($dir)) mkdir($dir, 0777);
+        $this->dir = $dir = dirname($reflect->getFileName()) . \VV\DS . $reflect->getShortName() . \VV\DS;
+        if (!file_exists($dir)) mkdir($dir);
 
         $this->dataObjectsGetterPhpdoc = array_fill_keys($a = ['Table', 'View'], '');
         $this->todel = array_fill_keys($a, []);
@@ -64,27 +50,10 @@ PHP;
         unset($v);
     }
 
-    protected function createStructBuilder(): StructBuilder {
-        $dbms = $this->connection->dbms();
-        switch ($dbms) {
-            case Driver::DBMS_MYSQL:
-                return new StructBuilder\Mysql;
-
-            case Driver::DBMS_ORACLE:
-                return new StructBuilder\Oracle;
-
-            case Driver::DBMS_POSTGRES:
-                return new StructBuilder\Postgres;
-
-            default:
-                throw new \RuntimeException('Not developed for db type: ' . $dbms);
-        }
-    }
-
     public function build() {
         echo "Added/updated classes:\r\n";
 
-        $structBuilder = $this->createStructBuilder();
+        $structBuilder = $this->createStructBuilder($this->connection);
         foreach ($structBuilder->objectIterator($this->connection) as $objectInfo) {
             $this->processObject($objectInfo);
         }
@@ -95,35 +64,38 @@ PHP;
             $className = $dataObjectType . 'List';
 
             $file = "$this->dir$className.php";
-            file_put_contents($file, <<<PHP
-$this->dfltTop
-namespace $this->ns;
-
-/**
- * Class $className
- *
-$v */
-class $className extends \\VV\\Db\\Model\\$className {
-
-}
-PHP
+            file_put_contents($file, <<<CODE
+                $this->dfltTop
+                namespace $this->ns;
+                
+                /**
+                 * Class $className
+                 *
+                 * @package $this->ns
+                $v */
+                class $className extends \\VV\\Db\\Model\\$className {
+                
+                }
+                CODE
             );
 
 
             $className = $dataObjectType;
             $file = $this->dir . $className . ".php";
             if (!file_exists($file)) {
-                file_put_contents($file, <<<PHP
-$this->dfltTop
-namespace $this->ns;
-
-/**
- * Class $className
- */
-class $className extends \\VV\\Db\\Model\\$className {
-
-}
-PHP
+                file_put_contents($file, <<<CODE
+                    $this->dfltTop
+                    namespace $this->ns;
+                    
+                    /**
+                     * Class $className
+                     *
+                     * @package $this->ns
+                     */
+                    class $className extends \\VV\\Db\\Model\\$className {
+                    
+                    }
+                    CODE
                 );
             }
         }
@@ -133,32 +105,29 @@ PHP
         foreach ($this->todel as $dataObjectType => $v) {
             foreach ($v as $f => $ff) {
                 echo "\tMain/$dataObjectType/$f\r\n";
-                \VV\Utils\Fs::rm($ff);
+                @unlink($ff);
             }
         }
     }
 
-    public static function buildTypeDecorator($map) {
-        return function ($t) use ($map) {
-            foreach ($map as $k => $v) {
-                foreach ((array)$v as $rx) {
-                    if (preg_match('/^' . $rx . '$/i', $t)) return $k;
-                }
-            }
-
-            return 'CHR';
+    protected function createStructBuilder(\VV\Db\Connection $connection): StructBuilder {
+        return match ($connection->dbms()) {
+            Driver::DBMS_MYSQL => new StructBuilder\Mysql,
+            Driver::DBMS_ORACLE => new StructBuilder\Oracle,
+            Driver::DBMS_POSTGRES => new StructBuilder\Postgres,
         };
     }
 
-
     protected function processObject(ObjectInfo $object) {
-        $objType = $object->type();
-        $classPth = $this->ns . '\\' . $objType;
+        $type = $object->type();
         $tableWopfx = \VV\Db\Model\DataObject::wopfx($object->name());
-        $name = \VV\StudlyCaps($tableWopfx);
-        $fullname = "$classPth\\$name";
+        $name = \VV\camelCase($tableWopfx);
+        $className = ucfirst($name) . $type;
+        $relNs = $object->typePlural();
+        $ns = "$this->ns\\$relNs";
+        $fqcn = "$ns\\$className";
 
-        echo "\t$fullname\r\n";
+        echo "\t$fqcn\r\n";
 
         // write fields
         $fieldsConstContent = "\n";
@@ -198,38 +167,107 @@ PHP
         }
 
         // write table
-        $this->dataObjectsGetterPhpdoc[$objType] .= " * @property-read $objType\\$name \$" . lcfirst($name) . "\n";
+        $this->dataObjectsGetterPhpdoc[$type] .= " * @property-read $relNs\\$className \$$name\n";
 
-        $extends = '\\' . $classPth;
         $pkConst = implode(', ', $pkFields);
         $pkFieldsConst = implode("', '", $pkFields);
         $alias = \VV\Db\Model\DataObject::name2alias($tableWopfx, []);
 
-        $content = <<<EOL
-$this->dfltTop
-namespace $classPth;
+        [$phpDoc, $advTopContent, $advBottomContent] = $this->parseClassAdvContent($fqcn);
 
-use VV\Db\Model\Field;
+        $content = <<<CODE
+            $this->dfltTop
+            namespace $ns;
 
-class $name extends $extends {
+            use VV\Db\Model\Field;
 
-    protected const NAME = '{$object->name()}';
+            {$phpDoc}class $className extends \\$this->ns\\$type {
 
-    protected const PK = '$pkConst';
+            $advTopContent    //region Auto-generated area
+                protected const NAME = '{$object->name()}';
+                protected const PK = '$pkConst';
+                protected const PK_FIELDS = ['$pkFieldsConst'];
+                protected const DFLT_ALIAS = '$alias';
+                protected const FIELDS = [$fieldsConstContent    ];
+                protected const FOREING_KEYS = [$fkConstContent    ];
+                //endregion$advBottomContent
+            }
+            CODE;
 
-    protected const PK_FIELDS = ['$pkFieldsConst'];
-
-    protected const DFLT_ALIAS = '$alias';
-
-    protected \$fields = [$fieldsConstContent    ];
-
-    protected \$foreignKeys = [$fkConstContent    ];
-}
-EOL;
-        @mkdir($this->dir . $objType, 0777);
-        $file = $this->dir . $objType . '/' . ($f = $name . '.php');
-        unset($this->todel[$objType][$f]);
+        @mkdir($this->dir . $relNs);
+        $file = $this->dir . $relNs . '/' . ($f = $className . '.php');
+        unset($this->todel[$type][$f]);
 
         file_put_contents($file, $content);
+    }
+
+    protected function parseClassAdvContent(string $fqcn): ?array {
+        if (!class_exists($fqcn)) return null;
+
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $reflector = new \ReflectionClass($fqcn);
+        $classLines = new \LimitIterator(
+            new \SplFileObject($reflector->getFileName()),
+            $start = $reflector->getStartLine(),
+            $reflector->getEndLine() - $start - 1
+        );
+        $phpDoc = $reflector->getDocComment();
+        if ($phpDoc) $phpDoc .= "\n";
+
+        $topLines = $bottomLines = [];
+        $stage = 0;
+        foreach ($classLines as $line) {
+            $starts = fn($with) => str_starts_with(trim($line), $with);
+
+            switch ($stage) {
+                case 0:
+                    if ($starts('protected const NAME =')) {
+                        $stage = 1;
+                        $lastIdx = count($topLines) - 1;
+                        if ($lastIdx >=0 && str_starts_with(trim($topLines[$lastIdx]), '//')) {
+                            unset($topLines[$lastIdx]);
+                        }
+                        break;
+                    }
+                    $topLines[] = $line;
+                    break;
+                case 1:
+                    if ($starts('protected const FOREING_KEYS =')) $stage = 2;
+                    break;
+                case 2:
+                    if ($starts('];')) $stage = 3;
+                    break;
+                /** @noinspection PhpMissingBreakStatementInspection */
+                case 3:
+                    $stage = 4;
+                    if ($starts('//')) break;
+                case 4:
+                    $bottomLines[] = $line;
+            }
+        }
+
+        $lines2code = fn($lines) => $lines && array_filter($lines, fn($v) => trim($v))
+            ? implode('', $lines)
+            : '';
+
+        $advTopContent = $lines2code($topLines);
+        if ($advTopContent) $advTopContent = '    ' . ltrim("$advTopContent");
+
+        $advBottomContent = $lines2code($bottomLines);
+        if ($advBottomContent) $advBottomContent = rtrim("\n$advBottomContent");
+
+        return [$phpDoc, $advTopContent, $advBottomContent];
+    }
+
+    public static function buildTypeDecorator($map): \Closure {
+        return function ($t) use ($map) {
+            foreach ($map as $k => $v) {
+                foreach ((array)$v as $rx) {
+                    if (preg_match('/^' . $rx . '$/i', $t)) return $k;
+                }
+            }
+
+            return 'CHR';
+        };
     }
 }

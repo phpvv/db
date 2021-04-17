@@ -33,7 +33,7 @@ class Postgres implements \VV\Db\ModelGenerator\StructBuilder {
         );
 
         $tableIter = $connection
-            ->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+            ->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name")
             ->setFlags(\VV\Db::FETCH_NUM);
 
         foreach ($tableIter as [$table]) {

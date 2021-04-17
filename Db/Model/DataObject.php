@@ -22,8 +22,9 @@ abstract class DataObject extends DbObject {
 
     public const DFLT_PREFIXES = ['tbl_', 'vw_', 't_', 'v_'];
     protected const DFLT_ALIAS = '';
-    /** @var FieldList */
-    protected $fields = [];
+    protected const FIELDS = [];
+
+    private ?FieldList $fields = null;
 
     public function dfltAlias(): string {
         return static::DFLT_ALIAS;
@@ -33,7 +34,7 @@ abstract class DataObject extends DbObject {
      * @return FieldList
      */
     public function fields(): FieldList {
-        if (is_array($this->fields)) $this->fields = new FieldList($this->fields);
+        if ($this->fields === null) $this->fields = new FieldList(static::FIELDS);
 
         return $this->fields;
     }

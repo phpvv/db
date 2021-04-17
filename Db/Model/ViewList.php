@@ -18,7 +18,7 @@ namespace VV\Db\Model;
  */
 abstract class ViewList extends \VV\Db\Model\ObjectList {
 
-    protected const SUBNS = 'View';
-
+    protected const SUBNS = 'Views';
+    protected const SUFFIX = 'View';
     protected const DFLT_PREFIXES = View::DFLT_PREFIXES;
 }

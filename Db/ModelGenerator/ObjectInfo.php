@@ -18,14 +18,12 @@ namespace VV\Db\ModelGenerator;
 class ObjectInfo {
 
     private string $name;
-
     private string $type;
-
     /** @var array[] */
     private array $columns = [];
-
-    /** @var array[] */
+     /** @var array[] */
     private array $foreignKeys = [];
+    private string $typePlural;
 
     /**
      * ObjectInfo constructor.
@@ -33,9 +31,10 @@ class ObjectInfo {
      * @param string $name
      * @param string $type
      */
-    public function __construct(string $name, string $type) {
+    public function __construct(string $name, string $type, string $typePlural = null) {
         $this->name = $name;
         $this->type = $type;
+        $this->typePlural = $typePlural ?: $type . 's';
     }
 
     /**
@@ -50,6 +49,13 @@ class ObjectInfo {
      */
     public function type(): string {
         return $this->type;
+    }
+
+    /**
+     * @return string
+     */
+    public function typePlural(): string {
+        return $this->typePlural;
     }
 
     /**

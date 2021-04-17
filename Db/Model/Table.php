@@ -20,14 +20,13 @@ use VV\Db\Sql\Condition;
  */
 abstract class Table extends DataObject {
 
-    protected const PK = '';
-
-    protected const PK_FIELDS = [];
-
     public const DFLT_PREFIXES = ['tbl_', 't_'];
 
-    /** @var ForeignKeyList|array */
-    protected $foreignKeys = [];
+    protected const PK = '';
+    protected const PK_FIELDS = [];
+    protected const FOREING_KEYS = [];
+
+    private ?ForeignKeyList $foreignKeys = null;
 
     public function pk(): string {
         return static::PK;
@@ -41,7 +40,7 @@ abstract class Table extends DataObject {
      * @return ForeignKeyList
      */
     public function foreignKeys(): ForeignKeyList {
-        if (is_array($this->foreignKeys)) $this->foreignKeys = new ForeignKeyList($this->foreignKeys);
+        if ($this->foreignKeys === null) $this->foreignKeys = new ForeignKeyList(static::FOREING_KEYS);
 
         return $this->foreignKeys;
     }
