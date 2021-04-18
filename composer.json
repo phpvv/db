@@ -1,6 +1,21 @@
 {
     "name": "phpvv/db",
     "description": "VV database abstraction layer with query builder and DB structure models",
+    "keywords": [
+        "database",
+        "db",
+        "dbal",
+        "abstraction layer",
+        "sql",
+        "query builder",
+        "mysql",
+        "postgres",
+        "postgresql",
+        "oracle",
+        "mysqli",
+        "pdo",
+        "oci8"
+    ],
     "type": "library",
     "license": "MIT",
     "authors": [
