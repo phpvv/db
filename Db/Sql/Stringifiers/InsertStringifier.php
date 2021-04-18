@@ -10,8 +10,6 @@
  */
 namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Driver\Driver;
-use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 use VV\Db\Sql;
 use VV\Db\Sql\InsertQuery as InsertQuery;
 
@@ -31,7 +29,7 @@ class InsertStringifier extends ModificatoryStringifier {
      * Insert constructor.
      *
      * @param InsertQuery $insertQuery
-     * @param Driver      $factory
+     * @param Factory     $factory
      */
     public function __construct(InsertQuery $insertQuery, Factory $factory) {
         parent::__construct($factory);
@@ -41,14 +39,14 @@ class InsertStringifier extends ModificatoryStringifier {
     /**
      * @return InsertQuery
      */
-    final public function insertQuery() {
+    final public function insertQuery(): InsertQuery {
         return $this->insertQuery;
     }
 
     /**
      * @return PlainSql
      */
-    final public function fieldsPart() {
+    final public function fieldsPart(): PlainSql {
         if (!$this->fieldsPart) {
             if ($this->isStdFieldsValues()) {
                 $this->fieldsPart = $this->buildFieldsPart();
@@ -63,7 +61,7 @@ class InsertStringifier extends ModificatoryStringifier {
     /**
      * @return PlainSql[]
      */
-    final public function valuesPart() {
+    final public function valuesPart(): array {
         if (!$this->valuesPart) {
             if ($this->isStdFieldsValues()) {
                 $this->valuesPart = $this->buildValuesPart();
@@ -171,6 +169,11 @@ class InsertStringifier extends ModificatoryStringifier {
      */
     protected function valueListToPart($values, $fields) {
         foreach ($values as &$row) {
+            if (!$row) {
+                $row = null;
+                continue;
+            }
+
             $params = [];
             if ($row instanceof \VV\Db\Sql\SelectQuery) {
                 $row = $this->factory()
@@ -216,7 +219,10 @@ class InsertStringifier extends ModificatoryStringifier {
      * @return string
      */
     protected function strStdValuesClause(&$params) {
-        $str = ' '. $this->valuesPart()[0]->embed($params);
+        $vals = $this->valuesPart()[0];
+        if (!$vals) return ' DEFAULT VALUES';
+
+        $str = ' ' . $vals->embed($params);
         if ($this->isSelectValues()) {
             return $str;
         }
@@ -252,6 +258,7 @@ class InsertStringifier extends ModificatoryStringifier {
         $fields = $this->fieldsPart();
         $table = $this->buildTableSql($this->insertQuery()->tableClause());
 
+        /** @noinspection SqlNoDataSourceInspection */
         return "INSERT INTO {$table->embed($params)} {$fields->embed($params)}";
     }
 

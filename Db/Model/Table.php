@@ -52,7 +52,7 @@ abstract class Table extends DataObject {
      */
     public function insert(array $data = null): Sql\InsertQuery|string|int {
         $insert = $this->connection()->insert()->into($this);
-        if (!$data) return $insert;
+        if ($data === null) return $insert;
 
         return $insert->set($data)->insertedId();
     }
