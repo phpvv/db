@@ -27,9 +27,9 @@ interface Result {
     public function fetchIterator(int $flags): \Traversable;
 
     /**
-     * @return mixed
+     * @return int|string|null
      */
-    public function insertedId();
+    public function insertedId(): int|string|null;
 
     /**
      * Returns number of rows affected during statement execution

@@ -20,7 +20,7 @@ abstract class ColumnList extends ItemList {
     /**
      * Add field(s)
      *
-     * @param string[]|\VV\Db\Sql\Expression[] ...$columns
+     * @param string|\VV\Db\Sql\Expression ...$columns
      *
      * @return $this
      */

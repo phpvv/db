@@ -100,7 +100,7 @@ abstract class Query {
     }
 
     public function lastTableAlias(): string {
-        $alias = $this->tableClause()->lastTableAlias() ;
+        $alias = $this->tableClause()->lastTableAlias();
         if (!$alias) throw new \LogicException('Can\'t determine last table alias');
 
         return $alias;
@@ -109,8 +109,8 @@ abstract class Query {
     /**
      * Add `WHERE` clause
      *
-     * @param \VV\Db\Sql\Expression|array|string $field
-     * @param \VV\Db\Sql\Expression|mixed        $value
+     * @param Expression|Condition|array|string $field
+     * @param Expression|mixed                  $value
      *
      * @return $this
      */
@@ -122,7 +122,7 @@ abstract class Query {
      * Add `WHERE pk_field=`
      *
      *
-     * @param \VV\Db\Sql\Expression|string|int $id
+     * @param Expression|string|int $id
      *
      * @return $this
      */
@@ -133,8 +133,8 @@ abstract class Query {
     }
 
     /**
-     * @param \VV\Db\Sql\Expression|string $field
-     * @param \VV\Db\Sql\Expression|mixed  ...$values
+     * @param Expression|string $field
+     * @param Expression|mixed  ...$values
      *
      * @return $this
      */
@@ -145,8 +145,8 @@ abstract class Query {
     }
 
     /**
-     * @param \VV\Db\Sql\Expression|string $field
-     * @param \VV\Db\Sql\Expression|mixed  ...$values
+     * @param Expression|string $field
+     * @param Expression|mixed  ...$values
      *
      * @return $this
      */
@@ -157,7 +157,7 @@ abstract class Query {
     }
 
     /**
-     * @param \VV\Db\Sql\Expression|mixed ...$values
+     * @param Expression|mixed ...$values
      *
      * @return $this
      */
@@ -166,7 +166,7 @@ abstract class Query {
     }
 
     /**
-     * @param \VV\Db\Sql\Expression|mixed ...$values
+     * @param Expression|mixed ...$values
      *
      * @return $this
      */
