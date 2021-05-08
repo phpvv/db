@@ -1,6 +1,21 @@
 # VV DB
 
-VV database abstraction layer with query builder and DB structure models. 
+VV database abstraction layer with query builder and DB structure models.
+
+## Installation
+
+This is the basic package. To use it with concrete DBMS install one of these drivers using [Composer](https://getcomposer.org):
+- [db-mysqli](https://packagist.org/packages/phpvv/db-mysqli) - MySQL driver over MySQLi extension;
+- [db-pdo](https://packagist.org/packages/phpvv/db-pdo) - PostgreSQL (and other) driver over PDO extension;
+- [db-oci](https://packagist.org/packages/phpvv/db-oci) - Oracle driver over oci8 extension.
+
+```shell
+composer require phpvv/db-mysqli
+# or
+composer require phpvv/db-pdo
+# or
+composer require phpvv/db-oci
+```
 
 ## Big Select Example
 
@@ -155,7 +170,7 @@ $db = \App\Db\Main::instance();
 
 $userId = 1;
 $cart = [
-    // productId => quentity
+    // productId => quantity
     10 => 1,
     20 => 2,
     40 => 3,
@@ -248,24 +263,95 @@ try {
 ```
 
 
-## Installation 
-
-This is the basic package. To use it with concrete DBMS install one of these drivers using [Composer](https://getcomposer.org):
-- [db-mysqli](https://packagist.org/packages/phpvv/db-mysqli) - MySQL driver over MySQLi extension;
-- [db-pdo](https://packagist.org/packages/phpvv/db-pdo) - PostgreSQL (and other) driver over PDO extension;
-- [db-oci](https://packagist.org/packages/phpvv/db-oci) - Oracle driver over oci8 extension. 
-
-```shell
-composer require phpvv/db-mysqli
-# or
-composer require phpvv/db-pdo
-# or
-composer require phpvv/db-oci
-```
-
 ## Basics
 
-*Coming soon...*
+### Using only `Connection` without schema model representation
+
+Example ([connection.php](https://github.com/phpvv/db-examples/blob/master/examples/connection.php)): 
+
+```php
+use APP\DB\MAIN as CONF;
+use VV\Db\Connection;
+use VV\Db\Pdo\Driver;
+
+// $driver = new \VV\Db\Oci\Driver;
+// $driver = new \VV\Db\Mysqli\Driver;
+$driver = new Driver(Driver::DBMS_POSTGRES);
+
+$connection = new Connection($driver, CONF\HOST, CONF\USER, CONF\PASSWD, CONF\DBNAME);
+// $connection->connect(); // auto connect on first query is enabled by default
+
+// all variants do same job:
+$queryString = 'SELECT product_id, title FROM tbl_product WHERE price > :price';
+$result = $connection->query($queryString, ['price' => 100]);
+// or
+$result = $connection->prepare($queryString)->bind(['price' => 100])->result();
+// or
+$result = $connection->select('product_id', 'title')->from('tbl_product')->where('price > ', 100)->result();
+
+print_r($result->rows);
+```
+
+### Using DB Model(s)
+
+#### Configuration 
+
+At start, it is needed to create somewhere `class <MyNameOf>Db extends \VV\Db` and implement one abstract method `createConnection()`.  
+Example ([App/Db/Main.php](https://github.com/phpvv/db-examples/blob/master/App/Db/Main.php)):
+
+```php
+namespace App\Db;
+
+use APP\DB\MAIN as CONF;
+use VV\Db\Connection;
+use VV\Db\Pdo\Driver;
+
+/**
+ * @method MainDb\TableList tables()
+ * @method MainDb\ViewList views()
+ * @property-read MainDb\TableList $tbl
+ * @property-read MainDb\TableList $vw
+ */
+class MainDb extends \VV\Db {
+
+    public function createConnection(): Connection {
+        $driver = new Driver(Driver::DBMS_POSTGRES);
+
+        return new Connection($driver, CONF\HOST, CONF\USER, CONF\PASSWD, CONF\DBNAME);
+    }
+}
+```
+
+#### Model Generation
+
+Just run this code ([gen-db-model.php](https://github.com/phpvv/db-examples/blob/master/examples/gen-db-model.php)):
+```php
+use App\Db\MainDb;
+use VV\Db\ModelGenerator\Generator;
+
+(new Generator(MainDb::instance()))->build();
+```
+DB schema  representation classes will be created in the `App\Db\MainDb` folder.
+
+#### Usage
+
+Example ([db-model.php](https://github.com/phpvv/db-examples/blob/master/examples/gen-db-model.php)):
+
+```php
+use App\Db\MainDb;
+
+$db = MainDb::instance();
+
+$products = $db->tbl->product
+    ->select('product_id', 'b.title brand', 'title', 'price')
+    ->join($db->tbl->brand)
+    ->where('brand_id', 1)
+    ->where('price >', 100)
+    ->rows;
+
+print_r($products);
+```
+
 
 ## Select
 
@@ -283,6 +369,10 @@ composer require phpvv/db-oci
 
 *Coming soon...*
 
-## Conditions
+## Condition
+
+*Coming soon...*
+
+## Case Expression
 
 *Coming soon...*
