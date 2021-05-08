@@ -39,7 +39,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
         return $sql;
     }
 
-    protected function applyInsertedIdClause(\VV\Db\Sql\Clauses\InsertedId $retinsId) {
+    protected function applyInsertedIdClause(\VV\Db\Sql\Clauses\InsertedIdClause $retinsId) {
         if ($retinsId->isEmpty()) return;
 
         $query = $this->insertQuery();

@@ -21,7 +21,7 @@ abstract class Query {
 
     private ?Connection $connection = null;
 
-    private ?Clauses\Table $tableClause = null;
+    private ?Clauses\TableClause $tableClause = null;
 
     private ?\VV\Db\Sql\Condition $whereClause = null;
 
@@ -59,7 +59,7 @@ abstract class Query {
      */
     public function table($table = null, string $alias = null) {
         if (!$table) return $this;
-        if ($table instanceof Clauses\Table) {
+        if ($table instanceof Clauses\TableClause) {
             $this->setTableClause($table);
         } else {
             $this->tableClause()->main($table, $alias);
@@ -195,7 +195,7 @@ abstract class Query {
     }
 
     /**
-     * @return Clauses\Table
+     * @return Clauses\TableClause
      */
     public function tableClause() {
         if (!$this->tableClause) {
@@ -206,11 +206,11 @@ abstract class Query {
     }
 
     /**
-     * @param Clauses\Table $tableClause
+     * @param Clauses\TableClause $tableClause
      *
      * @return $this
      */
-    public function setTableClause(Clauses\Table $tableClause) {
+    public function setTableClause(Clauses\TableClause $tableClause) {
         $this->tableClause = $tableClause;
 
         return $this;
@@ -219,7 +219,7 @@ abstract class Query {
     /**
      * Clears tableClause property and returns previous value
      *
-     * @return Clauses\Table
+     * @return Clauses\TableClause
      */
     public function clearTableClause() {
         try {
@@ -230,10 +230,10 @@ abstract class Query {
     }
 
     /**
-     * @return Clauses\Table
+     * @return Clauses\TableClause
      */
     public function createTableClause() {
-        return new Clauses\Table;
+        return new Clauses\TableClause;
     }
 
     /**

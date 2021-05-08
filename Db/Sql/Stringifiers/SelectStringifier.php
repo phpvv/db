@@ -90,11 +90,11 @@ class SelectStringifier extends QueryStringifier {
                . $this->strColumnList($query->columnsClause()->items(), $params, true);
     }
 
-    protected function strFromClause(Sql\Clauses\Table $table, &$params): string {
+    protected function strFromClause(Sql\Clauses\TableClause $table, &$params): string {
         return ' FROM ' . $this->buildTableSql($table)->embed($params);
     }
 
-    protected function strGroupByClause(Sql\Clauses\GroupBy $groupBy, &$params): string {
+    protected function strGroupByClause(Sql\Clauses\GroupByClause $groupBy, &$params): string {
         if ($groupBy->isEmpty()) return '';
 
         return ' GROUP BY ' . $this->strColumnList($groupBy->items(), $params);
@@ -106,13 +106,13 @@ class SelectStringifier extends QueryStringifier {
         return ' HAVING ' . $this->buildConditionSql($having)->embed($params);
     }
 
-    protected function strOrderByClause(Sql\Clauses\OrderBy $orderBy, &$params): string {
+    protected function strOrderByClause(Sql\Clauses\OrderByClause $orderBy, &$params): string {
         if ($orderBy->isEmpty()) return '';
 
         return ' ORDER BY ' . $this->strOrderByItems($orderBy, $params);
     }
 
-    protected function strOrderByItems(Sql\Clauses\OrderBy $orderBy, &$params): string {
+    protected function strOrderByItems(Sql\Clauses\OrderByClause $orderBy, &$params): string {
         $orderStarr = [];
 
         foreach ($orderBy->items() as $item) {
@@ -127,7 +127,7 @@ class SelectStringifier extends QueryStringifier {
         return implode(', ', $orderStarr);
     }
 
-    protected function applyOderByItemNullsLast(&$str, $colstr, Sql\Clauses\OrderByItem $item): void {
+    protected function applyOderByItemNullsLast(&$str, $colstr, Sql\Clauses\OrderByItemClause $item): void {
         $isdesc = $item->isDesc();
         $isNullsLast = $item->isNullsLast();
         if ($isdesc == $isNullsLast) return;

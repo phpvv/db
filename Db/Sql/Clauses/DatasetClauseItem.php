@@ -17,7 +17,7 @@ use VV\Db\Sql;
  *
  * @package VV\Db\Sql\Clause\Dataset
  */
-class DatasetItem {
+class DatasetClauseItem {
 
     /**
      * @var \VV\Db\Sql\DbObject

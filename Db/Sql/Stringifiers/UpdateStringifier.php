@@ -57,11 +57,11 @@ class UpdateStringifier extends ModificatoryStringifier {
                . $this->strReturnIntoClause($query->returnIntoClause(), $params);
     }
 
-    protected function strUpdateClause(Sql\Clauses\Table $table, &$params) {
+    protected function strUpdateClause(Sql\Clauses\TableClause $table, &$params) {
         return 'UPDATE ' . $this->buildTableSql($table)->embed($params);
     }
 
-    protected function strSetClause(Sql\Clauses\Dataset $dataset, &$params) {
+    protected function strSetClause(Sql\Clauses\DatasetClause $dataset, &$params) {
         return ' SET ' . $this->strDataset($dataset, $params);
     }
 

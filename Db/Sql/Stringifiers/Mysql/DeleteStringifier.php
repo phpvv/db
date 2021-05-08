@@ -19,7 +19,7 @@ use VV\Db\Sql;
  */
 class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier {
 
-    protected function strDeleteClause(Sql\Clauses\DeleteTables $tables, &$params) {
+    protected function strDeleteClause(Sql\Clauses\DeleteTablesClause $tables, &$params) {
         $str = 'DELETE';
 
         if (!$tables->isEmpty()) {

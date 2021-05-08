@@ -18,7 +18,7 @@ use VV\Db\Sql;
  * @package VV\Db\Sql\Clause
  * @method Sql\DbObject[] items():array
  */
-class DeleteTables extends ItemList {
+class DeleteTablesClause extends ItemList {
 
     /**
      * Add field(s)

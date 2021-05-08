@@ -10,7 +10,7 @@
  */
 namespace VV\Db\Sql\Stringifiers\Mysql;
 
-use VV\Db\Sql\Clauses\Dataset as OnDupKeyClause;
+use VV\Db\Sql\Clauses\DatasetClause as OnDupKeyClause;
 use VV\Db\Sql\InsertQuery as InsertQuery;
 
 /**
@@ -41,7 +41,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
     /**
      * @inheritDoc
      */
-    protected function applyInsertedIdClause(\VV\Db\Sql\Clauses\InsertedId $retinsId) {
+    protected function applyInsertedIdClause(\VV\Db\Sql\Clauses\InsertedIdClause $retinsId) {
         if ($retinsId->isEmpty()) return;
     }
 }

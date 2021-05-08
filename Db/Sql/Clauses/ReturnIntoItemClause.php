@@ -17,7 +17,7 @@ use VV\Db\Sql;
  *
  * @package VV\Db\Sql\Clause\ReturnInto
  */
-class ReturnIntoItem {
+class ReturnIntoItemClause {
 
     /**
      * @var Sql\Expression

@@ -16,9 +16,9 @@ use VV\Db\Param;
  * Class ReturnInto
  *
  * @package VV\Db\Sql\Clause
- * @method \VV\Db\Sql\Clauses\ReturnIntoItem[] items():array
+ * @method \VV\Db\Sql\Clauses\ReturnIntoItemClause[] items():array
  */
-class ReturnInto extends ItemList {
+class ReturnIntoClause extends ItemList {
 
     /**
      * @param string|array|\Traversable|\VV\Db\Sql\Expression $expr
@@ -53,7 +53,7 @@ class ReturnInto extends ItemList {
      */
     public function split() {
         $exprs = $params = [];
-        /** @var \VV\Db\Sql\Clauses\ReturnIntoItem $item */
+        /** @var \VV\Db\Sql\Clauses\ReturnIntoItemClause $item */
         foreach ($this->items() as $item) {
             $exprs[] = $item->expr();
             $params[] = $item->param();
@@ -66,9 +66,9 @@ class ReturnInto extends ItemList {
      * @param string|\VV\Db\Sql\Expression $field
      * @param Param                        $param
      *
-     * @return \VV\Db\Sql\Clauses\ReturnIntoItem
+     * @return \VV\Db\Sql\Clauses\ReturnIntoItemClause
      */
     protected function creteItem($field, Param $param) {
-        return new \VV\Db\Sql\Clauses\ReturnIntoItem($field, $param);
+        return new \VV\Db\Sql\Clauses\ReturnIntoItemClause($field, $param);
     }
 }

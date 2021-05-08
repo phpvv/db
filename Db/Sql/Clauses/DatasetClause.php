@@ -16,9 +16,9 @@ use VV\Db\Sql\Expression;
  * Class Dataset
  *
  * @package VV\Db\Sql\Clauses
- * @method \VV\Db\Sql\Clauses\DatasetItem[] items():array
+ * @method \VV\Db\Sql\Clauses\DatasetClauseItem[] items():array
  */
-class Dataset extends ItemList {
+class DatasetClause extends ItemList {
 
     /**
      * @ussed
@@ -67,7 +67,7 @@ class Dataset extends ItemList {
      */
     public function fieldsNamesValuesMap() {
         $map = [];
-        /** @var \VV\Db\Sql\Clauses\DatasetItem $item */
+        /** @var \VV\Db\Sql\Clauses\DatasetClauseItem $item */
         foreach ($this->items() as $item) {
             $map[$item->field()->name()] = $item->value();
         }
@@ -86,7 +86,7 @@ class Dataset extends ItemList {
         $this->items[$itemName] = $item;
     }
 
-    protected function creteItem($field, $value): DatasetItem {
-        return new DatasetItem($field, $value);
+    protected function creteItem($field, $value): DatasetClauseItem {
+        return new DatasetClauseItem($field, $value);
     }
 }

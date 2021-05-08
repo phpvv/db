@@ -10,14 +10,14 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use VV\Db\Sql\Clauses\Dataset as DatasetClause;
+use VV\Db\Sql\Clauses\DatasetClause as DatasetClause;
 
 /**
  * Class DatasetField
  *
  * @package VV\Db\Sql\Query
  */
-trait DatasetClauseFieldTrait {
+trait DatasetFieldTrait {
 
     /**
      * @var DatasetClause

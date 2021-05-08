@@ -30,7 +30,7 @@ class DeleteQuery extends ModificatoryQuery {
     /**
      * Returns delTablesClause
      *
-     * @return Clauses\DeleteTables
+     * @return Clauses\DeleteTablesClause
      */
     public function delTablesClause() {
         if (!$this->delTablesClause) {
@@ -43,11 +43,11 @@ class DeleteQuery extends ModificatoryQuery {
     /**
      * Sets delTablesClause
      *
-     * @param Clauses\DeleteTables $delTablesClause
+     * @param Clauses\DeleteTablesClause $delTablesClause
      *
      * @return $this
      */
-    public function setDelTablesClause(Clauses\DeleteTables $delTablesClause = null) {
+    public function setDelTablesClause(Clauses\DeleteTablesClause $delTablesClause = null) {
         $this->delTablesClause = $delTablesClause;
 
         return $this;
@@ -56,7 +56,7 @@ class DeleteQuery extends ModificatoryQuery {
     /**
      * Clears delTablesClause property and returns previous value
      *
-     * @return Clauses\DeleteTables
+     * @return Clauses\DeleteTablesClause
      */
     public function clearDelTablesClause() {
         try {
@@ -69,10 +69,10 @@ class DeleteQuery extends ModificatoryQuery {
     /**
      * Creates default delTablesClause
      *
-     * @return Clauses\DeleteTables
+     * @return Clauses\DeleteTablesClause
      */
     public function createDelTablesClause() {
-        return new Clauses\DeleteTables;
+        return new Clauses\DeleteTablesClause;
     }
 
     /**
@@ -83,7 +83,7 @@ class DeleteQuery extends ModificatoryQuery {
      * @return $this
      */
     public function tables(...$tables) {
-        $clause = $tables[0] instanceof Clauses\DeleteTables
+        $clause = $tables[0] instanceof Clauses\DeleteTablesClause
             ? $tables[0]
             : $this->createDelTablesClause()->add(...$tables);
 

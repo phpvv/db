@@ -168,17 +168,17 @@ abstract class QueryStringifier {
     abstract public function stringifyRaw(&$params);
 
     /**
-     * @return Sql\Clauses\Table
+     * @return Sql\Clauses\TableClause
      */
     abstract public function queryTableClause();
 
     /**
      * @param                  $field
-     * @param Sql\Clauses\Table $tableClause
+     * @param Sql\Clauses\TableClause $tableClause
      *
      * @return \VV\Db\Model\Field|null
      */
-    protected function fieldModel($field, Sql\Clauses\Table $tableClause) {
+    protected function fieldModel($field, Sql\Clauses\TableClause $tableClause) {
         if (!$field) return null;
 
         if ($field instanceof \VV\Db\Model\Field) {
@@ -225,11 +225,11 @@ abstract class QueryStringifier {
     }
 
     /**
-     * @param Sql\Clauses\Table $table
+     * @param Sql\Clauses\TableClause $table
      *
      * @return PlainSql
      */
-    protected function buildTableSql(Sql\Clauses\Table $table) {
+    protected function buildTableSql(Sql\Clauses\TableClause $table) {
         $condstr = $this->conditionStringifier();
 
         $sql = '';
@@ -274,7 +274,7 @@ abstract class QueryStringifier {
         return $sql;
     }
 
-    protected function useAliasForTable(Sql\Clauses\Table $table) {
+    protected function useAliasForTable(Sql\Clauses\TableClause $table) {
         return true;
     }
 }

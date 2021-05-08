@@ -15,7 +15,7 @@ namespace VV\Db\Sql\Clauses;
  *
  * @package VV\Db\Sql\Clause
  */
-class InsertedId implements Clause {
+class InsertedIdClause implements Clause {
 
     private ?\VV\Db\Param $param = null;
 

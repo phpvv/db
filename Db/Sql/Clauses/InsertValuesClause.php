@@ -17,8 +17,7 @@ use VV\Db\Sql;
  *
  * @package VV\Db\Sql\Clause
  */
-class InsertValues extends ItemList {
-
+class InsertValuesClause extends ItemList {
 
     /**
      * Add field(s)

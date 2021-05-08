@@ -23,7 +23,7 @@ class SelectStringifier extends \VV\Db\Sql\Stringifiers\SelectStringifier {
         $sql .= " LIMIT $count" . ($offset ? " OFFSET $offset" : '');
     }
 
-    protected function applyOderByItemNullsLast(&$str, $colstr, \VV\Db\Sql\Clauses\OrderByItem $item): void {
+    protected function applyOderByItemNullsLast(&$str, $colstr, \VV\Db\Sql\Clauses\OrderByItemClause $item): void {
         $str .= ' NULLS ' . ($item->isNullsLast() ? 'LAST' : 'FIRST');
     }
 }

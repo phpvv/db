@@ -231,20 +231,20 @@ class InsertStringifier extends ModificatoryStringifier {
     }
 
     /**
-     * @param Sql\Clauses\Dataset $ondupkey
+     * @param Sql\Clauses\DatasetClause $ondupkey
      * @param                    $params
      *
      * @return string
      */
-    protected function strOnDupKeyClause(Sql\Clauses\Dataset $ondupkey, &$params) {
+    protected function strOnDupKeyClause(Sql\Clauses\DatasetClause $ondupkey, &$params) {
         if ($ondupkey->isEmpty()) return '';
         throw new \LogicException('onDupKey is not supported by this stringifier');
     }
 
     /**
-     * @param Sql\Clauses\InsertedId $retinsId
+     * @param Sql\Clauses\InsertedIdClause $retinsId
      */
-    protected function applyInsertedIdClause(Sql\Clauses\InsertedId $retinsId) {
+    protected function applyInsertedIdClause(Sql\Clauses\InsertedIdClause $retinsId) {
         if ($retinsId->isEmpty()) return;
         throw new \LogicException('InsertedIdClause is not supported by this stringifier');
     }
@@ -262,7 +262,7 @@ class InsertStringifier extends ModificatoryStringifier {
         return "INSERT INTO {$table->embed($params)} {$fields->embed($params)}";
     }
 
-    protected function useAliasForTable(Sql\Clauses\Table $table) {
+    protected function useAliasForTable(Sql\Clauses\TableClause $table) {
         return false;
     }
 

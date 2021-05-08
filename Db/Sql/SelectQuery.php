@@ -46,15 +46,15 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
 
     const MAX_RESULT_FIELD_NAME_LEN = 30;
 
-    private ?Clauses\Columns $columnsClause = null;
+    private ?Clauses\ColumnsClause $columnsClause = null;
 
-    private ?Clauses\GroupBy $groupByClause = null;
+    private ?Clauses\GroupByClause $groupByClause = null;
 
-    private ?Clauses\OrderBy $orderByClause = null;
+    private ?Clauses\OrderByClause $orderByClause = null;
 
     private ?Sql\Condition $havingClause = null;
 
-    private ?Clauses\Limit $limitClause = null;
+    private ?Clauses\LimitClause $limitClause = null;
 
     private bool $distinctFlag = false;
 
@@ -246,7 +246,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\Table::join}
+     * See {@link \VV\Db\Sql\Clauses\TableClause::join}
      *
      * @param \VV\Db\Model\Table|string $tbl
      * @param string|null               $on
@@ -261,7 +261,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\Table::left}
+     * See {@link \VV\Db\Sql\Clauses\TableClause::left}
      *
      * @param \VV\Db\Model\Table|string $tbl
      * @param string|null               $on
@@ -276,7 +276,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\Table::right}
+     * See {@link \VV\Db\Sql\Clauses\TableClause::right}
      *
      * @param \VV\Db\Model\Table|string $tbl
      * @param string|null               $on
@@ -291,7 +291,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\Table::full}
+     * See {@link \VV\Db\Sql\Clauses\TableClause::full}
      *
      * @param \VV\Db\Model\Table|string $tbl
      * @param string|null                    $on
@@ -306,7 +306,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\Table::joinBack}
+     * See {@link \VV\Db\Sql\Clauses\TableClause::joinBack}
      *
      * @param \VV\Db\Model\Table|string $tbl
      * @param string|null                    $ontbl
@@ -321,7 +321,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\Table::leftBack}
+     * See {@link \VV\Db\Sql\Clauses\TableClause::leftBack}
      *
      * @param \VV\Db\Model\Table|string $tbl
      * @param string|null                    $ontbl
@@ -336,7 +336,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\Table::joinParent}
+     * See {@link \VV\Db\Sql\Clauses\TableClause::joinParent}
      *
      * @param string      $alias
      * @param string|null $ontbl
@@ -351,7 +351,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\Table::leftParent}
+     * See {@link \VV\Db\Sql\Clauses\TableClause::leftParent}
      *
      * @param string      $alias
      * @param string|null $ontbl
@@ -545,7 +545,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Returns columnsClause
      *
-     * @return Clauses\Columns
+     * @return Clauses\ColumnsClause
      */
     public function columnsClause() {
         if (!$this->columnsClause) {
@@ -558,11 +558,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Sets columnsClause
      *
-     * @param Clauses\Columns|null $columnsClause
+     * @param Clauses\ColumnsClause|null $columnsClause
      *
      * @return $this
      */
-    public function setColumnsClause(Clauses\Columns $columnsClause = null) {
+    public function setColumnsClause(Clauses\ColumnsClause $columnsClause = null) {
         $this->columnsClause = $columnsClause->setTableClause($this->tableClause());
 
         return $this;
@@ -571,7 +571,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Clears columnsClause property and returns previous value
      *
-     * @return Clauses\Columns
+     * @return Clauses\ColumnsClause
      */
     public function clearColumnsClause() {
         try {
@@ -584,16 +584,16 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Creates default columnsClause
      *
-     * @return Clauses\Columns
+     * @return Clauses\ColumnsClause
      */
     public function createColumnsClause() {
-        return new Clauses\Columns;
+        return new Clauses\ColumnsClause;
     }
 
     /**
      * Returns groupByClause
      *
-     * @return Clauses\GroupBy
+     * @return Clauses\GroupByClause
      */
     public function groupByClause() {
         if (!$this->groupByClause) {
@@ -606,11 +606,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Sets groupByClause
      *
-     * @param Clauses\GroupBy|null $groupByClause
+     * @param Clauses\GroupByClause|null $groupByClause
      *
      * @return $this
      */
-    public function setGroupByClause(Clauses\GroupBy $groupByClause = null) {
+    public function setGroupByClause(Clauses\GroupByClause $groupByClause = null) {
         $this->groupByClause = $groupByClause;
 
         return $this;
@@ -619,7 +619,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Clears groupByClause property and returns previous value
      *
-     * @return Clauses\GroupBy
+     * @return Clauses\GroupByClause
      */
     public function clearGroupByClause() {
         try {
@@ -632,10 +632,10 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Creates default groupByClause
      *
-     * @return Clauses\GroupBy
+     * @return Clauses\GroupByClause
      */
     public function createGroupByClause() {
-        return new Clauses\GroupBy;
+        return new Clauses\GroupByClause;
     }
 
     /**
@@ -689,7 +689,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Returns orderByClause
      *
-     * @return Clauses\OrderBy
+     * @return Clauses\OrderByClause
      */
     public function orderByClause() {
         if (!$this->orderByClause) {
@@ -702,11 +702,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Sets orderByClause
      *
-     * @param Clauses\OrderBy|null $orderByClause
+     * @param Clauses\OrderByClause|null $orderByClause
      *
      * @return $this
      */
-    public function setOrderByClause(Clauses\OrderBy $orderByClause = null) {
+    public function setOrderByClause(Clauses\OrderByClause $orderByClause = null) {
         $this->orderByClause = $orderByClause;
 
         return $this;
@@ -715,7 +715,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Clears orderByClause property and returns previous value
      *
-     * @return Clauses\OrderBy
+     * @return Clauses\OrderByClause
      */
     public function clearOrderByClause() {
         try {
@@ -728,16 +728,16 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Creates default orderByClause
      *
-     * @return Clauses\OrderBy
+     * @return Clauses\OrderByClause
      */
     public function createOrderByClause() {
-        return new Clauses\OrderBy;
+        return new Clauses\OrderByClause;
     }
 
     /**
      * Returns limitClause
      *
-     * @return Clauses\Limit
+     * @return Clauses\LimitClause
      */
     public function limitClause() {
         if (!$this->limitClause) {
@@ -750,11 +750,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Sets limitClause
      *
-     * @param Clauses\Limit|null $limitClause
+     * @param Clauses\LimitClause|null $limitClause
      *
      * @return $this
      */
-    public function setLimitClause(Clauses\Limit $limitClause = null) {
+    public function setLimitClause(Clauses\LimitClause $limitClause = null) {
         $this->limitClause = $limitClause;
 
         return $this;
@@ -763,7 +763,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Clears limitClause property and returns previous value
      *
-     * @return Clauses\Limit
+     * @return Clauses\LimitClause
      */
     public function clearLimitClause() {
         try {
@@ -776,10 +776,10 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Creates default limitClause
      *
-     * @return Clauses\Limit
+     * @return Clauses\LimitClause
      */
     public function createLimitClause() {
-        return new Clauses\Limit;
+        return new Clauses\LimitClause;
     }
 
     /**

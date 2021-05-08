@@ -20,37 +20,37 @@ use VV\Db\Sql\Expression as SqlExpr;
  * Class Table
  *
  * @package VV\Db\Sql\Clauses
- * @method TableItem[] items():array
+ * @method TableClausesItem[] items():array
  */
-class Table extends ItemList {
+class TableClause extends ItemList {
 
-    private ?TableItem $mainItem = null;
-    private ?TableItem $lastItem = null;
+    private ?TableClausesItem $mainItem = null;
+    private ?TableClausesItem $lastItem = null;
 
     /**
      * @param string $alias
      *
-     * @return TableItem
+     * @return TableClausesItem
      */
-    public function item(string $alias): TableItem {
+    public function item(string $alias): TableClausesItem {
         if (!$this->hasItem($alias)) throw new \OutOfBoundsException("Item with alias '$alias' not found");
 
         return $this->items()[$alias];
     }
 
     /**
-     * @return TableItem
+     * @return TableClausesItem
      */
-    public function mainItem(): TableItem {
+    public function mainItem(): TableClausesItem {
         if (!$this->mainItem) throw new \LogicException('Main Item is not defined yet');
 
         return $this->mainItem;
     }
 
     /**
-     * @return TableItem
+     * @return TableClausesItem
      */
-    public function lastItem(): TableItem {
+    public function lastItem(): TableClausesItem {
         if (!$this->lastItem) throw new \LogicException('Last Item is not defined yet');
 
         return $this->lastItem;
@@ -68,18 +68,18 @@ class Table extends ItemList {
     /**
      * @param string $alias
      *
-     * @return TableItem
+     * @return TableClausesItem
      */
-    public function itemOrMain(string $alias): TableItem {
+    public function itemOrMain(string $alias): TableClausesItem {
         return $alias ? $this->item($alias) : $this->mainItem();
     }
 
     /**
      * @param string $alias
      *
-     * @return TableItem
+     * @return TableClausesItem
      */
-    public function itemOrLast(string $alias): TableItem {
+    public function itemOrLast(string $alias): TableClausesItem {
         return $alias ? $this->item($alias) : $this->lastItem();
     }
 
@@ -219,7 +219,7 @@ class Table extends ItemList {
      * @return $this
      */
     public function left(string|TableModel|SqlExpr $tbl, $on = null, $alias = null): static {
-        return $this->_join($tbl, $on, $alias, TableItem::J_LEFT);
+        return $this->_join($tbl, $on, $alias, TableClausesItem::J_LEFT);
     }
 
     /**
@@ -232,7 +232,7 @@ class Table extends ItemList {
      * @return $this
      */
     public function right(string|TableModel|SqlExpr $tbl, $on = null, $alias = null): static {
-        return $this->_join($tbl, $on, $alias, TableItem::J_RIGHT);
+        return $this->_join($tbl, $on, $alias, TableClausesItem::J_RIGHT);
     }
 
     /**
@@ -245,7 +245,7 @@ class Table extends ItemList {
      * @return $this
      */
     public function full(string|TableModel|SqlExpr $tbl, $on = null, $alias = null): static {
-        return $this->_join($tbl, $on, $alias, TableItem::J_FULL);
+        return $this->_join($tbl, $on, $alias, TableClausesItem::J_FULL);
     }
 
     //endregion
@@ -274,7 +274,7 @@ class Table extends ItemList {
      * @return $this
      */
     public function leftBack(string|TableModel|SqlExpr $tbl, $ontbl = null, $alias = null): static {
-        return $this->_joinBack($tbl, $ontbl, $alias, TableItem::J_LEFT);
+        return $this->_joinBack($tbl, $ontbl, $alias, TableClausesItem::J_LEFT);
     }
 
     //endregion
@@ -303,7 +303,7 @@ class Table extends ItemList {
      * @return $this
      */
     public function leftParent(string $alias, $ontbl = null, $parent_field = null): static {
-        return $this->_joinParent($alias, $ontbl, $parent_field, TableItem::J_LEFT);
+        return $this->_joinParent($alias, $ontbl, $parent_field, TableClausesItem::J_LEFT);
     }
 
     public function a($alias): static {
@@ -325,7 +325,7 @@ class Table extends ItemList {
         return $this;
     }
 
-    public function addItem(TableItem $item): static {
+    public function addItem(TableClausesItem $item): static {
         $alias = $item->table()->alias();
         if (!$alias) {
             throw new \InvalidArgumentException('Alias is not defined for table');
@@ -340,8 +340,8 @@ class Table extends ItemList {
         return $this->setLastItem($item);
     }
 
-    public function createItem($table, $alias = null): TableItem {
-        return new TableItem($table, $alias);
+    public function createItem($table, $alias = null): TableClausesItem {
+        return new TableClausesItem($table, $alias);
     }
 
     /**
@@ -352,22 +352,22 @@ class Table extends ItemList {
     }
 
     /**
-     * @param TableItem $firstItem
+     * @param TableClausesItem $firstItem
      *
      * @return $this
      */
-    private function setMainItem(TableItem $firstItem): static {
+    private function setMainItem(TableClausesItem $firstItem): static {
         $this->mainItem = $firstItem;
 
         return $this;
     }
 
     /**
-     * @param TableItem $lastItem
+     * @param TableClausesItem $lastItem
      *
      * @return $this
      */
-    private function setLastItem(TableItem $lastItem): static {
+    private function setLastItem(TableClausesItem $lastItem): static {
         $this->lastItem = $lastItem;
 
         return $this;

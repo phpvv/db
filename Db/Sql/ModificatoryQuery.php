@@ -21,7 +21,7 @@ use VV\Db\Transaction;
  */
 abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
 
-    protected ?Clauses\ReturnInto $returnIntoClause = null;
+    protected ?Clauses\ReturnIntoClause $returnIntoClause = null;
 
     public function __get($var): mixed {
         return match ($var) {
@@ -42,7 +42,7 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
      * @return $this
      */
     public function returnInto($field, &$param = null, $type = null, $name = null, $size = null): self {
-        if ($field instanceof Clauses\ReturnInto) {
+        if ($field instanceof Clauses\ReturnIntoClause) {
             $this->setReturnIntoClause($field);
         } else {
             $this->returnIntoClause()->add($field, $param, $type, $name, $size);
@@ -54,9 +54,9 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
     /**
      * Returns returnIntoClause
      *
-     * @return Clauses\ReturnInto
+     * @return Clauses\ReturnIntoClause
      */
-    public function returnIntoClause(): Clauses\ReturnInto {
+    public function returnIntoClause(): Clauses\ReturnIntoClause {
         if (!$this->returnIntoClause) {
             $this->setReturnIntoClause($this->createReturnIntoClause());
         }
@@ -67,11 +67,11 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
     /**
      * Sets returnIntoClause
      *
-     * @param Clauses\ReturnInto|null $returnIntoClause
+     * @param Clauses\ReturnIntoClause|null $returnIntoClause
      *
      * @return $this
      */
-    public function setReturnIntoClause(Clauses\ReturnInto $returnIntoClause = null): self {
+    public function setReturnIntoClause(Clauses\ReturnIntoClause $returnIntoClause = null): self {
         $this->returnIntoClause = $returnIntoClause;
 
         return $this;
@@ -80,9 +80,9 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
     /**
      * Clears returnIntoClause property and returns previous value
      *
-     * @return Clauses\ReturnInto
+     * @return Clauses\ReturnIntoClause
      */
-    public function clearReturnIntoClause(): Clauses\ReturnInto {
+    public function clearReturnIntoClause(): Clauses\ReturnIntoClause {
         try {
             return $this->returnIntoClause();
         } finally {
@@ -93,10 +93,10 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
     /**
      * Creates default returnIntoClause
      *
-     * @return Clauses\ReturnInto
+     * @return Clauses\ReturnIntoClause
      */
-    public function createReturnIntoClause(): Clauses\ReturnInto {
-        return new Clauses\ReturnInto;
+    public function createReturnIntoClause(): Clauses\ReturnIntoClause {
+        return new Clauses\ReturnIntoClause;
     }
 
     /**

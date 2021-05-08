@@ -17,7 +17,7 @@ use VV\Db\Sql\Expression;
  *
  * @package VV\Db\Sql\Clause\OrderBy
  */
-class OrderByItem {
+class OrderByItemClause {
 
     /**
      * @var string|\VV\Db\Sql\Expression

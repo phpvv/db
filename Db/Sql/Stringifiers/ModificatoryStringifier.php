@@ -14,7 +14,7 @@ use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 use VV\Db\Model\Field;
 use VV\Db\Param;
 use VV\Db\Sql;
-use VV\Db\Sql\Clauses\ReturnIntoItem as ReturnIntoItem;
+use VV\Db\Sql\Clauses\ReturnIntoItemClause as ReturnIntoItem;
 
 
 /**
@@ -27,23 +27,23 @@ abstract class ModificatoryStringifier extends QueryStringifier {
     private $advReturnInto = [];
 
     /**
-     * @return ReturnIntoItem[]
+     * @return ReturnIntoItemClause[]
      */
     protected function advReturnInto() {
         return $this->advReturnInto;
     }
 
     protected function addAdvReturnInto($field, $value) {
-        $this->advReturnInto[] = new ReturnIntoItem($field, $value);
+        $this->advReturnInto[] = new ReturnIntoItemClause($field, $value);
     }
 
     /**
-     * @param Sql\Clauses\ReturnInto $returnInto
+     * @param Sql\Clauses\ReturnIntoClause $returnInto
      * @param                       $params
      *
      * @return string
      */
-    protected function strReturnIntoClause(Sql\Clauses\ReturnInto $returnInto, &$params) {
+    protected function strReturnIntoClause(Sql\Clauses\ReturnIntoClause $returnInto, &$params) {
         $items = $returnInto->items();
         if ($advReturnInto = $this->advReturnInto()) {
             array_push($items, ...$advReturnInto);
@@ -109,7 +109,7 @@ abstract class ModificatoryStringifier extends QueryStringifier {
         return $this->strParam($value, $params);
     }
 
-    protected function strDataset(Sql\Clauses\Dataset $dataset, &$params) {
+    protected function strDataset(Sql\Clauses\DatasetClause $dataset, &$params) {
         $set = [];
         $exprStringifier = $this->exprStringifier();
         foreach ($dataset->items() as $item) {

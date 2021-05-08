@@ -13,24 +13,19 @@ namespace VV\Db\Sql\Clauses;
 use VV\Db\Sql;
 
 /**
- * Class OrderBy
+ * Class GroupBy
  *
  * @package VV\Db\Sql\Clauses
- * @method OrderByItem[] items():array
+ * @method Sql\Expression[] items():array
  */
-class OrderBy extends ColumnList {
+class GroupByClause extends ColumnList {
 
     protected function _add(array $columns) {
-        foreach ($columns as $col) {
-            if ($item = OrderByItem::create($col)) {
-                $this->appendItems($item);
-            } else {
-                throw new \InvalidArgumentException;
-            }
-        }
+        foreach ($columns as $col)
+            $this->appendItems(Sql::expression($col));
     }
 
     protected function allowedObjectTypes(): array {
-        return [OrderByItem::class, Sql\Expression::class];
+        return [Sql\Expression::class];
     }
 }

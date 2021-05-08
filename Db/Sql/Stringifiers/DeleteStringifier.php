@@ -57,16 +57,16 @@ class DeleteStringifier extends ModificatoryStringifier {
         return $sql;
     }
 
-    protected function strDeleteClause(Sql\Clauses\DeleteTables $tables, &$params) {
+    protected function strDeleteClause(Sql\Clauses\DeleteTablesClause $tables, &$params) {
         return 'DELETE';
     }
 
-    protected function strTableClause(Sql\Clauses\Table $table, &$params) {
+    protected function strTableClause(Sql\Clauses\TableClause $table, &$params) {
         return ' FROM ' . $this->buildTableSql($table)->embed($params);
     }
 
     /**
-     * @return Sql\Clauses\Table
+     * @return Sql\Clauses\TableClause
      */
     public function queryTableClause() {
         return $this->deleteQuery()->tableClause();
@@ -86,7 +86,7 @@ class DeleteStringifier extends ModificatoryStringifier {
         }
     }
 
-    protected function useAliasForTable(Sql\Clauses\Table $table) {
+    protected function useAliasForTable(Sql\Clauses\TableClause $table) {
         return count($table->items()) > 1;
     }
 }

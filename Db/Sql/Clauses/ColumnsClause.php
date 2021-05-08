@@ -17,10 +17,10 @@ use VV\Db\Sql;
  *
  * @package VV\Db\Sql\Clauses
  */
-class Columns extends ColumnList {
+class ColumnsClause extends ColumnList {
 
     /**
-     * @var Table
+     * @var TableClause
      */
     private $tableClause;
 
@@ -82,18 +82,18 @@ class Columns extends ColumnList {
     }
 
     /**
-     * @return Table
+     * @return TableClause
      */
     public function tableClause() {
         return $this->tableClause;
     }
 
     /**
-     * @param Table $tableClause
+     * @param TableClause $tableClause
      *
      * @return $this
      */
-    public function setTableClause(Table $tableClause) {
+    public function setTableClause(TableClause $tableClause) {
         $this->tableClause = $tableClause;
 
         return $this;
@@ -109,7 +109,7 @@ class Columns extends ColumnList {
     /**
      * @param array $resultFieldsMap
      *
-     * @return $this|Columns
+     * @return $this|ColumnsClause
      */
     public function setResultFieldsMap(?array $resultFieldsMap): self {
         $this->resultFieldsMap = $resultFieldsMap;

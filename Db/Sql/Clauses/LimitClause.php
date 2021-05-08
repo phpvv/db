@@ -15,7 +15,7 @@ namespace VV\Db\Sql\Clauses;
  *
  * @package VV\Db\Sql\Clause
  */
-class Limit implements Clause {
+class LimitClause implements Clause {
 
     /**
      * @var int

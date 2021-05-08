@@ -18,7 +18,7 @@ use VV\Db\Sql;
  * @package VV\Db\Sql\Clause
  * @method Sql\DbObject[] items():array
  */
-class InsertFields extends ColumnList {
+class InsertFieldsClause extends ColumnList {
 
     protected function _add(array $columns) {
         foreach ($columns as &$col) {

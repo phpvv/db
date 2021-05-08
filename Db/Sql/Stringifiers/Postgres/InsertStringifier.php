@@ -10,7 +10,7 @@
  */
 namespace VV\Db\Sql\Stringifiers\Postgres;
 
-use VV\Db\Sql\Clauses\InsertedId;
+use VV\Db\Sql\Clauses\InsertedIdClause;
 
 /**
  * Class InsertStringifier
@@ -30,7 +30,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
                | \VV\Db\Sql\InsertQuery::C_RETURN_INS_ID;
     }
 
-    protected function applyInsertedIdClause(InsertedId $retinsId) {
+    protected function applyInsertedIdClause(InsertedIdClause $retinsId) {
         if ($retinsId->isEmpty()) return;
 
         $this->insertedIdParam = ($retinsId->param() ?: \VV\Db\Param::chr())->setForInsertedId();

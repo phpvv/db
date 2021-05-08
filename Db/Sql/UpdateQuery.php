@@ -10,7 +10,7 @@
  */
 namespace VV\Db\Sql;
 
-use VV\Db\Sql\Clauses\DatasetClauseFieldTrait;
+use VV\Db\Sql\Clauses\DatasetFieldTrait;
 
 /**
  * Class Update
@@ -19,7 +19,7 @@ use VV\Db\Sql\Clauses\DatasetClauseFieldTrait;
  */
 class UpdateQuery extends ModificatoryQuery {
 
-    use DatasetClauseFieldTrait;
+    use DatasetFieldTrait;
 
     const C_TABLE = 0x01,
         C_DATASET = 0x02,
