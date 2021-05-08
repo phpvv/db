@@ -95,16 +95,16 @@ class TableClause extends ItemList {
     }
 
     /**
-     * @return TableModel
+     * @return TableModel|null
      */
-    public function mainTableModel(): TableModel {
+    public function mainTableModel(): ?TableModel {
         return $this->mainItem()->tableModel();
     }
 
     /**
-     * @return TableModel
+     * @return TableModel|null
      */
-    public function lastTableModel(): TableModel {
+    public function lastTableModel(): ?TableModel {
         return $this->lastItem()->tableModel();
     }
 
