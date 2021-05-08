@@ -10,8 +10,15 @@
  */
 namespace VV;
 
+use VV\Db\Connection;
 use VV\Db\Exceptions\ConnectionError;
+use VV\Db\Model\TableList;
+use VV\Db\Model\ViewList;
+use VV\Db\Result;
 use VV\Db\Sql;
+use VV\Db\Sql\Query;
+use VV\Db\Statement;
+use VV\Db\Transaction;
 
 /**
  * Class Db
@@ -21,21 +28,15 @@ use VV\Db\Sql;
 abstract class Db {
 
     public const FETCH_ASSOC = 0x01;
-
     public const FETCH_NUM = 0x02;
-
     public const FETCH_BOTH = self::FETCH_ASSOC | self::FETCH_NUM;
-
     public const FETCH_OBJ = 0x04;
-
     public const FETCH_LOB_NOT_LOAD = 0x08; // only for oracle yet
 
-    /** @var \VV\Db\Connection[] */
+    /** @var Connection[] */
     private array $connections = [];
-
-    private ?Db\Model\TableList $tables = null;
-
-    private ?Db\Model\ViewList $views = null;
+    private ?TableList $tables = null;
+    private ?ViewList $views = null;
 
     public function __get($name): mixed {
         return match ($name) {
@@ -46,16 +47,16 @@ abstract class Db {
     }
 
     /**
-     * @return Db\Connection
+     * @return Connection
      */
-    public function connection(): Db\Connection {
+    public function connection(): Connection {
         $connection = &$this->connections[0];
         if (!$connection) $connection = $this->createConnection();
 
         return $connection;
     }
 
-    public function transactionFreeConnection(): Db\Connection {
+    public function transactionFreeConnection(): Connection {
         foreach ($this->connections as $connection) {
             if (!$connection->isBusy()) {
                 return $connection;
@@ -76,45 +77,45 @@ abstract class Db {
     }
 
     /**
-     * @param          $sql
-     * @param array    $params
-     * @param int|null $flags
+     * @param Query|string $query
+     * @param array|null   $params
+     * @param int|null     $flags
      *
-     * @return Db\Result
+     * @return Result
      */
-    public function query($sql, $params = [], int $flags = null): Db\Result {
-        return $this->connection()->query($sql, $params, $flags);
+    public function query(Query|string $query, array $params = null, int $flags = null): Result {
+        return $this->connection()->query($query, $params, $flags);
     }
 
     /**
-     * @param $sql
+     * @param Query|string $query
      *
-     * @return Db\Statement
+     * @return Statement
      */
-    public function prepare($sql): Db\Statement {
-        return $this->connection()->prepare($sql);
+    public function prepare(Query|string $query): Statement {
+        return $this->connection()->prepare($query);
     }
 
     /**
-     * @return Db\Transaction
+     * @return Transaction
      */
-    public function startTransaction(): Db\Transaction {
+    public function startTransaction(): Transaction {
         return $this->connection()->startTransaction();
     }
 
     /**
-     * @return \VV\Db\Model\TableList
+     * @return TableList
      */
-    public function tables(): \VV\Db\Model\TableList {
+    public function tables(): TableList {
         if (!$this->tables) $this->tables = $this->createTableList();
 
         return $this->tables;
     }
 
     /**
-     * @return \VV\Db\Model\ViewList
+     * @return ViewList
      */
-    public function views(): \VV\Db\Model\ViewList {
+    public function views(): ViewList {
         if (!$this->views) $this->views = $this->createViewList();
 
         return $this->views;
@@ -123,7 +124,7 @@ abstract class Db {
     /**
      * Create select query
      *
-     * @param string[]|\VV\Db\Sql\Expression[] $columns
+     * @param string[]|Sql\Expression[] $columns
      *
      * @return Sql\SelectQuery
      */
@@ -169,21 +170,21 @@ abstract class Db {
         return $this->connection()->connectionError();
     }
 
-    abstract public function createConnection(): Db\Connection;
+    abstract public function createConnection(): Connection;
 
     /**
-     * @return \VV\Db\Model\TableList
+     * @return TableList
      */
-    protected function createTableList(): \VV\Db\Model\TableList {
+    protected function createTableList(): TableList {
         $cls = get_class($this) . '\TableList';
 
         return new $cls($this);
     }
 
     /**
-     * @return \VV\Db\Model\ViewList
+     * @return ViewList
      */
-    protected function createViewList(): \VV\Db\Model\ViewList {
+    protected function createViewList(): ViewList {
         $cls = get_class($this) . '\ViewLs';
 
         return new $cls($this);

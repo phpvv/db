@@ -11,10 +11,10 @@
 namespace VV\Db;
 
 use JetBrains\PhpStorm\Pure;
-use VV\Db\Sql\Stringifiers\Factory as SqlStringifiersFactory;
-use VV\Db\Sql\Stringifiers\QueryStringifier;
 use VV\Db\Exceptions\ConnectionError;
 use VV\Db\Sql\Query;
+use VV\Db\Sql\Stringifiers\Factory as SqlStringifiersFactory;
+use VV\Db\Sql\Stringifiers\QueryStringifier;
 
 /**
  * Class Connection
@@ -40,12 +40,12 @@ final class Connection {
     /**
      * Constructor
      *
-     * @param Driver\Driver      $driver
-     * @param string|null $host
-     * @param string|null $user
-     * @param string|null $passwd
-     * @param string|null $scheme
-     * @param string|null $charset
+     * @param Driver\Driver $driver
+     * @param string|null   $host
+     * @param string|null   $user
+     * @param string|null   $passwd
+     * @param string|null   $scheme
+     * @param string|null   $charset
      */
     public function __construct(Driver\Driver $driver, string $host = null, string $user = null, string $passwd = null, string $scheme = null, string $charset = null) {
         $this->driver = $driver;
@@ -126,12 +126,12 @@ final class Connection {
 
     /**
      * @param Query|string $query
-     * @param array        $params
-     * @param null         $fetchSize
+     * @param array|null   $params
+     * @param int|null     $fetchSize
      *
      * @return Statement
      */
-    public function prepare(Query|string $query, $params = [], $fetchSize = null): Statement {
+    public function prepare(Query|string $query, array $params = null, int $fetchSize = null): Statement {
         $this->tryAutoConnect();
 
         $resultFieldsMap = null;
@@ -158,14 +158,14 @@ final class Connection {
      * Executes query and returns query statement
      *
      * @param string|Query $query
-     * @param array        $params
+     * @param array|null   $params
      * @param int|null     $flags Default flags for fetch
      * @param null         $decorator
      * @param int|null     $fetchSize
      *
      * @return Result
      */
-    public function query(Query|string $query, $params = [], int $flags = null, $decorator = null, int $fetchSize = null): Result {
+    public function query(Query|string $query, array $params = null, int $flags = null, $decorator = null, int $fetchSize = null): Result {
         $prepared = $this->prepare($query);
 
         if ($params) {
@@ -392,6 +392,13 @@ final class Connection {
     /**
      * @return bool
      */
+    public function isPostgresql(): bool {
+        return $this->dbms() == Driver\Driver::DBMS_POSTGRES;
+    }
+
+    /**
+     * @return bool
+     */
     public function isOracle(): bool {
         return $this->dbms() == Driver\Driver::DBMS_ORACLE;
     }
@@ -401,13 +408,6 @@ final class Connection {
      */
     public function isMssql(): bool {
         return $this->dbms() == Driver\Driver::DBMS_MSSQL;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isPostgresql(): bool {
-        return $this->dbms() == Driver\Driver::DBMS_POSTGRES;
     }
 
     /**
