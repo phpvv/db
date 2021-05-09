@@ -13,7 +13,7 @@ namespace VV\Db\Sql\Clauses;
 /**
  * Class ItemList
  *
- * @package VV\Db\Sql\Clause
+ * @package VV\Db\Sql\Clauses
  */
 abstract class ItemList implements Clause {
 

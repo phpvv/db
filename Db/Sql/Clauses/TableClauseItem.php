@@ -18,7 +18,7 @@ use VV\Db\Sql\Expression as SqlExpr;
  *
  * @package VV\Db\Sql\Clause\Table
  */
-class TableClausesItem {
+class TableClauseItem {
 
     const J_INNER = 'JOIN',
         J_LEFT = 'LEFT JOIN',

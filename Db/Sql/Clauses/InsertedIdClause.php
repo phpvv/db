@@ -10,34 +10,34 @@
  */
 namespace VV\Db\Sql\Clauses;
 
+use VV\Db\Param;
+
 /**
- * Class InsertedId
+ * Class InsertedIdClause
  *
- * @package VV\Db\Sql\Clause
+ * @package VV\Db\Sql\Clauses
  */
 class InsertedIdClause implements Clause {
 
-    private ?\VV\Db\Param $param = null;
-
+    private ?Param $param = null;
     private bool $empty = true;
-
     private ?string $pk = null;
 
     /**
-     * @param int|\VV\Db\Param|null $type
-     * @param int|null              $size
-     * @param string|null           $pk
+     * @param int|Param|null $type
+     * @param int|null       $size
+     * @param string|null    $pk
      *
      * @return $this
      */
-    public function set($type = null, int $size = null, string $pk = null): self {
+    public function set(Param|int $type = null, int $size = null, string $pk = null): self {
         $this->empty = false;
 
         if ($type) {
-            if ($type instanceof \VV\Db\Param) {
+            if ($type instanceof Param) {
                 $param = $type;
             } else {
-                $param = new \VV\Db\Param($type, null, null, $size);
+                $param = new Param($type, null, null, $size);
             }
             if ($size !== null) $param->setSize($size);
 
@@ -58,7 +58,7 @@ class InsertedIdClause implements Clause {
     }
 
     /**
-     * @return \VV\Db\Param
+     * @return Param
      */
     public function param() {
         return $this->param;

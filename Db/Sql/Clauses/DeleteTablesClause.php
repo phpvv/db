@@ -10,20 +10,21 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use VV\Db\Sql;
+use VV\Db\Sql\DbObject;
+use VV\Db\Sql\Expression;
 
 /**
- * Class DeleteTables
+ * Class DeleteTablesClause
  *
- * @package VV\Db\Sql\Clause
- * @method Sql\DbObject[] items():array
+ * @package VV\Db\Sql\Clauses
+ * @method DbObject[] items():array
  */
 class DeleteTablesClause extends ItemList {
 
     /**
      * Add field(s)
      *
-     * @param string[]|\VV\Db\Sql\Expression[] ...$tables
+     * @param string|Expression ...$tables
      *
      * @return $this
      */
@@ -31,11 +32,7 @@ class DeleteTablesClause extends ItemList {
         if (!$tables) return $this;
 
         foreach ($tables as $i => $tbl) {
-            if (\VV\emt($tbl)) {
-                throw new \InvalidArgumentException("Table #$i is empty");
-            }
-
-            if (!$tbl = Sql\DbObject::create($tbl)) {
+            if (!$tbl = DbObject::create($tbl)) {
                 throw new \InvalidArgumentException("Table #$i is incorrect");
             }
 

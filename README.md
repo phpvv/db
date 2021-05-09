@@ -198,7 +198,7 @@ try {
     // variants:
     switch (2) {
         case 1:
-            // doesn't care about performance
+            // don't care about performance
             foreach ($productIterExtended as [$productId, $price, $quantity]) {
                 $db->tbl->orderItem->insert()
                     ->set([
@@ -331,11 +331,11 @@ use VV\Db\ModelGenerator\Generator;
 
 (new Generator(MainDb::instance()))->build();
 ```
-DB schema  representation classes will be created in the `App\Db\MainDb` folder.
+DB schema representation classes will be created in the `App\Db\MainDb` folder.
 
 #### Usage
 
-Example ([db-model.php](https://github.com/phpvv/db-examples/blob/master/examples/gen-db-model.php)):
+Example ([db-model.php](https://github.com/phpvv/db-examples/blob/master/examples/db-model.php)):
 
 ```php
 use App\Db\MainDb;

@@ -13,7 +13,7 @@ namespace VV\Db\Sql\Clauses;
 /**
  * Interface Clause
  *
- * @package VV\Db\Sql
+ * @package VV\Db\Sql\Clauses
  */
 interface Clause {
 

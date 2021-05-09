@@ -66,12 +66,12 @@ abstract class Table extends DataObject {
      * @return Sql\UpdateQuery|int
      */
     public function update($data = [], $condition = null): Sql\UpdateQuery|int {
-        $q = $this->connection()->update()->table($this)->set($data);
-        if (!$condition) return $q;
+        $query = $this->connection()->update()->table($this)->set($data);
+        if (!$condition) return $query;
 
         if (is_scalar($condition)) $condition = [static::PK => $condition];
 
-        return $q->where($condition)->affectedRows;
+        return $query->where($condition)->affectedRows;
     }
 
     /**

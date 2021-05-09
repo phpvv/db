@@ -11,27 +11,34 @@
 namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Param;
+use VV\Db\Sql\Expression;
 
 /**
  * Class ReturnInto
  *
  * @package VV\Db\Sql\Clause
- * @method \VV\Db\Sql\Clauses\ReturnIntoItemClause[] items():array
+ * @method ReturnIntoClauseItem[] items():array
  */
 class ReturnIntoClause extends ItemList {
 
     /**
-     * @param string|array|\Traversable|\VV\Db\Sql\Expression $expr
-     * @param mixed|Param                                     $param
-     * @param int                                             $type \VV\Db\P::T_...
-     * @param string                                          $name
-     * @param int                                             $size Size of variable in bytes
+     * @param iterable|string|Expression $expression
+     * @param mixed|Param|null           $param
+     * @param int|null                   $type \VV\Db\P::T_...
+     * @param string|null                $name
+     * @param int|null                   $size Size of variable in bytes
      *
      * @return $this
      */
-    public function add($expr, &$param = null, $type = null, $name = null, $size = null) {
-        if (is_iterable($expr)) {
-            foreach ($expr as $k => &$v) $this->add($k, $v);
+    public function add(
+        iterable|string|Expression $expression,
+        mixed &$param = null,
+        int $type = null,
+        string $name = null,
+        int $size = null
+    ): static {
+        if (is_iterable($expression)) {
+            foreach ($expression as $k => &$v) $this->add($k, $v);
             unset($v);
 
             return $this;
@@ -41,8 +48,8 @@ class ReturnIntoClause extends ItemList {
             ? Param::ptr($type ?: Param::T_CHR, $param, $name, $size)
             : $param;
 
-        $item = $this->creteItem($expr, $P);
-        $itemName = $item->expr()->exprId();
+        $item = $this->creteItem($expression, $P);
+        $itemName = $item->expression()->exprId();
         $this->items[$itemName] = $item;
 
         return $this;
@@ -51,11 +58,10 @@ class ReturnIntoClause extends ItemList {
     /**
      * @return array
      */
-    public function split() {
+    public function split(): array {
         $exprs = $params = [];
-        /** @var \VV\Db\Sql\Clauses\ReturnIntoItemClause $item */
         foreach ($this->items() as $item) {
-            $exprs[] = $item->expr();
+            $exprs[] = $item->expression();
             $params[] = $item->param();
         }
 
@@ -63,12 +69,12 @@ class ReturnIntoClause extends ItemList {
     }
 
     /**
-     * @param string|\VV\Db\Sql\Expression $field
-     * @param Param                        $param
+     * @param string|Expression $field
+     * @param Param             $param
      *
-     * @return \VV\Db\Sql\Clauses\ReturnIntoItemClause
+     * @return ReturnIntoClauseItem
      */
-    protected function creteItem($field, Param $param) {
-        return new \VV\Db\Sql\Clauses\ReturnIntoItemClause($field, $param);
+    protected function creteItem(string|Expression $field, Param $param): ReturnIntoClauseItem {
+        return new ReturnIntoClauseItem($field, $param);
     }
 }

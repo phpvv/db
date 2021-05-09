@@ -10,6 +10,8 @@
  */
 namespace VV\Db\Sql\Clauses;
 
+use VV\Db\Sql\Expression;
+
 /**
  * Class ColumnList
  *
@@ -20,11 +22,11 @@ abstract class ColumnList extends ItemList {
     /**
      * Add field(s)
      *
-     * @param string|\VV\Db\Sql\Expression ...$columns
+     * @param string|Expression ...$columns
      *
      * @return $this
      */
-    public function add(...$columns): static {
+    public function add(string|Expression ...$columns): static {
         if (!$columns) return $this;
 
         if (count($columns) == 1 && is_array($columns[0])) {

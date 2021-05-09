@@ -14,7 +14,7 @@ use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 use VV\Db\Model\Field;
 use VV\Db\Param;
 use VV\Db\Sql;
-use VV\Db\Sql\Clauses\ReturnIntoItemClause as ReturnIntoItem;
+use VV\Db\Sql\Clauses\ReturnIntoClauseItem;
 
 
 /**
@@ -27,14 +27,14 @@ abstract class ModificatoryStringifier extends QueryStringifier {
     private $advReturnInto = [];
 
     /**
-     * @return ReturnIntoItemClause[]
+     * @return ReturnIntoClauseItem[]
      */
     protected function advReturnInto() {
         return $this->advReturnInto;
     }
 
     protected function addAdvReturnInto($field, $value) {
-        $this->advReturnInto[] = new ReturnIntoItemClause($field, $value);
+        $this->advReturnInto[] = new ReturnIntoClauseItem($field, $value);
     }
 
     /**
@@ -53,7 +53,7 @@ abstract class ModificatoryStringifier extends QueryStringifier {
 
         $vars = $exprs = [];
         foreach ($items as $item) {
-            $exprs[] = $this->strExpr($item->expr(), $params);
+            $exprs[] = $this->strExpr($item->expression(), $params);
             /** @var \VV\Db\Sql\Stringifiers\ExpressoinStringifier $exprStringifier */
             $exprStringifier = $this->exprStringifier();
             $vars[] = $exprStringifier->strParam($item->param(), $params);

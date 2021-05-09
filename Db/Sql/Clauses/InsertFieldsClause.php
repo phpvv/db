@@ -13,9 +13,9 @@ namespace VV\Db\Sql\Clauses;
 use VV\Db\Sql;
 
 /**
- * Class InsertFields
+ * Class InsertFieldsClause
  *
- * @package VV\Db\Sql\Clause
+ * @package VV\Db\Sql\Clauses
  * @method Sql\DbObject[] items():array
  */
 class InsertFieldsClause extends ColumnList {

@@ -116,7 +116,7 @@ class SelectStringifier extends QueryStringifier {
         $orderStarr = [];
 
         foreach ($orderBy->items() as $item) {
-            $str = $colstr = $this->strExpr($item->column(), $params);
+            $str = $colstr = $this->strExpr($item->expression(), $params);
             if ($item->isDesc()) $str .= ' DESC';
 
             $this->applyOderByItemNullsLast($str, $colstr, $item);
@@ -127,7 +127,7 @@ class SelectStringifier extends QueryStringifier {
         return implode(', ', $orderStarr);
     }
 
-    protected function applyOderByItemNullsLast(&$str, $colstr, Sql\Clauses\OrderByItemClause $item): void {
+    protected function applyOderByItemNullsLast(&$str, $colstr, Sql\Clauses\OrderByClauseItem $item): void {
         $isdesc = $item->isDesc();
         $isNullsLast = $item->isNullsLast();
         if ($isdesc == $isNullsLast) return;

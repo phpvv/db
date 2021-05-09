@@ -13,23 +13,15 @@ namespace VV\Db\Sql\Clauses;
 use VV\Db\Sql;
 
 /**
- * Class Columns
+ * Class ColumnsClause
  *
  * @package VV\Db\Sql\Clauses
  */
 class ColumnsClause extends ColumnList {
 
-    /**
-     * @var TableClause
-     */
-    private $tableClause;
-
-    private $_resultFields;
-
-    /**
-     * @var array
-     */
-    private $resultFieldsMap;
+    private ?TableClause $tableClause = null;
+    private ?array $resultFields = null;
+    private ?array $resultFieldsMap = null;
 
     /**
      * @return Sql\Expression[]
@@ -38,17 +30,28 @@ class ColumnsClause extends ColumnList {
         return parent::items() ?: [Sql\DbObject::create('*')];
     }
 
+    /**
+     * @inheritDoc
+     */
     public function isEmpty(): bool {
         return false; // can't be empty (*)
     }
 
-    public function isAll() {
+    /**
+     * Return true if `SELECT *`
+     *
+     * @return bool
+     */
+    public function isAllColumns(): bool {
         return !parent::items();
     }
 
-    public function resultFields() {
-        $rf = &$this->_resultFields;
-        if (is_null($rf)) {
+    /**
+     * @return string[]
+     */
+    public function resultFields(): array {
+        $rf = &$this->resultFields;
+        if ($rf === null) {
             $rf = [];
             foreach ($this->items() as $col) {
                 $a = null;
@@ -82,9 +85,9 @@ class ColumnsClause extends ColumnList {
     }
 
     /**
-     * @return TableClause
+     * @return TableClause|null
      */
-    public function tableClause() {
+    public function tableClause(): ?TableClause {
         return $this->tableClause;
     }
 
@@ -93,21 +96,21 @@ class ColumnsClause extends ColumnList {
      *
      * @return $this
      */
-    public function setTableClause(TableClause $tableClause) {
+    public function setTableClause(TableClause $tableClause): static {
         $this->tableClause = $tableClause;
 
         return $this;
     }
 
     /**
-     * @return array
+     * @return array|null
      */
     public function resultFieldsMap(): ?array {
         return $this->resultFieldsMap;
     }
 
     /**
-     * @param array $resultFieldsMap
+     * @param array|null $resultFieldsMap
      *
      * @return $this|ColumnsClause
      */

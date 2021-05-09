@@ -17,22 +17,22 @@ namespace VV\Db\Sql;
  */
 trait AliasFieldTrait {
 
-    private $_alias;
+    private ?string $alias = null;
 
     /**
-     * @return string
+     * @return string|null
      */
     public function alias(): ?string {
-        return $this->_alias;
+        return $this->alias;
     }
 
     /**
-     * @param string $alias
+     * @param string|null $alias
      *
      * @return $this
      */
-    public function as(?string $alias) {
-        $this->_alias = $alias;
+    public function as(?string $alias): static {
+        $this->alias = $alias;
 
         return $this;
     }

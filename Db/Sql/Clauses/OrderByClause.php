@@ -13,16 +13,16 @@ namespace VV\Db\Sql\Clauses;
 use VV\Db\Sql;
 
 /**
- * Class OrderBy
+ * Class OrderByClause
  *
  * @package VV\Db\Sql\Clauses
- * @method OrderByItemClause[] items():array
+ * @method OrderByClauseItem[] items():array
  */
 class OrderByClause extends ColumnList {
 
     protected function _add(array $columns) {
         foreach ($columns as $col) {
-            if ($item = OrderByItemClause::create($col)) {
+            if ($item = OrderByClauseItem::create($col)) {
                 $this->appendItems($item);
             } else {
                 throw new \InvalidArgumentException;
@@ -31,6 +31,6 @@ class OrderByClause extends ColumnList {
     }
 
     protected function allowedObjectTypes(): array {
-        return [OrderByItemClause::class, Sql\Expression::class];
+        return [OrderByClauseItem::class, Sql\Expression::class];
     }
 }

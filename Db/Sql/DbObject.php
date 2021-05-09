@@ -133,21 +133,19 @@ class DbObject implements Sql\Expression {
     }
 
     /**
-     * @param string|static $name
-     * @param string|static $dfltOwner
-     * @param bool          $parseAlias
+     * @param string|static        $name
+     * @param string|DbObject|null $dfltOwner
+     * @param bool                 $parseAlias
      *
      * @return static|null
      */
-    public static function create($name, $dfltOwner = null, bool $parseAlias = true): ?self {
-        if (\VV\emt($name)) throw new \InvalidArgumentException('Name is empty');
+    public static function create(string|self $name, string|self $dfltOwner = null, bool $parseAlias = true): ?self {
+        if (!$name) throw new \InvalidArgumentException('DbObject Name is empty');
         if ($name instanceof static) return $name;
-        if (!is_string($name)) return null;
 
         [$path, $alias] = static::parse($name, $parseAlias);
         if (!$path) return null;
 
-        /** @var static $obj */
         $obj = (new static)->setParsedData($path, $alias);
         if ($dfltOwner && !$obj->owner()) $obj->setOwner($dfltOwner);
 

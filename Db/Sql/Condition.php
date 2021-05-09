@@ -30,7 +30,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     private ?string $connector = null;
     private ?Expression $target = null;
     private bool $itemNegation = false;
-    /** Negation for all condition */
+    /** Negation for all condition like in predicate */
     private bool $negation = false;
 
     public function __get($var) {

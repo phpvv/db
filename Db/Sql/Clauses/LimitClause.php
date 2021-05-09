@@ -10,34 +10,29 @@
  */
 namespace VV\Db\Sql\Clauses;
 
+use JetBrains\PhpStorm\Pure;
+
 /**
- * Class Limit
+ * Class LimitClause
  *
- * @package VV\Db\Sql\Clause
+ * @package VV\Db\Sql\Clauses
  */
 class LimitClause implements Clause {
 
-    /**
-     * @var int
-     */
-    private $count = 0;
-
-    /**
-     * @var int
-     */
-    private $offset;
+    private int $count = 0;
+    private int $offset = 0;
 
     /**
      * @return int
      */
-    public function count() {
+    public function count(): int {
         return $this->count;
     }
 
     /**
      * @return int
      */
-    public function offset() {
+    public function offset(): int {
         return $this->offset;
     }
 
@@ -45,11 +40,15 @@ class LimitClause implements Clause {
      * @param int $count
      * @param int $offset
      */
-    public function set($count, $offset = 0) {
-        $this->count = (int)$count;
-        $this->offset = (int)$offset;
+    public function set(int $count, int $offset = 0) {
+        $this->count = $count;
+        $this->offset = $offset;
     }
 
+    /**
+     * @return bool
+     */
+    #[Pure]
     public function isEmpty(): bool {
         return !$this->count();
     }

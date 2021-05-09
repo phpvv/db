@@ -25,7 +25,7 @@ class SelectStringifier extends \VV\Db\Sql\Stringifiers\SelectStringifier {
         $sql = "SELECT $fields FROM (SELECT t.*, rownum AS $rn FROM ($sql) t) WHERE $rn>$offset AND $rn<=$count+$offset";
     }
 
-    protected function applyOderByItemNullsLast(&$str, $colstr, \VV\Db\Sql\Clauses\OrderByItemClause $item): void {
+    protected function applyOderByItemNullsLast(&$str, $colstr, \VV\Db\Sql\Clauses\OrderByClauseItem $item): void {
         $str .= ' NULLS ' . ($item->isNullsLast() ? 'LAST' : 'FIRST');
     }
 }

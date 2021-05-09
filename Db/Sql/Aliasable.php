@@ -18,7 +18,7 @@ namespace VV\Db\Sql;
 interface Aliasable {
 
     /**
-     * @return string
+     * @return string|null
      */
     public function alias(): ?string;
 
@@ -27,5 +27,5 @@ interface Aliasable {
      *
      * @return $this
      */
-    public function as(?string $alias);
+    public function as(?string $alias): static;
 }

@@ -13,7 +13,7 @@ namespace VV\Db\Sql\Clauses;
 use VV\Db\Sql;
 
 /**
- * Class GroupBy
+ * Class GroupByClause
  *
  * @package VV\Db\Sql\Clauses
  * @method Sql\Expression[] items():array
@@ -21,8 +21,9 @@ use VV\Db\Sql;
 class GroupByClause extends ColumnList {
 
     protected function _add(array $columns) {
-        foreach ($columns as $col)
+        foreach ($columns as $col) {
             $this->appendItems(Sql::expression($col));
+        }
     }
 
     protected function allowedObjectTypes(): array {

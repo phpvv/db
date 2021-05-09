@@ -10,10 +10,11 @@
  */
 namespace VV\Db\Sql\Clauses;
 
+use VV\Db\Sql\DbObject;
 use VV\Db\Sql\Expression;
 
 /**
- * Class Dataset
+ * Class DatasetClause
  *
  * @package VV\Db\Sql\Clauses
  * @method \VV\Db\Sql\Clauses\DatasetClauseItem[] items():array
@@ -23,12 +24,12 @@ class DatasetClause extends ItemList {
     /**
      * @ussed
      *
-     * @param string|iterable|Expression $field
-     * @param null                       $value
+     * @param string|iterable|Expression    $field
+     * @param mixed|Expression|\VV\Db\Param $value
      *
      * @return $this
      */
-    public function add(iterable|string|Expression $field, $value = null): static {
+    public function add(iterable|string|Expression $field, mixed $value = null): static {
         if ($field) {
             if (is_iterable($field)) {
                 foreach ($field as $k => $v) {
@@ -36,14 +37,14 @@ class DatasetClause extends ItemList {
                         $k = $v;
                         $v = [];
                     }
-                    $this->_setItem($k, $v);
+                    $this->setItem($k, $v);
                 }
             } else {
                 if (func_num_args() < 2) {
                     $value = [];
                 }
 
-                $this->_setItem($field, $value);
+                $this->setItem($field, $value);
             }
 
             return $this;
@@ -52,6 +53,11 @@ class DatasetClause extends ItemList {
         return $this;
     }
 
+    /**
+     * Returns tuple [$fields[], $values[]]
+     *
+     * @return array
+     */
     public function split(): array {
         $fields = $values = [];
         foreach ($this->items() as $item) {
@@ -63,11 +69,10 @@ class DatasetClause extends ItemList {
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function fieldsNamesValuesMap() {
+    public function fieldsNamesValuesMap(): array {
         $map = [];
-        /** @var \VV\Db\Sql\Clauses\DatasetClauseItem $item */
         foreach ($this->items() as $item) {
             $map[$item->field()->name()] = $item->value();
         }
@@ -75,7 +80,13 @@ class DatasetClause extends ItemList {
         return $map;
     }
 
-    protected function _setItem($field, $value) {
+    /**
+     * @param mixed $field
+     * @param mixed $value
+     *
+     * @return $this
+     */
+    protected function setItem(mixed $field, mixed $value): static {
         if (is_array($value)) {
             [$field, $expr] = explode('=', $field);
             $value = \VV\Db\Sql::plain($expr, $value);
@@ -84,9 +95,17 @@ class DatasetClause extends ItemList {
         $item = $this->creteItem($field, $value);
         $itemName = $item->field()->exprId();
         $this->items[$itemName] = $item;
+
+        return $this;
     }
 
-    protected function creteItem($field, $value): DatasetClauseItem {
+    /**
+     * @param string|DbObject $field
+     * @param mixed           $value
+     *
+     * @return DatasetClauseItem
+     */
+    protected function creteItem(string|DbObject $field, mixed $value): DatasetClauseItem {
         return new DatasetClauseItem($field, $value);
     }
 }

@@ -13,20 +13,20 @@ namespace VV\Db\Sql\Clauses;
 use VV\Db\Sql;
 
 /**
- * Class InsertValues
+ * Class InsertValuesClause
  *
- * @package VV\Db\Sql\Clause
+ * @package VV\Db\Sql\Clauses
  */
 class InsertValuesClause extends ItemList {
 
     /**
      * Add field(s)
      *
-     * @param string|\VV\Db\Param|Sql\Expression ...$values
+     * @param mixed|\VV\Db\Param|Sql\Expression ...$values
      *
      * @return $this
      */
-    public function add(...$values): static {
+    public function add(mixed ...$values): static {
         if (count($values) == 1 && $values[0] instanceof Sql\SelectQuery) {
             $values = $values[0];
         } else {

@@ -11,69 +11,64 @@
 namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Sql;
+use VV\Db\Sql\DbObject;
 
 /**
- * Class Item
+ * Class DatasetClauseItem
  *
- * @package VV\Db\Sql\Clause\Dataset
+ * @package VV\Db\Sql\Clauses
  */
 class DatasetClauseItem {
 
-    /**
-     * @var \VV\Db\Sql\DbObject
-     */
-    private $field;
-
-    /**
-     * @var mixed|Sql\Plain|Sql\SelectQuery|\VV\Db\Param
-     */
-    private $value;
+    private DbObject $field;
+    /** @var mixed|Sql\Expression|\VV\Db\Param */
+    private mixed $value;
 
     /**
      * Item constructor.
      *
-     * @param \VV\Db\Sql\DbObject|string                   $field
-     * @param Sql\Plain|Sql\SelectQuery|\VV\Db\Param|mixed $value
+     * @param string|DbObject                   $field
+     * @param mixed|Sql\Expression|\VV\Db\Param $value
      *
      */
-    public function __construct($field, $value = null) {
+    public function __construct(string|DbObject $field, mixed $value = null) {
         $this->setField($field);
         if (func_num_args() > 1) $this->setValue($value);
     }
 
     /**
-     * @return Sql\DbObject
+     * @return DbObject
      */
-    public function field() {
+    public function field(): DbObject {
         return $this->field;
     }
 
     /**
-     * @return \VV\Db\Param|Sql\Plain|Sql\SelectQuery|mixed
+     * @return mixed
      */
-    public function value() {
+    public function value(): mixed {
         return $this->value;
     }
 
     /**
-     * @param \VV\Db\Param|Sql\Plain|Sql\SelectQuery|mixed $value
+     * @param mixed|Sql\Expression|\VV\Db\Param $value
      *
      * @return $this
      */
-    public function setValue($value) {
+    public function setValue(mixed $value): static {
         $this->value = $value;
 
         return $this;
     }
 
     /**
-     * @param Sql\DbObject $field
+     * @param DbObject|string $field
      *
      * @return $this
      */
-    protected function setField($field) {
-        if (!$field instanceof Sql\DbObject) {
-            $field = Sql\DbObject::create($field);
+    protected function setField(DbObject|string $field): static {
+        if (!$field instanceof DbObject) {
+            $field = DbObject::create($field);
         }
 
         if (!$field) throw new \InvalidArgumentException;

@@ -10,30 +10,25 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use VV\Db\Sql\Clauses\DatasetClause as DatasetClause;
-
 /**
- * Class DatasetField
+ * Trait DatasetFieldTrait
  *
- * @package VV\Db\Sql\Query
+ * @package VV\Db\Sql\Clauses
  */
 trait DatasetFieldTrait {
 
-    /**
-     * @var DatasetClause
-     */
-    private $datasetClause;
+    private DatasetClause $datasetClause;
 
     /**
      * Add set
      *
      * @param string|array|\VV\Db\Sql\SelectQuery $field
      * @param mixed                               $value
-     * @param bool                                $is_exp
+     * @param bool                                $isExp
      *
      * @return $this
      */
-    public function set($field, $value = false, $is_exp = false) {
+    public function set($field, $value = false) {
         $this->datasetClause()->add(...func_get_args());
 
         return $this;
@@ -43,8 +38,9 @@ trait DatasetFieldTrait {
      * @return DatasetClause
      */
     public function datasetClause() {
-        if (!$this->datasetClause)
+        if (!$this->datasetClause) {
             $this->setDatasetClause($this->createDatasetClause());
+        }
 
         return $this->datasetClause;
     }
