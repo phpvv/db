@@ -325,11 +325,11 @@ class MainDb extends \VV\Db {
 #### Model Generation
 
 Just run this code ([gen-db-model.php](https://github.com/phpvv/db-examples/blob/master/examples/gen-db-model.php)):
-```php
-use App\Db\MainDb;
-use VV\Db\ModelGenerator\Generator;
 
-(new Generator(MainDb::instance()))->build();
+```php
+use App\Db\MainDb;use VV\Db\Model\Generator\ModelGenerator;
+
+(new ModelGenerator(MainDb::instance()))->build();
 ```
 DB schema representation classes will be created in the `App\Db\MainDb` folder.
 

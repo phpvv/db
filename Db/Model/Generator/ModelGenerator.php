@@ -9,11 +9,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\ModelGenerator;
+namespace VV\Db\Model\Generator;
 
 use VV\Db\Driver\Driver;
 
-class Generator {
+class ModelGenerator {
 
     private \VV\Db\Connection $connection;
     private string $ns;

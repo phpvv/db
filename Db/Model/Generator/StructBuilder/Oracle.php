@@ -8,17 +8,17 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\ModelGenerator\StructBuilder;
+namespace VV\Db\Model\Generator\StructBuilder;
 
-use VV\Db\ModelGenerator\Generator;
-use VV\Db\ModelGenerator\ObjectInfo;
+use VV\Db\Model\Generator\ModelGenerator;
+use VV\Db\Model\Generator\ObjectInfo;
 
 /**
  * Class Oracle
  *
  * @package VV\Db\ModelGenerator\StructBuilder
  */
-class Oracle implements \VV\Db\ModelGenerator\StructBuilder {
+class Oracle implements \VV\Db\Model\Generator\StructBuilder {
 
     public function objectIterator(\VV\Db\Connection $connection): iterable {
         // todo: variable to properties and setters
@@ -39,7 +39,7 @@ WHERE
 SQL
         )->assoc;
 
-        $typed = Generator::buildTypeDecorator([
+        $typed = ModelGenerator::buildTypeDecorator([
                 'NUM' => 'number',
                 'TEXT' => 'clob',
                 'BLOB' => 'blob',

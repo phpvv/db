@@ -8,22 +8,22 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\ModelGenerator\StructBuilder;
+namespace VV\Db\Model\Generator\StructBuilder;
 
-use VV\Db\ModelGenerator\Generator;
-use VV\Db\ModelGenerator\ObjectInfo;
+use VV\Db\Model\Generator\ModelGenerator;
+use VV\Db\Model\Generator\ObjectInfo;
 
 /**
  * Class Mysql
  *
  * @package VV\Db\ModelGenerator\StructBuilder
  */
-class Mysql implements \VV\Db\ModelGenerator\StructBuilder {
+class Mysql implements \VV\Db\Model\Generator\StructBuilder {
 
     public function objectIterator(\VV\Db\Connection $connection): iterable {
         $tables = $connection->query('SHOW TABLES')->rows(\VV\Db::FETCH_ASSOC);
 
-        $typed = Generator::buildTypeDecorator([
+        $typed = ModelGenerator::buildTypeDecorator([
                 'NUM' => ['.*int', 'decimal', 'integer', 'numeric', 'double', 'float', 'real'],
                 'TEXT' => '.*text',
                 'BLOB' => '.*blob',
