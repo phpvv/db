@@ -11,6 +11,7 @@
 namespace VV\Db\Sql;
 
 use VV\Db\Connection;
+use VV\Db\Sql\Condition\Condition;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
@@ -24,7 +25,7 @@ abstract class Query {
 
     private ?Clauses\TableClause $tableClause = null;
 
-    private ?\VV\Db\Sql\Condition $whereClause = null;
+    private ?\VV\Db\Sql\Condition\Condition $whereClause = null;
 
     private ?string $hintClause = null;
 
@@ -238,7 +239,7 @@ abstract class Query {
     }
 
     /**
-     * @return \VV\Db\Sql\Condition
+     * @return \VV\Db\Sql\Condition\Condition
      */
     public function whereClause() {
         if (!$this->whereClause) {
@@ -249,11 +250,11 @@ abstract class Query {
     }
 
     /**
-     * @param \VV\Db\Sql\Condition|null $whereClause
+     * @param \VV\Db\Sql\Condition\Condition|null $whereClause
      *
      * @return $this
      */
-    public function setWhereClause(\VV\Db\Sql\Condition $whereClause = null) {
+    public function setWhereClause(Condition $whereClause = null) {
         $this->whereClause = $whereClause;
 
         return $this;
@@ -262,7 +263,7 @@ abstract class Query {
     /**
      * Clears whereClause property and returns previous value
      *
-     * @return \VV\Db\Sql\Condition
+     * @return \VV\Db\Sql\Condition\Condition
      */
     public function clearWhereClause() {
         try {
@@ -273,7 +274,7 @@ abstract class Query {
     }
 
     /**
-     * @return \VV\Db\Sql\Condition
+     * @return \VV\Db\Sql\Condition\Condition
      */
     public function createWhereClause() {
         return \VV\Db\Sql::condition();
@@ -338,11 +339,11 @@ abstract class Query {
         return $connection;
     }
 
-    protected function condAnd(\VV\Db\Sql\Condition $condition, $field, $value = null) {
+    protected function condAnd(Condition $condition, $field, $value = null) {
         if ($field) {
             if (is_array($field)) {
                 $condition->and($field);
-            } elseif ($field instanceof \VV\Db\Sql\Condition) {
+            } elseif ($field instanceof Condition) {
                 $condition->and($field);
             } else {
                 if (func_num_args() < 3) $value = [];

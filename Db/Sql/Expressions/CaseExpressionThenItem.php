@@ -10,7 +10,7 @@
  */
 namespace VV\Db\Sql\Expressions;
 
-use VV\Db\Sql\Condition;
+use VV\Db\Sql\Condition\Condition;
 
 /**
  * Class Item
@@ -26,9 +26,9 @@ class CaseExpressionThenItem {
     /**
      * ThenItem constructor.
      *
-     * @param Condition|null  $whenCondition
-     * @param Expression|null $whenExpression
-     * @param Expression      $thenExpression
+     * @param \VV\Db\Sql\Condition\Condition|null $whenCondition
+     * @param Expression|null                     $whenExpression
+     * @param Expression                          $thenExpression
      */
     public function __construct(?Condition $whenCondition, ?Expression $whenExpression, Expression $thenExpression) {
         if (!$whenCondition && !$whenExpression) {
@@ -41,7 +41,7 @@ class CaseExpressionThenItem {
     }
 
     /**
-     * @return Condition|null
+     * @return \VV\Db\Sql\Condition\Condition|null
      */
     public function whenCondition(): ?Condition {
         return $this->whenCondition;

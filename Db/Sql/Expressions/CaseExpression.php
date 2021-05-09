@@ -10,7 +10,8 @@
  */
 namespace VV\Db\Sql\Expressions;
 
-use VV\Db\Sql\Condition;
+use VV\Db\Sql\Condition\Condition;
+use VV\Db\Sql\Condition\Predicate;
 
 /**
  * Class CaseExpr
@@ -27,8 +28,13 @@ class CaseExpression implements Expression {
     private Expression|Condition|null $when = null;
     private ?Expression $elseExpression = null;
 
-    public function __construct($case = null) {
-        if ($case) $this->case($case);
+    /**
+     * CaseExpression constructor.
+     *
+     * @param string|int|Expression|null $case
+     */
+    public function __construct(string|int|Expression $case = null) {
+        if ($case !== null) $this->case($case);
     }
 
     /**
@@ -43,11 +49,11 @@ class CaseExpression implements Expression {
     }
 
     /**
-     * @param string|int|Expression $when
+     * @param string|int|Expression|Predicate|array $when
      *
      * @return $this
      */
-    public function when(string|int|Expression $when): static {
+    public function when(string|int|Expression|Predicate|array $when): static {
         if ($this->mainExpression) {
             $when = \VV\Db\Sql::expression($when);
         } else {
@@ -134,8 +140,8 @@ class CaseExpression implements Expression {
     }
 
     /**
-     * @param Condition  $when
-     * @param Expression $then
+     * @param \VV\Db\Sql\Condition\Condition $when
+     * @param Expression                     $then
      *
      * @return CaseExpressionThenItem
      */

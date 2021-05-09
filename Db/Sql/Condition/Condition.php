@@ -8,11 +8,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Sql;
+namespace VV\Db\Sql\Condition;
 
-use VV\Db\Sql\Condition\Predicate;
 use VV\Db\Sql\Condition\Predicates;
 use VV\Db\Sql\Condition\Predicates\Compare as Cmp;
+use VV\Db\Sql\Expressions;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
@@ -24,7 +24,7 @@ use VV\Db\Sql\Expressions\Expression;
  * @property-read Condition $or
  * @property-read Condition $not
  *
- * @method Condition\Item[] items():array
+ * @method Item[] items():array
  */
 class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
 
@@ -39,17 +39,16 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
             'and' => $this->and(),
             'or' => $this->or(),
             'not' => $this->not(),
-            default => throw new \LogicException("Undefined property $var"),
         };
     }
 
     /**
-     * @param Expression|string $expr
+     * @param string|int|Expression $expression
      *
      * @return $this
      */
-    public function expr(string|Expression $expr): static {
-        return $this->setTarget($expr);
+    public function expr(string|int|Expression $expression): static {
+        return $this->setTarget($expression);
     }
 
     /**
@@ -62,15 +61,15 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     }
 
     /**
-     * @param Expression|string|null $expr
+     * @param string|int|Expression|null $expression
      *
      * @return static
      */
-    public function sub($expr = null): static {
+    public function sub(string|int|Expression $expression = null): static {
         $sub = new self;
 
-        if (!$expr) $expr = $this->target();
-        if ($expr) $sub->expr($expr);
+        if (!$expression) $expression = $this->target();
+        if ($expression) $sub->expr($expression);
 
         $this->addPredicItem($sub);
 
@@ -120,7 +119,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
                     return $this->isNotNull();
             }
 
-        $predic = new Cmp($this->target(), self::conv2param($param), $operator, $this->isItemNegation());
+        $predic = new Cmp($this->target(), self::toParam($param), $operator, $this->isItemNegation());
 
         return $this->_addPredicItem($predic);
     }
@@ -188,8 +187,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     public function between($from, $till): static {
         $predic = new Predicates\Between(
             $this->target(),
-            self::conv2param($from),
-            self::conv2param($till),
+            self::toParam($from),
+            self::toParam($till),
             $this->isItemNegation()
         );
 
@@ -268,7 +267,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     public function like(string $pattern, bool $caseInsensitive = false): static {
         return $this->_addPredicItem(new Predicates\Like(
             $this->target(),
-            self::conv2param($pattern),
+            self::toParam($pattern),
             $this->isItemNegation(),
             $caseInsensitive
         ));
@@ -338,11 +337,11 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     }
 
     /**
-     * @param Condition\Item $item
+     * @param Item $item
      *
      * @return $this
      */
-    public function addItem(Condition\Item $item): static {
+    public function addItem(Item $item): static {
         $this->clearTarget()->_addItem($item);
 
         return $this;
@@ -352,10 +351,10 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      * @param Predicate   $predic
      * @param string|null $connector
      *
-     * @return Condition\Item
+     * @return Item
      */
-    public function createItem(Predicate $predic, string $connector = null): Condition\Item {
-        return new Condition\Item($predic, $connector);
+    public function createItem(Predicate $predic, string $connector = null): Item {
+        return new Item($predic, $connector);
     }
 
     /**
@@ -402,23 +401,23 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     }
 
     /**
-     * @param Expression|string|null $target
-     * @param Expression|array|mixed ...$params
+     * @param string|int|array|Expression|Predicate|null $target
+     * @param mixed                                ...$params
      *
      * @return $this
      */
-    public function and($target = null, ...$params): static {
-        return $this->append(Condition\Item::CONN_AND, ...func_get_args());
+    public function and(string|int|array|Expression|Predicate $target = null, mixed ...$params): static {
+        return $this->append(Item::CONN_AND, ...func_get_args());
     }
 
     /**
-     * @param Expression|string|null $target
-     * @param Expression|array|mixed ...$params
+     * @param string|int|array|Expression|Predicate|null $target
+     * @param mixed                                ...$params
      *
      * @return $this
      */
-    public function or($target = null, ...$params): static {
-        return $this->append(Condition\Item::CONN_OR, ...func_get_args());
+    public function or(string|int|array|Expression|Predicate $target = null, mixed ...$params): static {
+        return $this->append(Item::CONN_OR, ...func_get_args());
     }
 
     /**
@@ -434,17 +433,17 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     }
 
     /**
-     * @param Condition\Item $item
+     * @param Item $item
      *
      * @return $this
      */
-    protected function _addItem(Condition\Item $item): static {
+    protected function _addItem(Item $item): static {
         $this->setItemNegation(false);
 
         // for backward compatibility (replace same condition)
         $predic = $item->predicate();
         $itemKey = null;
-        if ($predic instanceof Cmp && $item->connector() == Condition\Item::CONN_AND) {
+        if ($predic instanceof Cmp && $item->connector() == Item::CONN_AND) {
             $itemKey = $predic->leftExpr()->expressionId() . ' ' . $predic->operator();
         }
 
@@ -476,7 +475,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     protected function setTarget(Expression|string $target): static {
         if (!$target) throw new \InvalidArgumentException('Expression is empty');
 
-        $this->target = self::conv2expr($target);
+        $this->target = self::toExpression($target);
 
         return $this;
     }
@@ -498,17 +497,21 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     }
 
     /**
-     * @param string                     $connector
-     * @param Expression|string|null     $target
-     * @param Expression[]|array|mixed[] ...$params
+     * @param string                               $connector
+     * @param string|int|array|Expression|Predicate|null $target
+     * @param mixed                                ...$params
      *
      * @return $this
      */
-    private function append(string $connector, $target = null, ...$params): static {
+    private function append(
+        string $connector,
+        string|int|array|Expression|Predicate $target = null,
+        mixed ...$params
+    ): static {
         $this->setConnector($connector);
 
         // if nothing passed, just set connector (traget is previous)
-        if (1 >= $c = func_num_args()) return $this;
+        if (1 >= $argc = func_num_args()) return $this;
 
         // process as cycle call of and()/or()
         if (is_array($target)) {
@@ -535,7 +538,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
             return $this->addPredicItem($target);
         }
 
-        if ($c < 3) {
+        if ($argc < 3) {
             return $this->setTarget($target);
         }
 
@@ -684,21 +687,21 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     }
 
     /**
-     * @param $obj
+     * @param string|int|Expression $expression
      *
      * @return Expression
      */
-    public static function conv2expr($obj): Expression {
-        return \VV\Db\Sql::expression($obj);
+    public static function toExpression(string|int|Expression $expression): Expression {
+        return \VV\Db\Sql::expression($expression);
     }
 
     /**
-     * @param $obj
+     * @param mixed $param
      *
      * @return Expression
      */
-    public static function conv2param($obj): Expression {
-        return \VV\Db\Sql::param($obj);
+    public static function toParam(mixed $param): Expression {
+        return \VV\Db\Sql::param($param);
     }
 
     /**

@@ -11,9 +11,12 @@
 namespace VV\Db;
 
 use JetBrains\PhpStorm\Pure;
-use VV\Db\Sql\Condition;
+use VV\Db\Sql\Condition\Condition;
 use VV\Db\Sql\Condition\Predicate;
+use VV\Db\Sql\Expressions\CaseExpression;
 use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Sql\Expressions\PlainSql;
+use VV\Db\Sql\Expressions\SqlParam;
 
 /**
  * Static class with factory methods
@@ -45,31 +48,31 @@ final class Sql {
     /**
      * @param mixed $param
      *
-     * @return \VV\Db\Sql\Expressions\Expression
+     * @return Expression
      */
     public static function param(mixed $param): Expression {
         if ($param instanceof Expression) return $param;
 
-        return new Sql\Expressions\SqlParam($param);
+        return new SqlParam($param);
     }
 
     /**
      * @param string|int $sql
      * @param array      $params
      *
-     * @return \VV\Db\Sql\Expressions\PlainSql
+     * @return PlainSql
      */
     #[Pure]
-    public static function plain(string|int $sql, array $params = []): Sql\Expressions\PlainSql {
-        return new Sql\Expressions\PlainSql($sql, $params);
+    public static function plain(string|int $sql, array $params = []): PlainSql {
+        return new PlainSql($sql, $params);
     }
 
     /**
-     * @param Condition|Predicate|array|string|null $condition
+     * @param string|int|array|Expression|Predicate|null $condition
      *
      * @return Condition
      */
-    public static function condition($condition = null): Condition {
+    public static function condition(array|string|int|Expression|Predicate $condition = null): Condition {
         if (!$condition) {
             return new Condition;
         }
@@ -86,25 +89,21 @@ final class Sql {
             return (new Condition)->and($condition);
         }
 
-        if (is_string($condition)) {
-            return (new Condition)->expr($condition);
-        }
-
-        throw new \InvalidArgumentException('Wrong argument for condition');
+        return (new Condition)->expr($condition);
     }
 
     /**
-     * @param string|\VV\Db\Sql\Expressions\Expression|null $case
-     * @param mixed|null                                    $when
-     * @param mixed|null                                    $then
-     * @param mixed|null                                    $else
+     * @param string|int|Expression|null                 $case
+     * @param string|int|Expression|Predicate|array|null $when
+     * @param string|int|Expression|null                 $then
+     * @param string|int|Expression|null                 $else
      *
-     * @return \VV\Db\Sql\Expressions\CaseExpression
+     * @return CaseExpression
      */
-    public static function case($case = null, $when = null, $then = null, $else = null): Sql\Expressions\CaseExpression {
-        $caseExpr = new Sql\Expressions\CaseExpression($case);
-        if ($when) $caseExpr->when($when)->then($then);
-        if ($else) $caseExpr->else($else);
+    public static function case(mixed $case = null, mixed $when = null, mixed $then = null, mixed $else = null): CaseExpression {
+        $caseExpr = new CaseExpression($case);
+        if ($when !== null) $caseExpr->when($when)->then($then);
+        if ($else !== null) $caseExpr->else($else);
 
         return $caseExpr;
     }

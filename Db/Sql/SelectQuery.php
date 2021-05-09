@@ -52,7 +52,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
 
     private ?Clauses\OrderByClause $orderByClause = null;
 
-    private ?Sql\Condition $havingClause = null;
+    private ?Condition\Condition $havingClause = null;
 
     private ?Clauses\LimitClause $limitClause = null;
 
@@ -367,7 +367,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
 
     /**
      * @param \VV\Db\Model\Table|SelectQuery|string $tbl
-     * @param string|\VV\Db\Sql\Condition           $on
+     * @param string|\VV\Db\Sql\Condition\Condition $on
      * @param string|null                           $group
      * @param string|null                           $alias
      *
@@ -379,7 +379,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
 
     /**
      * @param \VV\Db\Model\Table|SelectQuery|string $tbl
-     * @param string|\VV\Db\Sql\Condition           $on
+     * @param string|\VV\Db\Sql\Condition\Condition $on
      * @param string|null                           $group
      * @param string|null                           $alias
      *
@@ -641,7 +641,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Returns havingClause
      *
-     * @return \VV\Db\Sql\Condition
+     * @return \VV\Db\Sql\Condition\Condition
      */
     public function havingClause() {
         if (!$this->havingClause) {
@@ -654,11 +654,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Sets havingClause
      *
-     * @param \VV\Db\Sql\Condition|null $havingClause
+     * @param \VV\Db\Sql\Condition\Condition|null $havingClause
      *
      * @return $this
      */
-    public function setHavingClause(Sql\Condition $havingClause = null) {
+    public function setHavingClause(Condition\Condition $havingClause = null) {
         $this->havingClause = $havingClause;
 
         return $this;
@@ -667,7 +667,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Clears havingClause property and returns previous value
      *
-     * @return \VV\Db\Sql\Condition
+     * @return \VV\Db\Sql\Condition\Condition
      */
     public function clearHavingClause() {
         try {
@@ -680,7 +680,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Creates default havingClause
      *
-     * @return \VV\Db\Sql\Condition
+     * @return \VV\Db\Sql\Condition\Condition
      */
     public function createHavingClause() {
         return Sql::condition();

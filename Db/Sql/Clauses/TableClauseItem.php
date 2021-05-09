@@ -10,7 +10,8 @@
 namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Model\Table as TableModel;
-use VV\Db\Sql\Condition as ConditionClause;
+use VV\Db\Sql\Condition\Condition;
+use VV\Db\Sql\Condition\Condition as ConditionClause;
 use VV\Db\Sql\Expressions\Expression as SqlExpr;
 
 /**

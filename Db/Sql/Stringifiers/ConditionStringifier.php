@@ -56,11 +56,11 @@ class ConditionStringifier {
     }
 
     /**
-     * @param \VV\Db\Sql\Condition $condition
+     * @param \VV\Db\Sql\Condition\Condition $condition
      *
      * @return PlainSql
      */
-    public function buildConditionSql(Sql\Condition $condition) {
+    public function buildConditionSql(Sql\Condition\Condition $condition) {
         $sql = '';
         $params = [];
         foreach ($condition->items() as $item) {
@@ -189,7 +189,7 @@ class ConditionStringifier {
      */
     private function strPredic(Sql\Condition\Predicate $predic, &$params): ?string {
         switch (true) {
-            case $predic instanceof Sql\Condition:
+            case $predic instanceof Sql\Condition\Condition:
                 if ($predic->isEmpty()) return null;
 
                 return "({$this->buildConditionSql($predic)->embed($params)})";

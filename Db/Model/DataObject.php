@@ -11,7 +11,7 @@
 namespace VV\Db\Model;
 
 use VV\Db\Sql;
-use VV\Db\Sql\Condition;
+use VV\Db\Sql\Condition\Condition;
 
 /**
  * Class DataObject
@@ -63,9 +63,9 @@ abstract class DataObject extends DbObject {
     }
 
     /**
-     * @param Condition|array|string $condition
-     * @param string|string[]        $fields
-     * @param int|null               $fetchMode
+     * @param \VV\Db\Sql\Condition\Condition|array|string $condition
+     * @param string|string[]                             $fields
+     * @param int|null                                    $fetchMode
      *
      * @return mixed
      */
@@ -77,10 +77,10 @@ abstract class DataObject extends DbObject {
     }
 
     /**
-     * @param string                      $valueField
-     * @param string                      $keyField
-     * @param Condition|array|string|null $condition
-     * @param string|null                 $orderBy
+     * @param string                                           $valueField
+     * @param string                                           $keyField
+     * @param \VV\Db\Sql\Condition\Condition|array|string|null $condition
+     * @param string|null                                      $orderBy
      *
      * @return array
      */
