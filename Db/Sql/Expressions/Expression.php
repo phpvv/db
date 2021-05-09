@@ -17,5 +17,5 @@ namespace VV\Db\Sql\Expressions;
  */
 interface Expression extends AliasableExpression {
 
-    public function exprId(): string;
+    public function expressionId(): string;
 }

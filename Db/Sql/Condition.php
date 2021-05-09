@@ -445,7 +445,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
         $predic = $item->predicate();
         $itemKey = null;
         if ($predic instanceof Cmp && $item->connector() == Condition\Item::CONN_AND) {
-            $itemKey = $predic->leftExpr()->exprId() . ' ' . $predic->operator();
+            $itemKey = $predic->leftExpr()->expressionId() . ' ' . $predic->operator();
         }
 
         if ($itemKey) {

@@ -108,25 +108,25 @@ class ExpressoinStringifier {
     public function strCaseExpr(Sql\Expressions\CaseExpression $caseExpr, &$params) {
         $str = 'CASE ';
 
-        if ($mainExpr = $caseExpr->mainExpr()) {
+        if ($mainExpr = $caseExpr->mainExpression()) {
             $mainStr = $this->strExpr($mainExpr, $params);
             $str .= "$mainStr ";
 
             foreach ($caseExpr->thenItems() as $item) {
-                $whenstr = $this->strExpr($item->comparisonExpr(), $params);
-                $thenstr = $this->strExpr($item->returnExpr(), $params);
+                $whenstr = $this->strExpr($item->whenExpression(), $params);
+                $thenstr = $this->strExpr($item->thenExpression(), $params);
                 $str .= "WHEN $whenstr THEN $thenstr ";
             }
         } else {
             $condStringifier = $this->queryStringifier()->conditionStringifier();
             foreach ($caseExpr->thenItems() as $item) {
-                $whenstr = $condStringifier->buildConditionSql($item->condition())->embed($params);
-                $thenstr = $this->strExpr($item->returnExpr(), $params);
+                $whenstr = $condStringifier->buildConditionSql($item->whenCondition())->embed($params);
+                $thenstr = $this->strExpr($item->thenExpression(), $params);
                 $str .= "WHEN $whenstr THEN $thenstr ";
             }
         }
 
-        if ($else = $caseExpr->elseExpr()) {
+        if ($else = $caseExpr->elseExpression()) {
             $str .= "ELSE {$this->strExpr($else, $params)} ";
         }
 

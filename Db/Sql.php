@@ -23,8 +23,8 @@ use VV\Db\Sql\Expressions\Expression;
 final class Sql {
 
     /**
-     * @param string|int|\VV\Db\Sql\Expressions\Expression $expression
-     * @param array                                        $params
+     * @param string|int|Expression $expression
+     * @param array                 $params
      *
      * @return Expression
      */
@@ -55,7 +55,7 @@ final class Sql {
 
     /**
      * @param string|int $sql
-     * @param array  $params
+     * @param array      $params
      *
      * @return \VV\Db\Sql\Expressions\PlainSql
      */

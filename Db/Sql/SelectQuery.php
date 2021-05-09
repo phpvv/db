@@ -789,7 +789,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
         return $this->columnsClause()->resultFieldsMap();
     }
 
-    public function exprId(): string {
+    public function expressionId(): string {
         return spl_object_hash($this);
     }
 

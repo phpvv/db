@@ -10,6 +10,7 @@
  */
 namespace VV\Db\Sql\Expressions;
 
+use JetBrains\PhpStorm\Pure;
 use VV\Db\Sql\Expressions;
 
 /**
@@ -21,19 +22,12 @@ class DbObject implements Expressions\Expression {
 
     use Expressions\AliasFieldTrait;
 
-    const NAME_RX = '[_a-zA-Z\$][\w]*';
+    public const NAME_RX = '[_a-zA-Z\$][\w]*';
 
-    /**
-     * @var string
-     */
-    private $name;
+    private string $name;
+    private ?DbObject $owner = null;
 
-    /**
-     * @var static
-     */
-    private $owner;
-
-    protected function __construct(string $name = null, $owner = null) {
+    protected function __construct(string $name = null, DbObject|string $owner = null) {
         if ($name) $this->setName($name);
         if ($owner) $this->setOwner($owner);
     }
@@ -45,6 +39,7 @@ class DbObject implements Expressions\Expression {
         return $this->name;
     }
 
+    #[Pure]
     public function resultName(): string {
         return $this->alias() ?: $this->name();
     }
@@ -54,8 +49,8 @@ class DbObject implements Expressions\Expression {
      *
      * @return $this
      */
-    public function setName(string $name): self {
-        if (!$name) throw new \InvalidArgumentException('Name is empty');
+    public function setName(string $name): static {
+        if (!$name = trim($name)) throw new \InvalidArgumentException('Name is empty');
         [$path, $alias] = static::parse($name);
         if (!$path) throw new \InvalidArgumentException('Incorrect name syntax');
 
@@ -76,36 +71,31 @@ class DbObject implements Expressions\Expression {
     }
 
     /**
-     * @return DbObject
+     * @return DbObject|null
      */
     public function owner(): ?DbObject {
         return $this->owner;
     }
 
     /**
-     * @param DbObject|string $owner
+     * @param string|DbObject|null $owner
      *
      * @return $this
      */
-    public function setOwner($owner = null): self {
-        if ($owner) {
-            if (!$owner instanceof static) {
-                $owner = new static($owner);
-            }
-
-            $this->owner = $owner;
-        } else {
-            $this->owner = null;
+    public function setOwner(DbObject|string $owner = null): static {
+        if ($owner && !$owner instanceof static) {
+            $owner = new static($owner);
         }
+        $this->owner = $owner;
 
         return $this;
     }
 
-    public function createChild($name): self {
+    public function createChild($name): static {
         return new static($name, $this);
     }
 
-    public function exprId(): string {
+    public function expressionId(): string {
         return implode('-', $this->path());
     }
 
@@ -115,7 +105,7 @@ class DbObject implements Expressions\Expression {
      *
      * @return $this
      */
-    protected function setParsedData(array $names, string $alias = null): self {
+    protected function setParsedData(array $names, string $alias = null): static {
         $this->setPlainName(array_pop($names));
         if ($alias) $this->as($alias);
         if ($names) {
@@ -126,7 +116,7 @@ class DbObject implements Expressions\Expression {
         return $this;
     }
 
-    protected function setPlainName($name): self {
+    protected function setPlainName($name): static {
         $this->name = $name;
 
         return $this;
@@ -183,12 +173,12 @@ class DbObject implements Expressions\Expression {
     }
 
     /**
-     * @param string $name
-     * @param string $nameWoAlias
+     * @param string      $name
+     * @param string|null $nameWoAlias
      *
      * @return string|null
      */
-    public static function parseAlias(string $name, &$nameWoAlias = null): ?string {
+    public static function parseAlias(string $name, string &$nameWoAlias = null): ?string {
         $namerx = static::NAME_RX;
 
         /** @noinspection RegExpRepeatedSpace */

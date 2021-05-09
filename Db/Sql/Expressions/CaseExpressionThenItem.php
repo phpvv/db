@@ -19,56 +19,45 @@ use VV\Db\Sql\Condition;
  */
 class CaseExpressionThenItem {
 
-    /**
-     * @var Condition
-     */
-    private $condition;
-
-    /**
-     * @var Expression
-     */
-    private $comparisonExpr;
-
-    /**
-     * @var Expression
-     */
-    private $returnExpr;
+    private ?Condition $whenCondition;
+    private ?Expression $whenExpression;
+    private Expression $thenExpression;
 
     /**
      * ThenItem constructor.
      *
-     * @param Condition  $condition
-     * @param Expression $cmpExpr
-     * @param Expression $returnExpr
+     * @param Condition|null  $whenCondition
+     * @param Expression|null $whenExpression
+     * @param Expression      $thenExpression
      */
-    public function __construct(Condition $condition = null, Expression $cmpExpr = null, Expression $returnExpr) {
-        if (!$condition && !$cmpExpr) {
-            throw new \InvalidArgumentException('$condition or $compareExpr must be non empty');
+    public function __construct(?Condition $whenCondition, ?Expression $whenExpression, Expression $thenExpression) {
+        if (!$whenCondition && !$whenExpression) {
+            throw new \InvalidArgumentException('$whenCondition or $whenExpression must be non empty');
         }
 
-        $this->condition = $condition;
-        $this->comparisonExpr = $cmpExpr;
-        $this->returnExpr = $returnExpr;
+        $this->whenCondition = $whenCondition;
+        $this->whenExpression = $whenExpression;
+        $this->thenExpression = $thenExpression;
     }
 
     /**
-     * @return Condition
+     * @return Condition|null
      */
-    public function condition() {
-        return $this->condition;
+    public function whenCondition(): ?Condition {
+        return $this->whenCondition;
+    }
+
+    /**
+     * @return Expression|null
+     */
+    public function whenExpression(): ?Expression {
+        return $this->whenExpression;
     }
 
     /**
      * @return Expression
      */
-    public function comparisonExpr() {
-        return $this->comparisonExpr;
-    }
-
-    /**
-     * @return Expression
-     */
-    public function returnExpr() {
-        return $this->returnExpr;
+    public function thenExpression(): Expression {
+        return $this->thenExpression;
     }
 }
