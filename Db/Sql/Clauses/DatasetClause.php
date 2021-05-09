@@ -10,8 +10,8 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use VV\Db\Sql\DbObject;
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\DbObject;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class DatasetClause
@@ -24,8 +24,8 @@ class DatasetClause extends ItemList {
     /**
      * @ussed
      *
-     * @param string|iterable|Expression    $field
-     * @param mixed|Expression|\VV\Db\Param $value
+     * @param string|iterable|\VV\Db\Sql\Expressions\Expression    $field
+     * @param mixed|\VV\Db\Sql\Expressions\Expression|\VV\Db\Param $value
      *
      * @return $this
      */

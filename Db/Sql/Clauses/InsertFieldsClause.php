@@ -16,13 +16,13 @@ use VV\Db\Sql;
  * Class InsertFieldsClause
  *
  * @package VV\Db\Sql\Clauses
- * @method Sql\DbObject[] items():array
+ * @method Sql\Expressions\DbObject[] items():array
  */
 class InsertFieldsClause extends ColumnList {
 
     protected function _add(array $columns) {
         foreach ($columns as &$col) {
-            if ($o = Sql\DbObject::create($col)) {
+            if ($o = Sql\Expressions\DbObject::create($col)) {
                 $col = $o;
             } else {
                 throw new \InvalidArgumentException;
@@ -34,6 +34,6 @@ class InsertFieldsClause extends ColumnList {
     }
 
     protected function allowedObjectTypes(): array {
-        return [Sql\DbObject::class];
+        return [Sql\Expressions\DbObject::class];
     }
 }

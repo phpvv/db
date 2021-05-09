@@ -11,8 +11,8 @@
 namespace VV\Db\Sql\Stringifiers;
 
 use VV\Db\Driver\Driver;
-use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 use VV\Db\Sql;
+use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 
 
 /**
@@ -122,19 +122,19 @@ abstract class QueryStringifier {
     }
 
     /**
-     * @param \VV\Db\Sql\Expression $expr
-     * @param array                 $params
-     * @param bool                  $withAlias
+     * @param \VV\Db\Sql\Expressions\Expression $expr
+     * @param array                             $params
+     * @param bool                              $withAlias
      *
      * @return mixed
      */
-    public function strExpr(\VV\Db\Sql\Expression $expr, &$params, $withAlias = false) {
+    public function strExpr(Sql\Expressions\Expression $expr, &$params, $withAlias = false) {
         return $this->exprStringifier()->strExpr($expr, $params, $withAlias);
     }
 
     /**
-     * @param mixed|Sql\Param $param
-     * @param array           $params
+     * @param mixed|\VV\Db\Sql\Expressions\SqlParam $param
+     * @param array                                 $params
      *
      * @return string
      */
@@ -145,8 +145,8 @@ abstract class QueryStringifier {
     /**
      * @inheritdoc
      */
-    public function strColumn(\VV\Db\Sql\Expression $expr, &$params, $withAlias = false) {
-        if ($expr instanceof Sql\DbObject) {
+    public function strColumn(Sql\Expressions\Expression $expr, &$params, $withAlias = false) {
+        if ($expr instanceof Sql\Expressions\DbObject) {
             if (!$expr->owner()) { // obj without owner (without table alias)
                 $tableClause = $this->queryTableClause();
                 if (count($tableClause->items()) > 1) {
@@ -185,8 +185,8 @@ abstract class QueryStringifier {
             return $field;
         }
 
-        if (!$field instanceof Sql\DbObject) {
-            $field = Sql\DbObject::create($field);
+        if (!$field instanceof Sql\Expressions\DbObject) {
+            $field = Sql\Expressions\DbObject::create($field);
             if (!$field) return null;
         }
 
@@ -198,9 +198,9 @@ abstract class QueryStringifier {
     }
 
     /**
-     * @param Sql\Expression[] $exprList
-     * @param array            $params
-     * @param bool             $withAlias
+     * @param \VV\Db\Sql\Expressions\Expression[] $exprList
+     * @param array                               $params
+     * @param bool                                $withAlias
      *
      * @return string
      */

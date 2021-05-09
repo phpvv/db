@@ -16,7 +16,7 @@ use VV\Db\Sql;
  * Class GroupByClause
  *
  * @package VV\Db\Sql\Clauses
- * @method Sql\Expression[] items():array
+ * @method Sql\Expressions\Expression[] items():array
  */
 class GroupByClause extends ColumnList {
 
@@ -27,6 +27,6 @@ class GroupByClause extends ColumnList {
     }
 
     protected function allowedObjectTypes(): array {
-        return [Sql\Expression::class];
+        return [Sql\Expressions\Expression::class];
     }
 }

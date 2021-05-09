@@ -11,8 +11,8 @@
  */
 namespace VV\Db\Sql;
 
-use VV\Db\Sql;
 use VV\Db\Sql\Clauses\DatasetFieldTrait;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class InsertQuery
@@ -69,7 +69,7 @@ class InsertQuery extends ModificatoryQuery {
     }
 
     /**
-     * @param string|Sql\Expression|Clauses\InsertFieldsClause ...$fields
+     * @param string|\VV\Db\Sql\Expressions\Expression|Clauses\InsertFieldsClause ...$fields
      *
      * @return $this
      */
@@ -121,8 +121,8 @@ class InsertQuery extends ModificatoryQuery {
     /**
      * Add on duplicate key update clause
      *
-     * @param string|\VV\Db\Sql\Expression $field
-     * @param mixed                        $value
+     * @param string|\VV\Db\Sql\Expressions\Expression $field
+     * @param mixed                                    $value
      *
      * @return $this
      *@todo Make it crossdb

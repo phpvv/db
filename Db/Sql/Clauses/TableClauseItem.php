@@ -11,7 +11,7 @@ namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Model\Table as TableModel;
 use VV\Db\Sql\Condition as ConditionClause;
-use VV\Db\Sql\Expression as SqlExpr;
+use VV\Db\Sql\Expressions\Expression as SqlExpr;
 
 /**
  * Class Item
@@ -154,7 +154,7 @@ class TableClauseItem {
         if ($alias) {
             $tbl->as($alias);
         } elseif (!$tbl->alias()) {
-            if (!$tbl instanceof \VV\Db\Sql\DbObject) {
+            if (!$tbl instanceof \VV\Db\Sql\Expressions\DbObject) {
                 throw new \LogicException('Can\'t determine alias for table');
             }
 

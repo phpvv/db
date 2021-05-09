@@ -10,8 +10,8 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use VV\Db\Sql\DbObject;
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\DbObject;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class DeleteTablesClause
@@ -24,7 +24,7 @@ class DeleteTablesClause extends ItemList {
     /**
      * Add field(s)
      *
-     * @param string|Expression ...$tables
+     * @param string|\VV\Db\Sql\Expressions\Expression ...$tables
      *
      * @return $this
      */

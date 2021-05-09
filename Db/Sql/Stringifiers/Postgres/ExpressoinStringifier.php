@@ -23,7 +23,7 @@ class ExpressoinStringifier extends \VV\Db\Sql\Stringifiers\ExpressoinStringifie
     public function strParam($param, &$params) {
         $res = parent::strParam($param, $params);
 
-        $dbp = $param instanceof \VV\Db\Sql\Param ? $param->param() : $param;
+        $dbp = $param instanceof \VV\Db\Sql\Expressions\SqlParam ? $param->param() : $param;
         if ($dbp instanceof \VV\Db\Param) {
             if (!$dbp->name()) $dbp->setNextName();
 

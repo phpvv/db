@@ -31,6 +31,6 @@ class OrderByClause extends ColumnList {
     }
 
     protected function allowedObjectTypes(): array {
-        return [OrderByClauseItem::class, Sql\Expression::class];
+        return [OrderByClauseItem::class, Sql\Expressions\Expression::class];
     }
 }

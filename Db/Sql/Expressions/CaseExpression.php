@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Sql;
+namespace VV\Db\Sql\Expressions;
 
 /**
  * Class CaseExpr
@@ -20,7 +20,7 @@ class CaseExpression implements Expression {
     use AliasFieldTrait;
 
     /**
-     * @var CaseExpression\ThenItem[]
+     * @var CaseExpressionThenItem[]
      */
     private $thenItems = [];
 
@@ -99,11 +99,11 @@ class CaseExpression implements Expression {
     }
 
     /**
-     * @param CaseExpression\ThenItem $thenItem
+     * @param CaseExpressionThenItem $thenItem
      *
      * @return $this
      */
-    public function addThenItem(CaseExpression\ThenItem $thenItem): self {
+    public function addThenItem(CaseExpressionThenItem $thenItem): self {
         $this->thenItems[] = $thenItem;
         $this->when = null;
 
@@ -118,7 +118,7 @@ class CaseExpression implements Expression {
     }
 
     /**
-     * @return CaseExpression\ThenItem[]
+     * @return CaseExpressionThenItem[]
      */
     public function thenItems(): array {
         return $this->thenItems;
@@ -149,20 +149,20 @@ class CaseExpression implements Expression {
      * @param \VV\Db\Sql\Condition $when
      * @param Expression           $then
      *
-     * @return CaseExpression\ThenItem
+     * @return CaseExpressionThenItem
      */
-    public function createSearchThenItem(\VV\Db\Sql\Condition $when, Expression $then): CaseExpression\ThenItem {
-        return new CaseExpression\ThenItem($when, null, $then);
+    public function createSearchThenItem(\VV\Db\Sql\Condition $when, Expression $then): CaseExpressionThenItem {
+        return new CaseExpressionThenItem($when, null, $then);
     }
 
     /**
      * @param Expression $when
      * @param Expression $then
      *
-     * @return CaseExpression\ThenItem
+     * @return CaseExpressionThenItem
      */
-    public function createComparisonThenItem(Expression $when, Expression $then): CaseExpression\ThenItem {
-        return new CaseExpression\ThenItem(null, $when, $then);
+    public function createComparisonThenItem(Expression $when, Expression $then): CaseExpressionThenItem {
+        return new CaseExpressionThenItem(null, $when, $then);
     }
 
     /**

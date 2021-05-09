@@ -78,7 +78,7 @@ class DeleteQuery extends ModificatoryQuery {
     /**
      * Add list of tables which need to be deleted
      *
-     * @param string[]|\VV\Db\Sql\DbObject[] $tables
+     * @param string[]|\VV\Db\Sql\Expressions\DbObject[] $tables
      *
      * @return $this
      */

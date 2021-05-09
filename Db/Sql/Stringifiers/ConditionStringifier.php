@@ -10,8 +10,8 @@
  */
 namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 use VV\Db\Sql;
+use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 
 /**
  * Class Condition
@@ -42,13 +42,13 @@ class ConditionStringifier {
     }
 
     /**
-     * @param \VV\Db\Sql\Expression $expr
-     * @param  array                $params
-     * @param bool                  $prnss4plain
+     * @param \VV\Db\Sql\Expressions\Expression $expr
+     * @param  array                            $params
+     * @param bool                              $prnss4plain
      *
      * @return mixed
      */
-    public function strColumn(\VV\Db\Sql\Expression $expr, &$params, $prnss4plain = false) {
+    public function strColumn(Sql\Expressions\Expression $expr, &$params, $prnss4plain = false) {
         $str = $this->queryStringifier()->strColumn($expr, $params);
         if ($prnss4plain) $str = $this->str2prnss4plainSql($str, $expr);
 
@@ -126,7 +126,7 @@ class ConditionStringifier {
         // build values clause: (?, ?, SOME_FUNC(field))
         $valsarr = [];
         foreach ($inParams as $p) {
-            if ($p instanceof Sql\Expression) {
+            if ($p instanceof Sql\Expressions\Expression) {
                 $valsarr[] = $this->strColumn($p, $params);
             } else {
                 $valsarr[] = $this->queryStringifier()->strParam($p, $params);
@@ -221,15 +221,15 @@ class ConditionStringifier {
     }
 
     private function decorateParamsByModel($field, &...$params) {
-        if ($field instanceof Sql\DbObject) {
+        if ($field instanceof Sql\Expressions\DbObject) {
             foreach ($params as &$p) {
-                if ($p instanceof Sql\Param) {
+                if ($p instanceof Sql\Expressions\SqlParam) {
                     $val = $p->param();
                 } else $val = $p;
 
                 $val = $this->queryStringifier()->decorateParamForCond($val, $field);
 
-                if ($p instanceof Sql\Param) {
+                if ($p instanceof Sql\Expressions\SqlParam) {
                     $p->setParam($val);
                 } else $p = $val;
             }
@@ -240,13 +240,13 @@ class ConditionStringifier {
     }
 
     /**
-     * @param string         $str
-     * @param Sql\Expression $expr
+     * @param string                            $str
+     * @param \VV\Db\Sql\Expressions\Expression $expr
      *
      * @return string
      */
-    private function str2prnss4plainSql(string $str, Sql\Expression $expr): string {
-        if ($expr instanceof Sql\Plain) return "($str)";
+    private function str2prnss4plainSql(string $str, Sql\Expressions\Expression $expr): string {
+        if ($expr instanceof Sql\Expressions\PlainSql) return "($str)";
 
         return $str;
     }

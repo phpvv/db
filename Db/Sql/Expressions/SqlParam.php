@@ -8,14 +8,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Sql;
+namespace VV\Db\Sql\Expressions;
 
 /**
  * Class Param
  *
  * @package VV\Db\Sql
  */
-class Param implements Expression {
+class SqlParam implements Expression {
 
     use AliasFieldTrait;
 

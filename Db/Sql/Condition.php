@@ -13,6 +13,7 @@ namespace VV\Db\Sql;
 use VV\Db\Sql\Condition\Predicate;
 use VV\Db\Sql\Condition\Predicates;
 use VV\Db\Sql\Condition\Predicates\Compare as Cmp;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class Condition
@@ -548,7 +549,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
         }
 
         $equals = is_object($target);
-        if (!$equals && $obj = \VV\Db\Sql\DbObject::create($target, null, false)) {
+        if (!$equals && $obj = Expressions\DbObject::create($target, null, false)) {
             $target = $obj;
             $equals = true;
         }

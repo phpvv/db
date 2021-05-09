@@ -11,6 +11,7 @@
 namespace VV\Db\Sql;
 
 use VV\Db\Connection;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class Query

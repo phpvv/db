@@ -11,7 +11,7 @@
 namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Param;
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class ReturnInto

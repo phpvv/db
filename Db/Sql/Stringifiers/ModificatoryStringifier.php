@@ -10,7 +10,6 @@
  */
 namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 use VV\Db\Model\Field;
 use VV\Db\Param;
 use VV\Db\Sql;
@@ -63,7 +62,7 @@ abstract class ModificatoryStringifier extends QueryStringifier {
     }
 
     protected function strValueToSave($value, $field, &$params) {
-        if ($value instanceof \VV\Db\Sql\Expression) {
+        if ($value instanceof Sql\Expressions\Expression) {
             $tmparams = [];
             $str = $this->strColumn($value, $tmparams);
             if ($tmparams) {

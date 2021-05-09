@@ -8,18 +8,18 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Sql;
+namespace VV\Db\Sql\Expressions;
 
-use VV\Db\Sql;
+use VV\Db\Sql\Expressions;
 
 /**
  * Class Object
  *
  * @package VV\Db\Sql
  */
-class DbObject implements Sql\Expression {
+class DbObject implements Expressions\Expression {
 
-    use Sql\AliasFieldTrait;
+    use Expressions\AliasFieldTrait;
 
     const NAME_RX = '[_a-zA-Z\$][\w]*';
 
@@ -133,17 +133,17 @@ class DbObject implements Sql\Expression {
     }
 
     /**
-     * @param string|static        $name
+     * @param string|int|DbObject  $name
      * @param string|DbObject|null $dfltOwner
      * @param bool                 $parseAlias
      *
      * @return static|null
      */
-    public static function create(string|self $name, string|self $dfltOwner = null, bool $parseAlias = true): ?self {
+    public static function create(string|int|self $name, string|self $dfltOwner = null, bool $parseAlias = true): ?self {
         if (!$name) throw new \InvalidArgumentException('DbObject Name is empty');
         if ($name instanceof static) return $name;
 
-        [$path, $alias] = static::parse($name, $parseAlias);
+        [$path, $alias] = static::parse((string)$name, $parseAlias);
         if (!$path) return null;
 
         $obj = (new static)->setParsedData($path, $alias);

@@ -42,7 +42,7 @@ abstract class DataObject extends DbObject {
     /**
      * Create select query
      *
-     * @param string[]|\VV\Db\Sql\Expression[] $fields
+     * @param string[]|\VV\Db\Sql\Expressions\Expression[] $fields
      *
      * @return Sql\SelectQuery
      */

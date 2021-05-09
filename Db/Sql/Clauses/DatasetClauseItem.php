@@ -10,8 +10,7 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use VV\Db\Sql;
-use VV\Db\Sql\DbObject;
+use VV\Db\Sql\Expressions\DbObject;
 
 /**
  * Class DatasetClauseItem
@@ -21,14 +20,14 @@ use VV\Db\Sql\DbObject;
 class DatasetClauseItem {
 
     private DbObject $field;
-    /** @var mixed|Sql\Expression|\VV\Db\Param */
+    /** @var mixed|\VV\Db\Sql\Expressions\Expression|\VV\Db\Param */
     private mixed $value;
 
     /**
      * Item constructor.
      *
-     * @param string|DbObject                   $field
-     * @param mixed|Sql\Expression|\VV\Db\Param $value
+     * @param string|DbObject                                      $field
+     * @param mixed|\VV\Db\Sql\Expressions\Expression|\VV\Db\Param $value
      *
      */
     public function __construct(string|DbObject $field, mixed $value = null) {
@@ -51,7 +50,7 @@ class DatasetClauseItem {
     }
 
     /**
-     * @param mixed|Sql\Expression|\VV\Db\Param $value
+     * @param mixed|\VV\Db\Sql\Expressions\Expression|\VV\Db\Param $value
      *
      * @return $this
      */

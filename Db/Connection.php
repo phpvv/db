@@ -427,7 +427,7 @@ final class Connection {
     /**
      * Create select query
      *
-     * @param string[]|\VV\Db\Sql\Expression[] $columns
+     * @param string[]|\VV\Db\Sql\Expressions\Expression[] $columns
      *
      * @return Sql\SelectQuery
      */

@@ -28,9 +28,9 @@ use VV\Db\Sql;
  * @property SelectQuery        $noCahce   Sets NO CACHE flag to true and returns $this
  * @property SelectQuery        $forUpdate Sets FOR UPDATE flag to true and returns $this
  */
-class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
+class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
 
-    use Sql\AliasFieldTrait;
+    use Expressions\AliasFieldTrait;
 
     const C_COLUMNS = 0x01,
         C_TABLE = 0x02,
@@ -151,7 +151,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Sets column list to sql
      *
-     * @param string[]|array|Sql\Expression[] $columns
+     * @param string[]|array|\VV\Db\Sql\Expressions\Expression[] $columns
      *
      * @return $this
      */
@@ -164,7 +164,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Appends column list
      *
-     * @param string[]|Sql\Expression[] $columns
+     * @param string[]|\VV\Db\Sql\Expressions\Expression[] $columns
      *
      * @return $this
      */
@@ -193,9 +193,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Appends columns list
      *
-     * @param string|string[]           $group
-     * @param string                    $dfltTableAlias
-     * @param string[]|Sql\Expression[] $columns
+     * @param string|string[]                              $group
+     * @param string                                       $dfltTableAlias
+     * @param string[]|\VV\Db\Sql\Expressions\Expression[] $columns
      *
      * @return $this
      */
@@ -207,11 +207,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
         $map = $columnsClause->resultFieldsMap();
         foreach ($columns as &$col) {
             if (is_string($col)) {
-                $col = Sql\DbObject::create($col, $dfltTableAlias);
+                $col = Expressions\DbObject::create($col, $dfltTableAlias);
                 $col->as($col->resultName());
             }
 
-            if (!$col instanceof Sql\Expression) {
+            if (!$col instanceof Expressions\Expression) {
                 throw new \InvalidArgumentException('$column must be string or Sql\Expr');
             }
 
@@ -392,7 +392,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Adds ORDER BY clause to sql
      *
-     * @param string[]|Sql\Expression[] $columns
+     * @param string[]|\VV\Db\Sql\Expressions\Expression[] $columns
      *
      * @return $this
      */
@@ -405,7 +405,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Appends ORDER BY clause
      *
-     * @param string[]|Sql\Expression[] $columns
+     * @param string[]|\VV\Db\Sql\Expressions\Expression[] $columns
      *
      * @return $this
      */
@@ -418,7 +418,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Add GROUP BY clause to sql
      *
-     * @param string[]|Sql\Expression[] $columns
+     * @param string[]|\VV\Db\Sql\Expressions\Expression[] $columns
      *
      * @return $this
      */
@@ -431,7 +431,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Appends GROUP BY clause
      *
-     * @param string[]|Sql\Expression[] $columns
+     * @param string[]|\VV\Db\Sql\Expressions\Expression[] $columns
      *
      * @return $this
      */
@@ -457,8 +457,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
     /**
      * Add `HAVING` clause
      *
-     * @param \VV\Db\Sql\Expression|string      $field
-     * @param \VV\Db\Sql\Expression|array|mixed $value
+     * @param \VV\Db\Sql\Expressions\Expression|string      $field
+     * @param \VV\Db\Sql\Expressions\Expression|array|mixed $value
      *
      * @return SelectQuery
      */
@@ -804,7 +804,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Sql\Expression {
      */
     protected function _joinAsColumnsGroup(callable $joinClbc, $from, $on = null, $group = null, $alias = null) {
         if (!$group && $on) {
-            $namerx = Sql\DbObject::NAME_RX;
+            $namerx = Expressions\DbObject::NAME_RX;
             if (preg_match("/^$namerx\.($namerx)$", $on, $m)) {
                 $group = $m[1];
             }

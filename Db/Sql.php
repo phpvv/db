@@ -13,7 +13,7 @@ namespace VV\Db;
 use JetBrains\PhpStorm\Pure;
 use VV\Db\Sql\Condition;
 use VV\Db\Sql\Condition\Predicate;
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Static class with factory methods
@@ -23,8 +23,8 @@ use VV\Db\Sql\Expression;
 final class Sql {
 
     /**
-     * @param string|int|Expression $expression
-     * @param array                 $params
+     * @param string|int|\VV\Db\Sql\Expressions\Expression $expression
+     * @param array                                        $params
      *
      * @return Expression
      */
@@ -37,7 +37,7 @@ final class Sql {
             return $expression;
         }
 
-        if ($o = \VV\Db\Sql\DbObject::create($expression)) return $o;
+        if ($o = Sql\Expressions\DbObject::create($expression)) return $o;
 
         return self::plain((string)$expression, $params);
     }
@@ -45,23 +45,23 @@ final class Sql {
     /**
      * @param mixed $param
      *
-     * @return Expression
+     * @return \VV\Db\Sql\Expressions\Expression
      */
     public static function param(mixed $param): Expression {
         if ($param instanceof Expression) return $param;
 
-        return new Sql\Param($param);
+        return new Sql\Expressions\SqlParam($param);
     }
 
     /**
      * @param string|int $sql
      * @param array  $params
      *
-     * @return Sql\Plain
+     * @return \VV\Db\Sql\Expressions\PlainSql
      */
     #[Pure]
-    public static function plain(string|int $sql, array $params = []): Sql\Plain {
-        return new \VV\Db\Sql\Plain($sql, $params);
+    public static function plain(string|int $sql, array $params = []): Sql\Expressions\PlainSql {
+        return new Sql\Expressions\PlainSql($sql, $params);
     }
 
     /**
@@ -94,15 +94,15 @@ final class Sql {
     }
 
     /**
-     * @param string|Expression|null $case
-     * @param mixed|null             $when
-     * @param mixed|null             $then
-     * @param mixed|null             $else
+     * @param string|\VV\Db\Sql\Expressions\Expression|null $case
+     * @param mixed|null                                    $when
+     * @param mixed|null                                    $then
+     * @param mixed|null                                    $else
      *
-     * @return Sql\CaseExpression
+     * @return \VV\Db\Sql\Expressions\CaseExpression
      */
-    public static function case($case = null, $when = null, $then = null, $else = null): Sql\CaseExpression {
-        $caseExpr = new \VV\Db\Sql\CaseExpression($case);
+    public static function case($case = null, $when = null, $then = null, $else = null): Sql\Expressions\CaseExpression {
+        $caseExpr = new Sql\Expressions\CaseExpression($case);
         if ($when) $caseExpr->when($when)->then($then);
         if ($else) $caseExpr->else($else);
 

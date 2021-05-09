@@ -8,14 +8,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Sql;
+namespace VV\Db\Sql\Expressions;
 
 /**
  * Interface Aliasable
  *
  * @package VV\Db\Sql
  */
-interface Aliasable {
+interface AliasableExpression {
 
     /**
      * @return string|null

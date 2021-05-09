@@ -10,7 +10,7 @@
  */
 namespace VV\Db\Sql\Condition\Predicates;
 
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class Custom
@@ -26,9 +26,9 @@ class Custom extends Base {
     /**
      * IsNull constructor.
      *
-     * @param Expression $expr
-     * @param array      $params
-     * @param bool       $not
+     * @param \VV\Db\Sql\Expressions\Expression $expr
+     * @param array                             $params
+     * @param bool                              $not
      */
     public function __construct(Expression $expr, array $params, bool $not = false) {
         $this->expr = $expr;

@@ -16,6 +16,7 @@ use VV\Db\Model\TableList;
 use VV\Db\Model\ViewList;
 use VV\Db\Result;
 use VV\Db\Sql;
+use VV\Db\Sql\Expressions\Expression;
 use VV\Db\Sql\Query;
 use VV\Db\Statement;
 use VV\Db\Transaction;
@@ -38,7 +39,7 @@ abstract class Db {
     private ?TableList $tables = null;
     private ?ViewList $views = null;
 
-    public function __get($name): mixed {
+    public function __get($name) {
         return match ($name) {
             'tbl' => $this->tables(),
             'vw' => $this->views(),
@@ -124,11 +125,11 @@ abstract class Db {
     /**
      * Create select query
      *
-     * @param string[]|Sql\Expression[] $columns
+     * @param string|Expression ...$columns
      *
      * @return Sql\SelectQuery
      */
-    public function select(...$columns): Sql\SelectQuery {
+    public function select(string|Expression ...$columns): Sql\SelectQuery {
         return $this->connection()->select(...$columns);
     }
 

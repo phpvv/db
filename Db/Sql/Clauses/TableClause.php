@@ -13,8 +13,8 @@ namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Model\Table as TableModel;
 use VV\Db\Sql\Condition;
-use VV\Db\Sql\DbObject as SqlObj;
-use VV\Db\Sql\Expression as SqlExpr;
+use VV\Db\Sql\Expressions\DbObject as SqlObj;
+use VV\Db\Sql\Expressions\Expression as SqlExpr;
 
 /**
  * Class Table

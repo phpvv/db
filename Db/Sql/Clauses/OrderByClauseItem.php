@@ -11,7 +11,7 @@
 namespace VV\Db\Sql\Clauses;
 
 use JetBrains\PhpStorm\Pure;
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class Item
@@ -27,9 +27,9 @@ class OrderByClauseItem {
     /**
      * Item constructor.
      *
-     * @param string|\VV\Db\Sql\Expression $expression
-     * @param bool|null                    $desc
-     * @param bool|null                    $nullsLast
+     * @param string|\VV\Db\Sql\Expressions\Expression $expression
+     * @param bool|null                                $desc
+     * @param bool|null                                $nullsLast
      */
     public function __construct(string|Expression $expression, bool $desc = null, bool $nullsLast = null) {
         if (!$expression instanceof Expression) {
@@ -46,7 +46,7 @@ class OrderByClauseItem {
         }
 
         $this->setExpression($expression)
-            ->setDesc($desc)
+            ->setDesc($desc ?? false)
             ->setNullsLast($nullsLast);
     }
 

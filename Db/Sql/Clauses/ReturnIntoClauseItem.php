@@ -11,8 +11,8 @@
 namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Param;
-use VV\Db\Sql\DbObject;
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\DbObject;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class Item
@@ -27,8 +27,8 @@ class ReturnIntoClauseItem {
     /**
      * Item constructor.
      *
-     * @param Expression|string $expression
-     * @param Param          $param
+     * @param \VV\Db\Sql\Expressions\Expression|string $expression
+     * @param Param                                    $param
      *
      */
     public function __construct(string|Expression $expression, Param $param) {
@@ -43,7 +43,7 @@ class ReturnIntoClauseItem {
     }
 
     /**
-     * @return Expression
+     * @return \VV\Db\Sql\Expressions\Expression
      */
     public function expression(): Expression {
         return $this->expression;

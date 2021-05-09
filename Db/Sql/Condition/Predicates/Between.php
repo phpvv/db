@@ -10,7 +10,7 @@
  */
 namespace VV\Db\Sql\Condition\Predicates;
 
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class Between
@@ -25,7 +25,7 @@ class Between extends Base {
     private $expr;
 
     /**
-     * @var Expression
+     * @var \VV\Db\Sql\Expressions\Expression
      */
     private $from;
 
@@ -57,7 +57,7 @@ class Between extends Base {
     }
 
     /**
-     * @return Expression
+     * @return \VV\Db\Sql\Expressions\Expression
      */
     public function from(): Expression {
         return $this->from;

@@ -44,7 +44,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
 
         $query = $this->insertQuery();
         $pk = $retinsId->pk() ?: $query->mainTablePk();
-        $field = \VV\Db\Sql\DbObject::create((string)$pk);
+        $field = \VV\Db\Sql\Expressions\DbObject::create((string)$pk);
 
         $pkField = null;
         if ($mtm = $query->tableClause()->mainTableModel()) {

@@ -24,10 +24,10 @@ class ColumnsClause extends ColumnList {
     private ?array $resultFieldsMap = null;
 
     /**
-     * @return Sql\Expression[]
+     * @return \VV\Db\Sql\Expressions\Expression[]
      */
     public function items(): array {
-        return parent::items() ?: [Sql\DbObject::create('*')];
+        return parent::items() ?: [Sql\Expressions\DbObject::create('*')];
     }
 
     /**
@@ -56,7 +56,7 @@ class ColumnsClause extends ColumnList {
             foreach ($this->items() as $col) {
                 $a = null;
 
-                if ($col instanceof \VV\Db\Sql\DbObject) {
+                if ($col instanceof Sql\Expressions\DbObject) {
                     if (!$a = $col->alias()) {
                         $a = $col->name();
                         if ($a == '*') {
@@ -71,7 +71,7 @@ class ColumnsClause extends ColumnList {
                             continue;
                         }
                     }
-                } elseif ($col instanceof \VV\Db\Sql\Aliasable) {
+                } elseif ($col instanceof Sql\Expressions\AliasableExpression) {
                     $a = $col->alias();
                 }
 
@@ -123,8 +123,8 @@ class ColumnsClause extends ColumnList {
     protected function _add(array $columns) {
         foreach ($columns as $col) {
             $expr = Sql::expression($col);
-            if ($expr instanceof Sql\Plain) {
-                if ($alias = Sql\DbObject::parseAlias($expr->sql(), $sql)) {
+            if ($expr instanceof Sql\Expressions\PlainSql) {
+                if ($alias = Sql\Expressions\DbObject::parseAlias($expr->sql(), $sql)) {
                     $expr = Sql::plain($sql, $expr->params())
                         ->as($alias);
                 }
@@ -138,6 +138,6 @@ class ColumnsClause extends ColumnList {
      * @return array
      */
     protected function allowedObjectTypes(): array {
-        return [Sql\Expression::class];
+        return [Sql\Expressions\Expression::class];
     }
 }

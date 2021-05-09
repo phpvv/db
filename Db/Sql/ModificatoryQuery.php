@@ -33,11 +33,11 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
     /**
      * Add `RETURNING INTO` clause (only for oracle)
      *
-     * @param string|array|\Traversable|\VV\Db\Sql\Expression $field
-     * @param mixed|\VV\Db\Param                              $param
-     * @param int|null                                        $type \VV\Db\P::T_...
-     * @param string|null                                     $name
-     * @param int|null                                        $size Size of variable in bytes
+     * @param string|array|\Traversable|\VV\Db\Sql\Expressions\Expression $field
+     * @param mixed|\VV\Db\Param                                          $param
+     * @param int|null                                                    $type \VV\Db\P::T_...
+     * @param string|null                                                 $name
+     * @param int|null                                                    $size Size of variable in bytes
      *
      * @return $this
      */

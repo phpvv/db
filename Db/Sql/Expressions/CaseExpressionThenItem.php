@@ -8,17 +8,16 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Sql\CaseExpression;
+namespace VV\Db\Sql\Expressions;
 
 use VV\Db\Sql\Condition;
-use VV\Db\Sql\Expression;
 
 /**
  * Class Item
  *
  * @package VV\Db\Sql\CaseExpr
  */
-class ThenItem {
+class CaseExpressionThenItem {
 
     /**
      * @var Condition

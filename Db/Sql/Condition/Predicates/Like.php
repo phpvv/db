@@ -10,7 +10,7 @@
  */
 namespace VV\Db\Sql\Condition\Predicates;
 
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class Like
@@ -47,7 +47,7 @@ class Like extends Base {
     }
 
     /**
-     * @return Expression
+     * @return \VV\Db\Sql\Expressions\Expression
      */
     public function rightExpr(): Expression {
         return $this->rightExpr;

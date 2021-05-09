@@ -10,7 +10,7 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class ColumnList
@@ -22,7 +22,7 @@ abstract class ColumnList extends ItemList {
     /**
      * Add field(s)
      *
-     * @param string|Expression ...$columns
+     * @param string|\VV\Db\Sql\Expressions\Expression ...$columns
      *
      * @return $this
      */

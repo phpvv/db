@@ -10,7 +10,7 @@
  */
 namespace VV\Db\Sql\Condition\Predicates;
 
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class In
@@ -25,16 +25,16 @@ class In extends Base {
     private $expr;
 
     /**
-     * @var Expression[]|array
+     * @var \VV\Db\Sql\Expressions\Expression[]|array
      */
     private $params;
 
     /**
      * IsNull constructor.
      *
-     * @param Expression $expr
-     * @param array      $params
-     * @param bool       $not
+     * @param \VV\Db\Sql\Expressions\Expression $expr
+     * @param array                             $params
+     * @param bool                              $not
      */
     public function __construct(Expression $expr, array $params, bool $not = false) {
         $this->expr = $expr;
@@ -51,7 +51,7 @@ class In extends Base {
     }
 
     /**
-     * @return Expression[]|array
+     * @return \VV\Db\Sql\Expressions\Expression[]|array
      */
     public function params(): array {
         return $this->params;

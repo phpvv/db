@@ -22,7 +22,7 @@ class InsertValuesClause extends ItemList {
     /**
      * Add field(s)
      *
-     * @param mixed|\VV\Db\Param|Sql\Expression ...$values
+     * @param mixed|\VV\Db\Param|\VV\Db\Sql\Expressions\Expression ...$values
      *
      * @return $this
      */
@@ -34,7 +34,7 @@ class InsertValuesClause extends ItemList {
                 $values = $values[0];
             }
 
-            $allowedObjTypes = [\VV\Db\Param::class, Sql\Expression::class, \DateTimeInterface::class];
+            $allowedObjTypes = [\VV\Db\Param::class, Sql\Expressions\Expression::class, \DateTimeInterface::class];
             foreach ($values as $i => &$v) {
                 if (is_object($v)) {
                     if (!\VV\instOf($v, ...$allowedObjTypes)) {

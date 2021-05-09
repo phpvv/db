@@ -10,7 +10,7 @@
  */
 namespace VV\Db\Sql\Condition\Predicates;
 
-use VV\Db\Sql\Expression;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class Compare
@@ -28,7 +28,7 @@ class Compare extends Base {
         OP_GTE = '>=';
 
     /**
-     * @var Expression
+     * @var \VV\Db\Sql\Expressions\Expression
      */
     private $leftExpr;
 
@@ -45,10 +45,10 @@ class Compare extends Base {
     /**
      * Compare constructor.
      *
-     * @param Expression $leftExpr
-     * @param Expression $rightExpr
-     * @param string     $operator
-     * @param bool       $not
+     * @param Expression                        $leftExpr
+     * @param \VV\Db\Sql\Expressions\Expression $rightExpr
+     * @param string                            $operator
+     * @param bool                              $not
      */
     public function __construct(Expression $leftExpr, Expression $rightExpr, string $operator = null, bool $not = false) {
         $this->leftExpr = $leftExpr;
@@ -76,7 +76,7 @@ class Compare extends Base {
     }
 
     /**
-     * @return Expression
+     * @return \VV\Db\Sql\Expressions\Expression
      */
     public function leftExpr(): Expression {
         return $this->leftExpr;

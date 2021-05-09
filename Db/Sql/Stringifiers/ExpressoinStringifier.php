@@ -37,21 +37,21 @@ class ExpressoinStringifier {
         return $this->queryStringifier;
     }
 
-    public function strExpr(\VV\Db\Sql\Expression $expr, &$params, $withAlias = false) {
+    public function strExpr(Sql\Expressions\Expression $expr, &$params, $withAlias = false) {
         switch (true) {
             case $expr instanceof Sql\SelectQuery:
                 $str = $this->strSelectQuery($expr, $params);
                 break;
-            case $expr instanceof Sql\Plain:
+            case $expr instanceof Sql\Expressions\PlainSql:
                 $str = $this->strPlainSql($expr, $params);
                 break;
-            case $expr instanceof Sql\DbObject:
+            case $expr instanceof Sql\Expressions\DbObject:
                 $str = $this->strSqlObj($expr, $params);
                 break;
-            case $expr instanceof Sql\Param:
+            case $expr instanceof Sql\Expressions\SqlParam:
                 $str = $this->strParam($expr, $params);
                 break;
-            case $expr instanceof Sql\CaseExpression:
+            case $expr instanceof Sql\Expressions\CaseExpression:
                 $str = $this->strCaseExpr($expr, $params);
                 break;
             default:
@@ -72,13 +72,13 @@ class ExpressoinStringifier {
         return "($str)";
     }
 
-    public function strPlainSql(Sql\Plain $plain, &$params) {
+    public function strPlainSql(Sql\Expressions\PlainSql $plain, &$params) {
         ($p = $plain->params()) && array_push($params, ...$p);
 
         return $plain->sql();
     }
 
-    public function strSqlObj(Sql\DbObject $obj, &$params) {
+    public function strSqlObj(Sql\Expressions\DbObject $obj, &$params) {
         $path = $obj->path();
 
         $parts = [];
@@ -90,13 +90,13 @@ class ExpressoinStringifier {
     }
 
     /**
-     * @param mixed|Sql\Param $param
-     * @param array           $params
+     * @param mixed|\VV\Db\Sql\Expressions\SqlParam $param
+     * @param array                                 $params
      *
      * @return string
      */
     public function strParam($param, &$params) {
-        if ($param instanceof Sql\Param) {
+        if ($param instanceof Sql\Expressions\SqlParam) {
             $param = $param->param();
         } // pam fuiiiww
 
@@ -105,7 +105,7 @@ class ExpressoinStringifier {
         return '?';
     }
 
-    public function strCaseExpr(Sql\CaseExpression $caseExpr, &$params) {
+    public function strCaseExpr(Sql\Expressions\CaseExpression $caseExpr, &$params) {
         $str = 'CASE ';
 
         if ($mainExpr = $caseExpr->mainExpr()) {
