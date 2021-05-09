@@ -9,10 +9,11 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use VV\Db\Model\Table as TableModel;
+use VV\Db\Model\DataObject;
+use VV\Db\Model\Table;
 use VV\Db\Sql\Condition\Condition;
-use VV\Db\Sql\Condition\Condition as ConditionClause;
-use VV\Db\Sql\Expressions\Expression as SqlExpr;
+use VV\Db\Sql\Expressions\DbObject;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class Item
@@ -21,131 +22,101 @@ use VV\Db\Sql\Expressions\Expression as SqlExpr;
  */
 class TableClauseItem {
 
-    const J_INNER = 'JOIN',
+    public const J_INNER = 'JOIN',
         J_LEFT = 'LEFT JOIN',
         J_RIGHT = 'RIGHT JOIN',
         J_FULL = 'FULL JOIN',
         J_OUTER = 'OUTER JOIN';
 
-    /**
-     * @var SqlExpr
-     */
-    private $table;
-
-    /**
-     * @var TableModel
-     */
-    private $tableModel;
-
-    /**
-     * @var ConditionClause
-     */
-    private $joinCondition;
-
-    /**
-     * @var string
-     */
-    private $joinType;
-
-    /**
-     * @var array
-     */
-    private $useIndex;
+    private Expression $table;
+    private ?Table $tableModel = null;
+    private ?Condition $joinOn = null;
+    private ?string $joinType = null;
+    private ?array $useIndex = null;
 
     /**
      * Item constructor.
      *
-     * @param string|SqlExpr|TableModel $table
-     * @param string                    $alias
-     * @param ConditionClause           $joinCond
-     * @param string                    $joinType
-     *
+     * @param string|Expression|Table $table
+     * @param string|null             $alias
+     * @param Condition|null          $joinOn
+     * @param string|null             $joinType
      */
-    public function __construct($table, $alias = null, ConditionClause $joinCond = null, $joinType = null) {
+    public function __construct(
+        string|Expression|Table $table,
+        string $alias = null,
+        Condition $joinOn = null,
+        string $joinType = null
+    ) {
         $this->setTable($table, $alias);
-        if ($joinCond) $this->setJoin($joinCond, $joinType);
+        if ($joinOn) $this->setJoin($joinOn, $joinType);
     }
 
 
     /**
-     * @return SqlExpr
+     * @return Expression
      */
-    public function table() {
+    public function table(): Expression {
         return $this->table;
     }
 
     /**
-     * @return TableModel
+     * @return Table|null
      */
-    public function tableModel() {
+    public function tableModel(): ?Table {
         return $this->tableModel;
     }
 
     /**
-     * @return string
+     * @return Condition|null
      */
-    public function joinType() {
+    public function joinOn(): ?Condition {
+        return $this->joinOn;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function joinType(): ?string {
         return $this->joinType;
     }
 
     /**
-     * @return ConditionClause
+     * @return array|null
      */
-    public function joinCondition() {
-        return $this->joinCondition;
-    }
-
-    /**
-     * @return array
-     */
-    public function useIndex() {
+    public function useIndex(): ?array {
         return $this->useIndex;
     }
 
     /**
-     * @param array $useIndex
+     * @param array|null $useIndex
      *
      * @return $this
      */
-    public function setUseIndex(array $useIndex) {
+    public function setUseIndex(?array $useIndex): static {
         $this->useIndex = $useIndex;
 
         return $this;
     }
 
     /**
-     * @param ConditionClause $joinCond
-     * @param null            $joinType
+     * @param Condition   $on
+     * @param string|null $type
      *
      * @return $this
      */
-    public function setJoin(ConditionClause $joinCond, $joinType = null) {
-        return $this->setJoinCondition($joinCond)->setJoinType($joinType ?: self::J_INNER);
+    public function setJoin(Condition $on, string $type = null): static {
+        return $this->setJoinOn($on)->setJoinType($type ?: self::J_INNER);
     }
 
     /**
-     * @param string $joinType
+     * @param string|Expression|Table $table
+     * @param string|null             $alias
      *
      * @return $this
      */
-    protected function setJoinType($joinType) {
-        if (!self::checkJoinType($joinType)) {
-            throw new \InvalidArgumentException('Wrong join type');
-        }
-
-        $this->joinType = $joinType;
-
-        return $this;
-    }
-
-    /**
-     * @param string|SqlExpr|TableModel $table
-     * @param string|null               $alias
-     *
-     * @return $this
-     */
-    protected function setTable($table, string $alias = null) {
-        if ($table instanceof TableModel) {
+    protected function setTable(string|Expression|Table $table, string $alias = null): static {
+        if ($table instanceof Table) {
             return $this
                 ->setTableModel($table)
                 ->setTable($table->name(), $alias ?: $table->dfltAlias());
@@ -155,11 +126,11 @@ class TableClauseItem {
         if ($alias) {
             $tbl->as($alias);
         } elseif (!$tbl->alias()) {
-            if (!$tbl instanceof \VV\Db\Sql\Expressions\DbObject) {
+            if (!$tbl instanceof DbObject) {
                 throw new \LogicException('Can\'t determine alias for table');
             }
 
-            $alias = \VV\Db\Model\DataObject::name2alias($tbl->name());
+            $alias = DataObject::name2alias($tbl->name());
             $tbl->as($alias);
         }
 
@@ -169,23 +140,38 @@ class TableClauseItem {
     }
 
     /**
-     * @param TableModel $tableModel
+     * @param Table $table
      *
      * @return $this
      */
-    protected function setTableModel(TableModel $tableModel) {
-        $this->tableModel = $tableModel;
+    protected function setTableModel(Table $table): static {
+        $this->tableModel = $table;
 
         return $this;
     }
 
     /**
-     * @param ConditionClause $joinCondition
+     * @param Condition $on
      *
      * @return $this
      */
-    protected function setJoinCondition(ConditionClause $joinCondition) {
-        $this->joinCondition = $joinCondition;
+    protected function setJoinOn(Condition $on): static {
+        $this->joinOn = $on;
+
+        return $this;
+    }
+
+    /**
+     * @param string $type
+     *
+     * @return $this
+     */
+    protected function setJoinType(string $type): static {
+        if (!self::checkJoinType($type)) {
+            throw new \InvalidArgumentException('Wrong join type');
+        }
+
+        $this->joinType = $type;
 
         return $this;
     }
@@ -195,16 +181,10 @@ class TableClauseItem {
      *
      * @return bool
      */
-    public static function checkJoinType($joinType) {
-        switch ($joinType) {
-            case self::J_INNER:
-            case self::J_LEFT:
-            case self::J_RIGHT:
-            case self::J_FULL:
-            case self::J_OUTER:
-                return true;
-            default:
-                return false;
-        }
+    public static function checkJoinType(string $joinType): bool {
+        return match ($joinType) {
+            self::J_INNER, self::J_LEFT, self::J_RIGHT, self::J_FULL, self::J_OUTER => true,
+            default => false,
+        };
     }
 }

@@ -97,13 +97,11 @@ final class Transaction {
     }
 
     /**
-     * @return $this
+     * @return void
      */
-    private function throwIfFinished(): self {
+    private function throwIfFinished(): void {
         if (!$this->connection) {
             throw new \LogicException('Transaction is already finished');
         }
-
-        return $this;
     }
 }

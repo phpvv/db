@@ -11,12 +11,17 @@
 namespace VV\Db;
 
 use JetBrains\PhpStorm\Pure;
-use VV\Db\Sql\Condition\Condition;
-use VV\Db\Sql\Condition\Predicate;
-use VV\Db\Sql\Expressions\CaseExpression;
-use VV\Db\Sql\Expressions\Expression;
-use VV\Db\Sql\Expressions\PlainSql;
-use VV\Db\Sql\Expressions\SqlParam;
+use VV\Db\Sql\Condition\{
+    Condition,
+    Predicate,
+};
+use VV\Db\Sql\Expressions\{
+    CaseExpression,
+    DbObject,
+    Expression,
+    PlainSql,
+    SqlParam,
+};
 
 /**
  * Static class with factory methods
@@ -40,7 +45,7 @@ final class Sql {
             return $expression;
         }
 
-        if ($o = Sql\Expressions\DbObject::create($expression)) return $o;
+        if ($o = DbObject::create($expression)) return $o;
 
         return self::plain((string)$expression, $params);
     }

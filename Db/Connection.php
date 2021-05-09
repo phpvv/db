@@ -62,6 +62,7 @@ final class Connection {
         $this->connect();
     }
 
+    #[Pure]
     public function isSame(self $connection): bool {
         return $this === $connection || $this->hash() == $connection->hash();
     }
@@ -420,6 +421,7 @@ final class Connection {
     /**
      * @return bool
      */
+    #[Pure]
     public function isBusy(): bool {
         return $this->isInTransaction() || $this->isUnderExecution();
     }

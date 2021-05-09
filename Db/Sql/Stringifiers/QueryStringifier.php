@@ -244,7 +244,7 @@ abstract class QueryStringifier {
             }
 
             if ($sql) {
-                $on = $condstr->buildConditionSql($item->joinCondition());
+                $on = $condstr->buildConditionSql($item->joinOn());
 
                 $sql .= " {$item->joinType()} $tblNameStr ON ({$on->embed($params)})";
             } else {

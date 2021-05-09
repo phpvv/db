@@ -22,11 +22,11 @@ abstract class ColumnList extends ItemList {
     /**
      * Add field(s)
      *
-     * @param string|\VV\Db\Sql\Expressions\Expression ...$columns
+     * @param string|array|Expression ...$columns
      *
      * @return $this
      */
-    public function add(string|Expression ...$columns): static {
+    public function add(string|array|Expression ...$columns): static {
         if (!$columns) return $this;
 
         if (count($columns) == 1 && is_array($columns[0])) {

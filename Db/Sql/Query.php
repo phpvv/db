@@ -10,8 +10,14 @@
  */
 namespace VV\Db\Sql;
 
+use JetBrains\PhpStorm\Pure;
 use VV\Db\Connection;
+use VV\Db\Model\Table;
+use VV\Db\Result;
+use VV\Db\Sql;
+use VV\Db\Sql\Clauses\TableClause;
 use VV\Db\Sql\Condition\Condition;
+use VV\Db\Sql\Condition\Predicate;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
@@ -25,7 +31,7 @@ abstract class Query {
 
     private ?Clauses\TableClause $tableClause = null;
 
-    private ?\VV\Db\Sql\Condition\Condition $whereClause = null;
+    private ?Condition $whereClause = null;
 
     private ?string $hintClause = null;
 
@@ -34,7 +40,7 @@ abstract class Query {
     }
 
     /**
-     * @return Connection
+     * @return Connection|null
      */
     public function connection(): ?Connection {
         return $this->connection;
@@ -54,17 +60,17 @@ abstract class Query {
     /**
      * Add from clause in sql
      *
-     * @param string|\VV\Db\Model\Table|null $table
-     * @param string|null                    $alias
+     * @param string|Table|TableClause|null $table
+     * @param string|null                   $alias
      *
      * @return $this
      */
-    public function table($table = null, string $alias = null) {
+    public function table(string|Table|TableClause $table = null, string $alias = null): static {
         if (!$table) return $this;
-        if ($table instanceof Clauses\TableClause) {
+        if ($table instanceof TableClause) {
             $this->setTableClause($table);
         } else {
-            $this->tableClause()->main($table, $alias);
+            $this->tableClause()->setMainTable($table, $alias);
         }
 
         return $this;
@@ -77,7 +83,7 @@ abstract class Query {
      *
      * @return $this
      */
-    public function a(string $alias) {
+    public function a(string $alias): static {
         $this->tableClause()->a($alias);
 
         return $this;
@@ -111,12 +117,12 @@ abstract class Query {
     /**
      * Add `WHERE` clause
      *
-     * @param Expression|Condition|array|string $field
-     * @param Expression|mixed                  $value
+     * @param string|int|array|Expression|Predicate|null $field
+     * @param mixed|array|Expression|null                $value
      *
      * @return $this
      */
-    public function where($field, $value = null) {
+    public function where(string|int|array|Expression|Predicate|null $field, mixed $value = null): static {
         return $this->condAnd($this->whereClause(), ...func_get_args());
     }
 
@@ -124,65 +130,65 @@ abstract class Query {
      * Add `WHERE pk_field=`
      *
      *
-     * @param Expression|string|int $id
+     * @param string|int|Expression $id
      *
      * @return $this
      */
-    public function whereId($id) {
+    public function whereId(string|int|Expression $id): static {
         $this->where($this->mainTablePk(), $id);
 
         return $this;
     }
 
     /**
-     * @param Expression|string $field
-     * @param Expression|mixed  ...$values
+     * @param string|int|Expression $field
+     * @param mixed|Expression  ...$values
      *
      * @return $this
      */
-    public function whereIn($field, ...$values) {
+    public function whereIn(string|int|Expression $field, ...$values): static {
         $this->whereClause()->and($field)->in(...$values);
 
         return $this;
     }
 
     /**
-     * @param Expression|string $field
-     * @param Expression|mixed  ...$values
+     * @param string|int|Expression $field
+     * @param mixed|Expression  ...$values
      *
      * @return $this
      */
-    public function whereNotIn($field, ...$values) {
+    public function whereNotIn(string|int|Expression $field, ...$values): static {
         $this->whereClause()->and($field)->not->in(...$values);
 
         return $this;
     }
 
     /**
-     * @param Expression|mixed ...$values
+     * @param mixed|Expression ...$values
      *
      * @return $this
      */
-    public function whereIdIn(...$values) {
+    public function whereIdIn(mixed ...$values): static {
         return $this->whereIn($this->mainTablePk(), ...$values);
     }
 
     /**
-     * @param Expression|mixed ...$values
+     * @param mixed|Expression ...$values
      *
      * @return $this
      */
-    public function whereIdNotIn(...$values) {
+    public function whereIdNotIn(mixed ...$values): static {
         return $this->whereNotIn($this->mainTablePk(), ...$values);
     }
 
     /**
-     * @param \Closure $clbk
+     * @param \Closure $callback
      *
      * @return $this
      */
-    public function apply(\Closure $clbk) {
-        $clbk($this);
+    public function apply(\Closure $callback): static {
+        $callback($this);
 
         return $this;
     }
@@ -190,16 +196,16 @@ abstract class Query {
     /**
      * @return int
      */
-    public function nonEmptyClausesIds() {
+    public function nonEmptyClausesIds(): int {
         $map = $this->nonEmptyClausesMap();
 
         return $this->makeNonEmptyClausesBitMask($map);
     }
 
     /**
-     * @return Clauses\TableClause
+     * @return TableClause
      */
-    public function tableClause() {
+    public function tableClause(): TableClause {
         if (!$this->tableClause) {
             $this->setTableClause($this->createTableClause());
         }
@@ -208,11 +214,11 @@ abstract class Query {
     }
 
     /**
-     * @param Clauses\TableClause $tableClause
+     * @param ?TableClause $tableClause
      *
      * @return $this
      */
-    public function setTableClause(Clauses\TableClause $tableClause) {
+    public function setTableClause(?TableClause $tableClause): static {
         $this->tableClause = $tableClause;
 
         return $this;
@@ -221,9 +227,9 @@ abstract class Query {
     /**
      * Clears tableClause property and returns previous value
      *
-     * @return Clauses\TableClause
+     * @return TableClause
      */
-    public function clearTableClause() {
+    public function clearTableClause(): TableClause {
         try {
             return $this->tableClause();
         } finally {
@@ -232,16 +238,17 @@ abstract class Query {
     }
 
     /**
-     * @return Clauses\TableClause
+     * @return TableClause
      */
-    public function createTableClause() {
-        return new Clauses\TableClause;
+    #[Pure]
+    public function createTableClause(): TableClause {
+        return new TableClause;
     }
 
     /**
-     * @return \VV\Db\Sql\Condition\Condition
+     * @return Condition
      */
-    public function whereClause() {
+    public function whereClause(): Condition {
         if (!$this->whereClause) {
             $this->setWhereClause($this->createWhereClause());
         }
@@ -250,11 +257,11 @@ abstract class Query {
     }
 
     /**
-     * @param \VV\Db\Sql\Condition\Condition|null $whereClause
+     * @param Condition|null $whereClause
      *
      * @return $this
      */
-    public function setWhereClause(Condition $whereClause = null) {
+    public function setWhereClause(?Condition $whereClause): static {
         $this->whereClause = $whereClause;
 
         return $this;
@@ -263,9 +270,9 @@ abstract class Query {
     /**
      * Clears whereClause property and returns previous value
      *
-     * @return \VV\Db\Sql\Condition\Condition
+     * @return Condition
      */
-    public function clearWhereClause() {
+    public function clearWhereClause(): Condition {
         try {
             return $this->whereClause();
         } finally {
@@ -274,18 +281,18 @@ abstract class Query {
     }
 
     /**
-     * @return \VV\Db\Sql\Condition\Condition
+     * @return Condition
      */
-    public function createWhereClause() {
-        return \VV\Db\Sql::condition();
+    public function createWhereClause(): Condition {
+        return Sql::condition();
     }
 
 
     /**
-     * @return string
+     * @return string|null
      * todo: reconsider hints uasge
      */
-    public function hintClause() {
+    public function hintClause(): ?string {
         return $this->hintClause;
     }
 
@@ -295,43 +302,43 @@ abstract class Query {
      * @return $this
      * todo: reconsider hints uasge
      */
-    public function setHintClause(?string $hintClause) {
+    public function setHintClause(?string $hintClause): static {
         $this->hintClause = $hintClause;
 
         return $this;
     }
 
     /**
-     * @param $hint
+     * @param string|null $hint
      *
      * @return $this
      * todo: reconsider hints uasge
      */
-    public function hint($hint) {
+    public function hint(?string $hint): static {
         return $this->setHintClause($hint);
     }
 
-    public function toString(&$params = null) {
+    public function toString(&$params = null): string {
         return $this->connectionOrThrow()->stringifyQuery($this, $params);
     }
 
     /**
      * @return \VV\Db\Statement
      */
-    public function prepare() {
+    public function prepare(): \VV\Db\Statement {
         return $this->connectionOrThrow()->prepare($this);
     }
 
-    final protected function nonEmptyClause(Clauses\Clause $clause) {
+    final protected function nonEmptyClause(Clauses\Clause $clause): ?Clauses\Clause {
         if ($clause->isEmpty()) return null;
 
         return $clause;
     }
 
     /**
-     * @return Connection
+     * @return Connection|null
      */
-    protected function connectionOrThrow() {
+    protected function connectionOrThrow(): ?Connection {
         if (!$connection = $this->connection()) {
             throw new \LogicException('Db connection instance is not set in sql builder');
         }
@@ -339,7 +346,11 @@ abstract class Query {
         return $connection;
     }
 
-    protected function condAnd(Condition $condition, $field, $value = null) {
+    protected function condAnd(
+        Condition $condition,
+        string|int|array|Expression|Predicate|null $field,
+        mixed $value = null
+    ): static {
         if ($field) {
             if (is_array($field)) {
                 $condition->and($field);
@@ -363,7 +374,7 @@ abstract class Query {
      *
      * @return int
      */
-    protected function makeNonEmptyClausesBitMask(array $map) {
+    protected function makeNonEmptyClausesBitMask(array $map): int {
         $res = 0;
         foreach ($map as $c => $clause) {
             if ($clause instanceof Clauses\Clause) {
@@ -383,9 +394,9 @@ abstract class Query {
      * @param string|\Closure|null $decorator
      * @param int|null             $fetchSize
      *
-     * @return \VV\Db\Result
+     * @return Result
      */
-    protected function _result(int $flags = null, $decorator = null, int $fetchSize = null): \VV\Db\Result {
+    protected function _result(int $flags = null, string|\Closure $decorator = null, int $fetchSize = null): Result {
         return $this->connectionOrThrow()->query($this, null, $flags, $decorator, $fetchSize);
     }
 
