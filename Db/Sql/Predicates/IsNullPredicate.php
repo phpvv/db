@@ -13,32 +13,29 @@ namespace VV\Db\Sql\Predicates;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
- * Class IsNull
+ * Class IsNullPredicate
  *
- * @package VV\Db\Sql\Predicate
+ * @package VV\Db\Sql\Predicates
  */
-class IsNull extends Base {
+class IsNullPredicate extends PredicateBase {
 
-    /**
-     * @var Expression
-     */
-    private $expr;
+    private Expression $expression;
 
     /**
      * IsNull constructor.
      *
-     * @param \VV\Db\Sql\Expressions\Expression $expr
-     * @param bool                              $not
+     * @param Expression $expression
+     * @param bool       $not
      */
-    public function __construct(Expression $expr, bool $not = false) {
-        $this->expr = $expr;
+    public function __construct(Expression $expression, bool $not = false) {
+        $this->expression = $expression;
         $this->not = $not;
     }
 
     /**
      * @return Expression
      */
-    public function expr(): Expression {
-        return $this->expr;
+    public function expression(): Expression {
+        return $this->expression;
     }
 }

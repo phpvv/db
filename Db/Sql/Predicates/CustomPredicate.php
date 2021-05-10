@@ -13,25 +13,24 @@ namespace VV\Db\Sql\Predicates;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
- * Class Custom
+ * Class CustomPredicate
  *
- * @package VV\Db\Sql\Predicate
+ * @package VV\Db\Sql\Predicates
  */
-class Custom extends Base {
+class CustomPredicate extends PredicateBase {
 
-    private Expression $expr;
-
+    private Expression $expression;
     private array $params;
 
     /**
      * IsNull constructor.
      *
-     * @param \VV\Db\Sql\Expressions\Expression $expr
-     * @param array                             $params
-     * @param bool                              $not
+     * @param Expression $expression
+     * @param array      $params
+     * @param bool       $not
      */
-    public function __construct(Expression $expr, array $params, bool $not = false) {
-        $this->expr = $expr;
+    public function __construct(Expression $expression, array $params, bool $not = false) {
+        $this->expression = $expression;
         $this->params = $params;
         $this->not = $not;
     }
@@ -39,8 +38,8 @@ class Custom extends Base {
     /**
      * @return Expression
      */
-    public function expr(): Expression {
-        return $this->expr;
+    public function expression(): Expression {
+        return $this->expression;
     }
 
     /**

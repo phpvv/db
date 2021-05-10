@@ -16,6 +16,7 @@ use VV\Db\Sql\Clauses\TableClauseItem as Item;
 use VV\Db\Sql\Condition;
 use VV\Db\Sql\Expressions\DbObject;
 use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Sql\Predicates\ComparePredicate;
 use VV\Db\Sql\Predicates\Predicate;
 
 /**
@@ -407,7 +408,7 @@ class TableClause extends ItemList {
         if (!$parentTableAlias) $parentTableAlias = $parentItem->table()->alias();
         if (!$parentField) $parentField = 'parent_id';
 
-        $on = new \VV\Db\Sql\Predicates\Compare(
+        $on = new ComparePredicate(
             DbObject::create("$alias.{$parentTblMdl->pk()}"),
             DbObject::create("$parentTableAlias.$parentField")
         );

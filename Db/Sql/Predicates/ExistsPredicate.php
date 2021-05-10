@@ -13,16 +13,16 @@ namespace VV\Db\Sql\Predicates;
 use VV\Db\Sql\SelectQuery;
 
 /**
- * Class Exists
+ * Class ExistsPredicate
  *
- * @package VV\Db\Sql\Predicate
+ * @package VV\Db\Sql\Predicates
  */
-class Exists extends Base {
+class ExistsPredicate extends PredicateBase {
 
     private SelectQuery $query;
 
     /**
-     * IsNull constructor.
+     * ExistsPredicate constructor.
      *
      * @param SelectQuery $query
      * @param bool        $not

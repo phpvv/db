@@ -13,7 +13,7 @@ namespace VV\Db\Sql;
 use VV\Db\Sql\Expressions;
 use VV\Db\Sql\Expressions\Expression;
 use VV\Db\Sql\Predicates;
-use VV\Db\Sql\Predicates\Compare as Cmp;
+use VV\Db\Sql\Predicates\ComparePredicate as Cmp;
 use VV\Db\Sql\Predicates\Predicate;
 
 /**
@@ -186,7 +186,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      * @return $this
      */
     public function between($from, $till): static {
-        $predic = new Predicates\Between(
+        $predic = new Predicates\BetweenPredicate(
             $this->target(),
             self::toParam($from),
             self::toParam($till),
@@ -216,7 +216,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
         $parentNot = $this->isItemNegation();
 
         $inPredic = $notNullParams
-            ? new Predicates\In($target, $notNullParams, $parentNot)
+            ? new Predicates\InPredicate($target, $notNullParams, $parentNot)
             : null;
 
         // IN     (null, 1, 2) ==> IN (1, 2)     OR IS NULL
@@ -237,7 +237,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
             // NOT IN () ==> no condition (all records)
             if ($parentNot) return $this;
             // NO RECORDS
-            $inPredic = new Predicates\In($target, [\VV\Db\Sql::plain('NULL')]);
+            $inPredic = new Predicates\InPredicate($target, [\VV\Db\Sql::plain('NULL')]);
         }
 
         return $this->_addPredicItem($inPredic);
@@ -247,7 +247,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      * @return $this
      */
     public function isNull(): static {
-        $predic = new Predicates\IsNull($this->target(), $this->isItemNegation());
+        $predic = new Predicates\IsNullPredicate($this->target(), $this->isItemNegation());
 
         return $this->_addPredicItem($predic);
     }
@@ -266,7 +266,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      * @return $this
      */
     public function like(string $pattern, bool $caseInsensitive = false): static {
-        return $this->_addPredicItem(new Predicates\Like(
+        return $this->_addPredicItem(new Predicates\LikePredicate(
             $this->target(),
             self::toParam($pattern),
             $this->isItemNegation(),
@@ -311,7 +311,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      */
     public function custom(...$params): static {
         if ($params && is_array($params[0])) $params = $params[0];
-        $predic = new Predicates\Custom($this->target(), $params, $this->isItemNegation());
+        $predic = new Predicates\CustomPredicate($this->target(), $params, $this->isItemNegation());
 
         return $this->addPredicItem($predic);
     }
@@ -322,7 +322,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      * @return $this
      */
     public function exists(\VV\Db\Sql\SelectQuery $query): static {
-        $predic = new Predicates\Exists($query, $this->isItemNegation());
+        $predic = new Predicates\ExistsPredicate($query, $this->isItemNegation());
 
         return $this->addPredicItem($predic);
     }
@@ -445,7 +445,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
         $predic = $item->predicate();
         $itemKey = null;
         if ($predic instanceof Cmp && $item->connector() == ConditionItem::CONN_AND) {
-            $itemKey = $predic->leftExpr()->expressionId() . ' ' . $predic->operator();
+            $itemKey = $predic->leftExpression()->expressionId() . ' ' . $predic->operator();
         }
 
         if ($itemKey) {

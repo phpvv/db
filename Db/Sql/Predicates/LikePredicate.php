@@ -17,40 +17,39 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Predicate
  */
-class Like extends Base {
+class LikePredicate extends PredicateBase {
 
-    private Expression $leftExpr;
-    private Expression $rightExpr;
+    private Expression $leftExpression;
+    private Expression $rightExpression;
     private bool $caseInsensitive;
 
     /**
      * Like constructor.
      *
-     * @param Expression $leftExpr
-     * @param Expression $rightExpr
+     * @param Expression $left
+     * @param Expression $right
      * @param bool       $not
      * @param bool       $caseInsensitive
      */
-    public function __construct(Expression $leftExpr, Expression $rightExpr, bool $not = false, bool $caseInsensitive = false) {
-        $this->leftExpr = $leftExpr;
-        $this->rightExpr = $rightExpr;
+    public function __construct(Expression $left, Expression $right, bool $not = false, bool $caseInsensitive = false) {
+        $this->leftExpression = $left;
+        $this->rightExpression = $right;
         $this->not = $not;
         $this->caseInsensitive = $caseInsensitive;
     }
 
     /**
      * @return Expression
-     * @return Expression
      */
-    public function leftExpr(): Expression {
-        return $this->leftExpr;
+    public function leftExpression(): Expression {
+        return $this->leftExpression;
     }
 
     /**
-     * @return \VV\Db\Sql\Expressions\Expression
+     * @return Expression
      */
-    public function rightExpr(): Expression {
-        return $this->rightExpr;
+    public function rightExpression(): Expression {
+        return $this->rightExpression;
     }
 
     /**

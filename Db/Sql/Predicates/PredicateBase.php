@@ -11,11 +11,11 @@
 namespace VV\Db\Sql\Predicates;
 
 /**
- * Class Base
+ * Class PredicateBase
  *
- * @package VV\Db\Sql\Predicate
+ * @package VV\Db\Sql\Predicates
  */
-abstract class Base implements \VV\Db\Sql\Predicates\Predicate {
+abstract class PredicateBase implements Predicate {
 
     protected bool $not = false;
 

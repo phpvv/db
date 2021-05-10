@@ -13,13 +13,13 @@ namespace VV\Db\Sql\Predicates;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
- * Class Compare
+ * Class ComparePredicate
  *
- * @package VV\Db\Sql\Predicate
+ * @package VV\Db\Sql\Predicates
  */
-class Compare extends Base {
+class ComparePredicate extends PredicateBase {
 
-    const OP_EQ = '=',
+    public const OP_EQ = '=',
         OP_NE = '<>',
         OP_NE_ALT = '!=',
         OP_LT = '<',
@@ -27,32 +27,21 @@ class Compare extends Base {
         OP_GT = '>',
         OP_GTE = '>=';
 
-    /**
-     * @var \VV\Db\Sql\Expressions\Expression
-     */
-    private $leftExpr;
-
-    /**
-     * @var Expression
-     */
-    private $rightExpr;
-
-    /**
-     * @var string
-     */
-    private $operator = self::OP_EQ;
+    private Expression $leftExpression;
+    private Expression $rightExpression;
+    private string $operator = self::OP_EQ;
 
     /**
      * Compare constructor.
      *
-     * @param Expression                        $leftExpr
-     * @param \VV\Db\Sql\Expressions\Expression $rightExpr
-     * @param string                            $operator
-     * @param bool                              $not
+     * @param Expression  $left
+     * @param Expression  $right
+     * @param string|null $operator
+     * @param bool        $not
      */
-    public function __construct(Expression $leftExpr, Expression $rightExpr, string $operator = null, bool $not = false) {
-        $this->leftExpr = $leftExpr;
-        $this->rightExpr = $rightExpr;
+    public function __construct(Expression $left, Expression $right, string $operator = null, bool $not = false) {
+        $this->leftExpression = $left;
+        $this->rightExpression = $right;
         $this->not = $not;
 
         if ($operator && $operator = trim($operator)) {
@@ -76,17 +65,17 @@ class Compare extends Base {
     }
 
     /**
-     * @return \VV\Db\Sql\Expressions\Expression
+     * @return Expression
      */
-    public function leftExpr(): Expression {
-        return $this->leftExpr;
+    public function leftExpression(): Expression {
+        return $this->leftExpression;
     }
 
     /**
      * @return Expression
      */
-    public function rightExpr(): Expression {
-        return $this->rightExpr;
+    public function rightExpression(): Expression {
+        return $this->rightExpression;
     }
 
     /**

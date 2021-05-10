@@ -13,37 +13,26 @@ namespace VV\Db\Sql\Predicates;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
- * Class Between
+ * Class BetweenPredicate
  *
- * @package VV\Db\Sql\Predicate
+ * @package VV\Db\Sql\Predicates
  */
-class Between extends Base {
+class BetweenPredicate extends PredicateBase {
 
-    /**
-     * @var Expression
-     */
-    private $expr;
-
-    /**
-     * @var \VV\Db\Sql\Expressions\Expression
-     */
-    private $from;
-
-    /**
-     * @var Expression
-     */
-    private $till;
+    private Expression $expression;
+    private Expression $from;
+    private Expression $till;
 
     /**
      * Between constructor.
      *
-     * @param Expression $expr
+     * @param Expression $expression
      * @param Expression $from
      * @param Expression $till
      * @param bool       $not
      */
-    public function __construct(Expression $expr, Expression $from, Expression $till, bool $not = false) {
-        $this->expr = $expr;
+    public function __construct(Expression $expression, Expression $from, Expression $till, bool $not = false) {
+        $this->expression = $expression;
         $this->from = $from;
         $this->till = $till;
         $this->not = $not;
@@ -52,12 +41,12 @@ class Between extends Base {
     /**
      * @return Expression
      */
-    public function expr(): Expression {
-        return $this->expr;
+    public function expression(): Expression {
+        return $this->expression;
     }
 
     /**
-     * @return \VV\Db\Sql\Expressions\Expression
+     * @return Expression
      */
     public function from(): Expression {
         return $this->from;
