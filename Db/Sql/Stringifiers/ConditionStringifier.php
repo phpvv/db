@@ -56,11 +56,11 @@ class ConditionStringifier {
     }
 
     /**
-     * @param \VV\Db\Sql\Condition\Condition $condition
+     * @param \VV\Db\Sql\Condition $condition
      *
      * @return PlainSql
      */
-    public function buildConditionSql(Sql\Condition\Condition $condition) {
+    public function buildConditionSql(Sql\Condition $condition) {
         $sql = '';
         $params = [];
         foreach ($condition->items() as $item) {
@@ -75,7 +75,7 @@ class ConditionStringifier {
         return $this->createPlainSql($sql, $params);
     }
 
-    public function strComparePredicate(Sql\Condition\Predicates\Compare $compare, &$params) {
+    public function strComparePredicate(Sql\Predicates\Compare $compare, &$params) {
         $leftExpr = $compare->leftExpr();
         $rightExpr = $compare->rightExpr();
         $this->decorateParamsByModel($leftExpr, $rightExpr);
@@ -89,7 +89,7 @@ class ConditionStringifier {
         return $this->str2prnss4plainSql($str, $leftExpr);
     }
 
-    public function strLikePredicate(Sql\Condition\Predicates\Like $like, &$params) {
+    public function strLikePredicate(Sql\Predicates\Like $like, &$params) {
         $lstr = $this->strColumn($leftExpr = $like->leftExpr(), $params);
         $rstr = $this->strColumn($like->rightExpr(), $params, true);
         $notstr = $like->isNegative() ? 'NOT ' : '';
@@ -99,7 +99,7 @@ class ConditionStringifier {
         return $this->str2prnss4plainSql($str, $leftExpr);
     }
 
-    public function strBetweenPredicate(Sql\Condition\Predicates\Between $between, &$params) {
+    public function strBetweenPredicate(Sql\Predicates\Between $between, &$params) {
         $expr = $between->expr();
         $from = $between->from();
         $till = $between->till();
@@ -117,7 +117,7 @@ class ConditionStringifier {
         return $this->str2prnss4plainSql($str, $expr);
     }
 
-    public function strInPredicate(Sql\Condition\Predicates\In $in, &$params) {
+    public function strInPredicate(Sql\Predicates\In $in, &$params) {
         $exprstr = $this->strColumn($expr = $in->expr(), $params);
 
         $inParams = $in->params();
@@ -140,7 +140,7 @@ class ConditionStringifier {
         return $this->str2prnss4plainSql($str, $expr);
     }
 
-    public function strIsNullPredicate(Sql\Condition\Predicates\IsNull $isNull, &$params) {
+    public function strIsNullPredicate(Sql\Predicates\IsNull $isNull, &$params) {
         $exprstr = $this->strColumn($expr = $isNull->expr(), $params);
         $not = $isNull->isNegative() ? ' NOT' : '';
         $str = "$exprstr IS{$not} NULL";
@@ -148,7 +148,7 @@ class ConditionStringifier {
         return $this->str2prnss4plainSql($str, $expr);
     }
 
-    public function strCustomPredicate(Sql\Condition\Predicates\Custom $custom, &$params) {
+    public function strCustomPredicate(Sql\Predicates\Custom $custom, &$params) {
         $str = $this->strColumn($custom->expr(), $params, true);
         ($p = $custom->params()) && array_push($params, ...$p);
 
@@ -157,7 +157,7 @@ class ConditionStringifier {
         return $str;
     }
 
-    public function strExistsPredicate(Sql\Condition\Predicates\Exists $exists, &$params) {
+    public function strExistsPredicate(Sql\Predicates\Exists $exists, &$params) {
         $selectStr = $this->queryStringifier()->factory()
             ->createSelectStringifier($exists->query())
             ->stringifyRaw($params);
@@ -182,37 +182,37 @@ class ConditionStringifier {
     }
 
     /**
-     * @param \VV\Db\Sql\Condition\Predicate $predic
+     * @param \VV\Db\Sql\Predicates\Predicate $predic
      * @param               $params
      *
      * @return string|null
      */
-    private function strPredic(Sql\Condition\Predicate $predic, &$params): ?string {
+    private function strPredic(Sql\Predicates\Predicate $predic, &$params): ?string {
         switch (true) {
-            case $predic instanceof Sql\Condition\Condition:
+            case $predic instanceof Sql\Condition:
                 if ($predic->isEmpty()) return null;
 
                 return "({$this->buildConditionSql($predic)->embed($params)})";
 
-            case $predic instanceof Sql\Condition\Predicates\Compare:
+            case $predic instanceof Sql\Predicates\Compare:
                 return $this->strComparePredicate($predic, $params);
 
-            case $predic instanceof Sql\Condition\Predicates\Like:
+            case $predic instanceof Sql\Predicates\Like:
                 return $this->strLikePredicate($predic, $params);
 
-            case $predic instanceof Sql\Condition\Predicates\Between:
+            case $predic instanceof Sql\Predicates\Between:
                 return $this->strBetweenPredicate($predic, $params);
 
-            case $predic instanceof Sql\Condition\Predicates\In:
+            case $predic instanceof Sql\Predicates\In:
                 return $this->strInPredicate($predic, $params);
 
-            case $predic instanceof Sql\Condition\Predicates\IsNull:
+            case $predic instanceof Sql\Predicates\IsNull:
                 return $this->strIsNullPredicate($predic, $params);
 
-            case $predic instanceof Sql\Condition\Predicates\Custom:
+            case $predic instanceof Sql\Predicates\Custom:
                 return $this->strCustomPredicate($predic, $params);
 
-            case $predic instanceof Sql\Condition\Predicates\Exists:
+            case $predic instanceof Sql\Predicates\Exists:
                 return $this->strExistsPredicate($predic, $params);
 
             default:

@@ -16,9 +16,8 @@ use VV\Db\Model\Table;
 use VV\Db\Result;
 use VV\Db\Sql;
 use VV\Db\Sql\Clauses\TableClause;
-use VV\Db\Sql\Condition\Condition;
-use VV\Db\Sql\Condition\Predicate;
 use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Sql\Predicates\Predicate;
 
 /**
  * Class Query
@@ -28,11 +27,8 @@ use VV\Db\Sql\Expressions\Expression;
 abstract class Query {
 
     private ?Connection $connection = null;
-
     private ?Clauses\TableClause $tableClause = null;
-
     private ?Condition $whereClause = null;
-
     private ?string $hintClause = null;
 
     public function __construct(Connection $connection = null) {

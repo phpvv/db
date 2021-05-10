@@ -100,7 +100,7 @@ class SelectStringifier extends QueryStringifier {
         return ' GROUP BY ' . $this->strColumnList($groupBy->items(), $params);
     }
 
-    protected function strHavingClause(Sql\Condition\Condition $having, &$params): string {
+    protected function strHavingClause(Sql\Condition $having, &$params): string {
         if ($having->isEmpty()) return '';
 
         return ' HAVING ' . $this->buildConditionSql($having)->embed($params);

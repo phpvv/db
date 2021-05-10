@@ -214,11 +214,11 @@ abstract class QueryStringifier {
         return implode(', ', $strarr);
     }
 
-    protected function buildConditionSql(Sql\Condition\Condition $condition) {
+    protected function buildConditionSql(Sql\Condition $condition) {
         return $this->conditionStringifier()->buildConditionSql($condition);
     }
 
-    protected function strWhereClause(Sql\Condition\Condition $where, &$params) {
+    protected function strWhereClause(Sql\Condition $where, &$params) {
         if ($where->isEmpty()) return '';
 
         return ' WHERE ' . $this->buildConditionSql($where)->embed($params);

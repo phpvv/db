@@ -8,12 +8,13 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Sql\Condition;
+namespace VV\Db\Sql;
 
-use VV\Db\Sql\Condition\Predicates;
-use VV\Db\Sql\Condition\Predicates\Compare as Cmp;
 use VV\Db\Sql\Expressions;
 use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Sql\Predicates;
+use VV\Db\Sql\Predicates\Compare as Cmp;
+use VV\Db\Sql\Predicates\Predicate;
 
 /**
  * Class Condition
@@ -24,7 +25,7 @@ use VV\Db\Sql\Expressions\Expression;
  * @property-read Condition $or
  * @property-read Condition $not
  *
- * @method Item[] items():array
+ * @method ConditionItem[] items():array
  */
 class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
 
@@ -337,11 +338,11 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     }
 
     /**
-     * @param Item $item
+     * @param ConditionItem $item
      *
      * @return $this
      */
-    public function addItem(Item $item): static {
+    public function addItem(ConditionItem $item): static {
         $this->clearTarget()->_addItem($item);
 
         return $this;
@@ -351,10 +352,10 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      * @param Predicate   $predic
      * @param string|null $connector
      *
-     * @return Item
+     * @return ConditionItem
      */
-    public function createItem(Predicate $predic, string $connector = null): Item {
-        return new Item($predic, $connector);
+    public function createItem(Predicate $predic, string $connector = null): ConditionItem {
+        return new ConditionItem($predic, $connector);
     }
 
     /**
@@ -407,7 +408,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      * @return $this
      */
     public function and(string|int|array|Expression|Predicate $target = null, mixed ...$params): static {
-        return $this->append(Item::CONN_AND, ...func_get_args());
+        return $this->append(ConditionItem::CONN_AND, ...func_get_args());
     }
 
     /**
@@ -417,7 +418,7 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      * @return $this
      */
     public function or(string|int|array|Expression|Predicate $target = null, mixed ...$params): static {
-        return $this->append(Item::CONN_OR, ...func_get_args());
+        return $this->append(ConditionItem::CONN_OR, ...func_get_args());
     }
 
     /**
@@ -433,17 +434,17 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     }
 
     /**
-     * @param Item $item
+     * @param ConditionItem $item
      *
      * @return $this
      */
-    protected function _addItem(Item $item): static {
+    protected function _addItem(ConditionItem $item): static {
         $this->setItemNegation(false);
 
         // for backward compatibility (replace same condition)
         $predic = $item->predicate();
         $itemKey = null;
-        if ($predic instanceof Cmp && $item->connector() == Item::CONN_AND) {
+        if ($predic instanceof Cmp && $item->connector() == ConditionItem::CONN_AND) {
             $itemKey = $predic->leftExpr()->expressionId() . ' ' . $predic->operator();
         }
 

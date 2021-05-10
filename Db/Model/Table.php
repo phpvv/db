@@ -11,7 +11,7 @@
 namespace VV\Db\Model;
 
 use VV\Db\Sql;
-use VV\Db\Sql\Condition\Condition;
+use VV\Db\Sql\Condition;
 
 /**
  * Class Table
@@ -77,7 +77,7 @@ abstract class Table extends DataObject {
     /**
      * Creates Delete Query or immediately deletes rows by $condition
      *
-     * @param \VV\Db\Sql\Condition\Condition|array|string|int|null $condition Condition for immediately deletion
+     * @param \VV\Db\Sql\Condition|array|string|int|null $condition Condition for immediately deletion
      *
      * @return Sql\DeleteQuery|int Delete Query or number of deleted rows
      */

@@ -13,10 +13,10 @@ namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Model\Table;
 use VV\Db\Sql\Clauses\TableClauseItem as Item;
-use VV\Db\Sql\Condition\Condition;
-use VV\Db\Sql\Condition\Predicate;
+use VV\Db\Sql\Condition;
 use VV\Db\Sql\Expressions\DbObject;
 use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Sql\Predicates\Predicate;
 
 /**
  * Class Table
@@ -407,7 +407,7 @@ class TableClause extends ItemList {
         if (!$parentTableAlias) $parentTableAlias = $parentItem->table()->alias();
         if (!$parentField) $parentField = 'parent_id';
 
-        $on = new \VV\Db\Sql\Condition\Predicates\Compare(
+        $on = new \VV\Db\Sql\Predicates\Compare(
             DbObject::create("$alias.{$parentTblMdl->pk()}"),
             DbObject::create("$parentTableAlias.$parentField")
         );

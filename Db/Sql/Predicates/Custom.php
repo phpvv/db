@@ -8,7 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace VV\Db\Sql\Condition\Predicates;
+namespace VV\Db\Sql\Predicates;
 
 use VV\Db\Sql\Expressions\Expression;
 

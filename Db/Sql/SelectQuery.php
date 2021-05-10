@@ -52,7 +52,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     private ?Clauses\ColumnsClause $columnsClause = null;
     private ?Clauses\GroupByClause $groupByClause = null;
     private ?Clauses\OrderByClause $orderByClause = null;
-    private ?Condition\Condition $havingClause = null;
+    private ?Condition $havingClause = null;
     private ?Clauses\LimitClause $limitClause = null;
     private bool $distinctFlag = false;
     private bool $noCacheFlag = false;
@@ -264,8 +264,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * See {@link \VV\Db\Sql\Clauses\TableClause::left}
      *
      * @param Table|string $tbl
-     * @param string|null               $on
-     * @param string|null               $alias
+     * @param string|null  $on
+     * @param string|null  $alias
      *
      * @return $this
      */
@@ -279,8 +279,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * See {@link \VV\Db\Sql\Clauses\TableClause::right}
      *
      * @param Table|string $tbl
-     * @param string|null               $on
-     * @param string|null               $alias
+     * @param string|null  $on
+     * @param string|null  $alias
      *
      * @return $this
      */
@@ -294,8 +294,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * See {@link \VV\Db\Sql\Clauses\TableClause::full}
      *
      * @param Table|string $tbl
-     * @param string|null               $on
-     * @param string|null               $alias
+     * @param string|null  $on
+     * @param string|null  $alias
      *
      * @return $this
      */
@@ -309,8 +309,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * See {@link \VV\Db\Sql\Clauses\TableClause::joinBack}
      *
      * @param Table|string $tbl
-     * @param string|null               $ontbl
-     * @param string|null               $alias
+     * @param string|null  $ontbl
+     * @param string|null  $alias
      *
      * @return $this
      */
@@ -324,8 +324,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * See {@link \VV\Db\Sql\Clauses\TableClause::leftBack}
      *
      * @param Table|string $tbl
-     * @param string|null               $ontbl
-     * @param string|null               $alias
+     * @param string|null  $ontbl
+     * @param string|null  $alias
      *
      * @return $this
      */
@@ -367,9 +367,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
 
     /**
      * @param Table|SelectQuery|string $tbl
-     * @param string|\VV\Db\Sql\Condition\Condition $on
-     * @param string|null                           $group
-     * @param string|null                           $alias
+     * @param string|Condition         $on
+     * @param string|null              $group
+     * @param string|null              $alias
      *
      * @return $this
      */
@@ -379,9 +379,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
 
     /**
      * @param Table|SelectQuery|string $tbl
-     * @param string|\VV\Db\Sql\Condition\Condition $on
-     * @param string|null                           $group
-     * @param string|null                           $alias
+     * @param string|Condition         $on
+     * @param string|null              $group
+     * @param string|null              $alias
      *
      * @return $this
      */
@@ -641,9 +641,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Returns havingClause
      *
-     * @return \VV\Db\Sql\Condition\Condition
+     * @return Condition|null
      */
-    public function havingClause(): ?Condition\Condition {
+    public function havingClause(): ?Condition {
         if (!$this->havingClause) {
             $this->setHavingClause($this->createHavingClause());
         }
@@ -654,11 +654,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Sets havingClause
      *
-     * @param \VV\Db\Sql\Condition\Condition|null $havingClause
+     * @param Condition|null $havingClause
      *
      * @return $this
      */
-    public function setHavingClause(Condition\Condition $havingClause = null): static {
+    public function setHavingClause(Condition $havingClause = null): static {
         $this->havingClause = $havingClause;
 
         return $this;
@@ -667,9 +667,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Clears havingClause property and returns previous value
      *
-     * @return \VV\Db\Sql\Condition\Condition
+     * @return Condition
      */
-    public function clearHavingClause(): ?Condition\Condition {
+    public function clearHavingClause(): Condition {
         try {
             return $this->havingClause();
         } finally {
@@ -680,9 +680,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Creates default havingClause
      *
-     * @return \VV\Db\Sql\Condition\Condition
+     * @return Condition
      */
-    public function createHavingClause(): Condition\Condition {
+    public function createHavingClause(): Condition {
         return Sql::condition();
     }
 
@@ -691,7 +691,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return Clauses\OrderByClause
      */
-    public function orderByClause(): ?Clauses\OrderByClause {
+    public function orderByClause(): Clauses\OrderByClause {
         if (!$this->orderByClause) {
             $this->setOrderByClause($this->createOrderByClause());
         }
@@ -717,7 +717,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return Clauses\OrderByClause
      */
-    public function clearOrderByClause(): ?Clauses\OrderByClause {
+    public function clearOrderByClause(): Clauses\OrderByClause {
         try {
             return $this->orderByClause();
         } finally {

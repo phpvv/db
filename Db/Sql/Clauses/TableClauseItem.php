@@ -11,7 +11,7 @@ namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Model\DataObject;
 use VV\Db\Model\Table;
-use VV\Db\Sql\Condition\Condition;
+use VV\Db\Sql\Condition;
 use VV\Db\Sql\Expressions\DbObject;
 use VV\Db\Sql\Expressions\Expression;
 

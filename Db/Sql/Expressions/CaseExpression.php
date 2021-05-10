@@ -10,8 +10,8 @@
  */
 namespace VV\Db\Sql\Expressions;
 
-use VV\Db\Sql\Condition\Condition;
-use VV\Db\Sql\Condition\Predicate;
+use VV\Db\Sql\Condition;
+use VV\Db\Sql\Predicates\Predicate;
 
 /**
  * Class CaseExpr
@@ -140,8 +140,8 @@ class CaseExpression implements Expression {
     }
 
     /**
-     * @param \VV\Db\Sql\Condition\Condition $when
-     * @param Expression                     $then
+     * @param \VV\Db\Sql\Condition $when
+     * @param Expression           $then
      *
      * @return CaseExpressionThenItem
      */

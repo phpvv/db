@@ -11,17 +11,14 @@
 namespace VV\Db;
 
 use JetBrains\PhpStorm\Pure;
-use VV\Db\Sql\Condition\{
-    Condition,
-    Predicate,
-};
+use VV\Db\Sql\Condition;
+use VV\Db\Sql\Predicates\Predicate;
 use VV\Db\Sql\Expressions\{
     CaseExpression,
     DbObject,
     Expression,
     PlainSql,
-    SqlParam,
-};
+    SqlParam,};
 
 /**
  * Static class with factory methods
