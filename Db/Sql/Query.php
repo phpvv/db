@@ -14,10 +14,8 @@ use JetBrains\PhpStorm\Pure;
 use VV\Db\Connection;
 use VV\Db\Model\Table;
 use VV\Db\Result;
-use VV\Db\Sql;
 use VV\Db\Sql\Clauses\TableClause;
 use VV\Db\Sql\Expressions\Expression;
-use VV\Db\Sql\Predicates\Predicate;
 
 /**
  * Class Query
@@ -28,7 +26,6 @@ abstract class Query {
 
     private ?Connection $connection = null;
     private ?Clauses\TableClause $tableClause = null;
-    private ?Condition $whereClause = null;
     private ?string $hintClause = null;
 
     public function __construct(Connection $connection = null) {
@@ -56,18 +53,13 @@ abstract class Query {
     /**
      * Add from clause in sql
      *
-     * @param string|Table|TableClause|null $table
-     * @param string|null                   $alias
+     * @param string|Table|Expression $table
+     * @param string|null  $alias
      *
      * @return $this
      */
-    public function table(string|Table|TableClause $table = null, string $alias = null): static {
-        if (!$table) return $this;
-        if ($table instanceof TableClause) {
-            $this->setTableClause($table);
-        } else {
-            $this->tableClause()->setMainTable($table, $alias);
-        }
+    public function table(string|Table|Expression $table, string $alias = null): static {
+        $this->tableClause()->setMainTable($table, $alias);
 
         return $this;
     }
@@ -108,74 +100,6 @@ abstract class Query {
         if (!$alias) throw new \LogicException('Can\'t determine last table alias');
 
         return $alias;
-    }
-
-    /**
-     * Add `WHERE` clause
-     *
-     * @param string|int|array|Expression|Predicate|null $field
-     * @param mixed|array|Expression|null                $value
-     *
-     * @return $this
-     */
-    public function where(string|int|array|Expression|Predicate|null $field, mixed $value = null): static {
-        return $this->condintionAnd($this->whereClause(), ...func_get_args());
-    }
-
-    /**
-     * Add `WHERE pk_field=`
-     *
-     *
-     * @param string|int|Expression $id
-     *
-     * @return $this
-     */
-    public function whereId(string|int|Expression $id): static {
-        $this->where($this->mainTablePk(), $id);
-
-        return $this;
-    }
-
-    /**
-     * @param string|int|Expression $field
-     * @param mixed|Expression  ...$values
-     *
-     * @return $this
-     */
-    public function whereIn(string|int|Expression $field, ...$values): static {
-        $this->whereClause()->and($field)->in(...$values);
-
-        return $this;
-    }
-
-    /**
-     * @param string|int|Expression $field
-     * @param mixed|Expression  ...$values
-     *
-     * @return $this
-     */
-    public function whereNotIn(string|int|Expression $field, ...$values): static {
-        $this->whereClause()->and($field)->not->in(...$values);
-
-        return $this;
-    }
-
-    /**
-     * @param mixed|Expression ...$values
-     *
-     * @return $this
-     */
-    public function whereIdIn(mixed ...$values): static {
-        return $this->whereIn($this->mainTablePk(), ...$values);
-    }
-
-    /**
-     * @param mixed|Expression ...$values
-     *
-     * @return $this
-     */
-    public function whereIdNotIn(mixed ...$values): static {
-        return $this->whereNotIn($this->mainTablePk(), ...$values);
     }
 
     /**
@@ -242,49 +166,6 @@ abstract class Query {
     }
 
     /**
-     * @return Condition
-     */
-    public function whereClause(): Condition {
-        if (!$this->whereClause) {
-            $this->setWhereClause($this->createWhereClause());
-        }
-
-        return $this->whereClause;
-    }
-
-    /**
-     * @param Condition|null $whereClause
-     *
-     * @return $this
-     */
-    public function setWhereClause(?Condition $whereClause): static {
-        $this->whereClause = $whereClause;
-
-        return $this;
-    }
-
-    /**
-     * Clears whereClause property and returns previous value
-     *
-     * @return Condition
-     */
-    public function clearWhereClause(): Condition {
-        try {
-            return $this->whereClause();
-        } finally {
-            $this->setWhereClause(null);
-        }
-    }
-
-    /**
-     * @return Condition
-     */
-    public function createWhereClause(): Condition {
-        return Sql::condition();
-    }
-
-
-    /**
      * @return string|null
      * todo: reconsider hints uasge
      */
@@ -334,29 +215,6 @@ abstract class Query {
         }
 
         return $connection;
-    }
-
-    protected function condintionAnd(
-        Condition $condition,
-        string|int|array|Expression|Predicate|null $field,
-        mixed $value = null
-    ): static {
-        if ($field) {
-            if (is_array($field)) {
-                $condition->and($field);
-            } elseif ($field instanceof Condition) {
-                $condition->and($field);
-            } else {
-                if (func_num_args() < 3) $value = [];
-                if (is_array($value)) {
-                    $condition->and($field)->custom(...$value);
-                } else {
-                    $condition->and($field, $value);
-                }
-            }
-        }
-
-        return $this;
     }
 
     /**

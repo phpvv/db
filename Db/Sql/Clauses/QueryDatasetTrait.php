@@ -14,11 +14,11 @@ use JetBrains\PhpStorm\Pure;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
- * Trait DatasetFieldTrait
+ * Trait QueryDatasetTrait
  *
  * @package VV\Db\Sql\Clauses
  */
-trait DatasetFieldTrait {
+trait QueryDatasetTrait {
 
     private ?DatasetClause $datasetClause = null;
 

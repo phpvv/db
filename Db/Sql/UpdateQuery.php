@@ -10,7 +10,8 @@
  */
 namespace VV\Db\Sql;
 
-use VV\Db\Sql\Clauses\DatasetFieldTrait;
+use VV\Db\Sql\Clauses\QueryDatasetTrait;
+use VV\Db\Sql\Clauses\QueryWhereTrait;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
@@ -20,7 +21,8 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class UpdateQuery extends ModificatoryQuery {
 
-    use DatasetFieldTrait;
+    use QueryDatasetTrait;
+    use QueryWhereTrait;
 
     public const C_TABLE = 0x01,
         C_DATASET = 0x02,

@@ -24,11 +24,11 @@ class DeleteTablesClause extends ItemList {
     /**
      * Add field(s)
      *
-     * @param string|\VV\Db\Sql\Expressions\Expression ...$tables
+     * @param string|Expression ...$tables
      *
      * @return $this
      */
-    public function add(...$tables): static {
+    public function add(string|Expression ...$tables): static {
         if (!$tables) return $this;
 
         foreach ($tables as $i => $tbl) {

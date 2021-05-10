@@ -11,7 +11,7 @@
  */
 namespace VV\Db\Sql;
 
-use VV\Db\Sql\Clauses\DatasetFieldTrait;
+use VV\Db\Sql\Clauses\QueryDatasetTrait;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
@@ -26,7 +26,7 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class InsertQuery extends ModificatoryQuery {
 
-    use DatasetFieldTrait;
+    use QueryDatasetTrait;
 
     public const C_DATASET = 0x01,
         C_FIELDS = 0x02,

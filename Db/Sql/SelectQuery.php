@@ -16,11 +16,11 @@ use VV\Db\Model\Table;
 use VV\Db\Sql;
 use VV\Db\Sql\Clauses\{
     ColumnsClause,
-    TableClause,
     GroupByClause,
-    OrderByClause,
     LimitClause,
-};
+    OrderByClause,
+    TableClause,
+    QueryWhereTrait};
 use VV\Db\Sql\Expressions\Expression;
 use VV\Db\Sql\Predicates\Predicate;
 
@@ -42,6 +42,7 @@ use VV\Db\Sql\Predicates\Predicate;
 class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
 
     use Expressions\AliasFieldTrait;
+    use QueryWhereTrait;
 
     public const C_COLUMNS = 0x01,
         C_TABLE = 0x02,

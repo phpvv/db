@@ -191,7 +191,7 @@ class TableClause extends ItemList {
         return ($table = $this->tableModel($alias)) ? $table->pk() : null;
     }
 
-    public function setMainTable($table, $alias = null): static {
+    public function setMainTable(string|Table|Expression $table, string $alias = null): static {
         $this->items = [];
         $this->mainItem = null;
         $this->add($table, null, $alias);
@@ -351,7 +351,13 @@ class TableClause extends ItemList {
         return $this->setLastItem($item);
     }
 
-    public function createItem($table, $alias = null): Item {
+    /**
+     * @param string|Table|Expression $table
+     * @param string|null             $alias
+     *
+     * @return Item
+     */
+    public function createItem(string|Table|Expression $table, string $alias = null): Item {
         return new Item($table, $alias);
     }
 

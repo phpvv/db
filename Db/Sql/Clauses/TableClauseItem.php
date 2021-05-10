@@ -37,13 +37,13 @@ class TableClauseItem {
     /**
      * Item constructor.
      *
-     * @param string|Expression|Table $table
+     * @param string|Table|Expression $table
      * @param string|null             $alias
      * @param Condition|null          $joinOn
      * @param string|null             $joinType
      */
     public function __construct(
-        string|Expression|Table $table,
+        string|Table|Expression $table,
         string $alias = null,
         Condition $joinOn = null,
         string $joinType = null
