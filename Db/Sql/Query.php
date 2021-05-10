@@ -83,8 +83,8 @@ abstract class Query {
      *
      * @return $this
      */
-    public function a(string $alias): static {
-        $this->tableClause()->a($alias);
+    public function mainTableAs(string $alias): static {
+        $this->tableClause()->mainTableAs($alias);
 
         return $this;
     }
@@ -123,7 +123,7 @@ abstract class Query {
      * @return $this
      */
     public function where(string|int|array|Expression|Predicate|null $field, mixed $value = null): static {
-        return $this->condAnd($this->whereClause(), ...func_get_args());
+        return $this->condintionAnd($this->whereClause(), ...func_get_args());
     }
 
     /**
@@ -329,12 +329,6 @@ abstract class Query {
         return $this->connectionOrThrow()->prepare($this);
     }
 
-    final protected function nonEmptyClause(Clauses\Clause $clause): ?Clauses\Clause {
-        if ($clause->isEmpty()) return null;
-
-        return $clause;
-    }
-
     /**
      * @return Connection|null
      */
@@ -346,7 +340,7 @@ abstract class Query {
         return $connection;
     }
 
-    protected function condAnd(
+    protected function condintionAnd(
         Condition $condition,
         string|int|array|Expression|Predicate|null $field,
         mixed $value = null

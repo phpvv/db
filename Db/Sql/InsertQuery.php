@@ -28,7 +28,7 @@ class InsertQuery extends ModificatoryQuery {
 
     use DatasetFieldTrait;
 
-    const C_DATASET = 0x01,
+    public const C_DATASET = 0x01,
         C_FIELDS = 0x02,
         C_VALUES = 0x04,
         C_ONDUPKEY = 0x08,
@@ -48,9 +48,6 @@ class InsertQuery extends ModificatoryQuery {
 
     public function __get($var): mixed {
         return match ($var) {
-            'dataset' => $this->nonEmptyClause($this->datasetClause()),
-            'fields' => $this->nonEmptyClause($this->fieldsClause()),
-            'values' => $this->nonEmptyClause($this->valuesClause()),
             'insertedId' => $this->insertedId(),
             default => parent::__get($var),
         };

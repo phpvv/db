@@ -92,12 +92,12 @@ class ColumnsClause extends ColumnList {
     }
 
     /**
-     * @param TableClause $tableClause
+     * @param TableClause|null $clause
      *
      * @return $this
      */
-    public function setTableClause(TableClause $tableClause): static {
-        $this->tableClause = $tableClause;
+    public function setTableClause(?TableClause $clause): static {
+        $this->tableClause = $clause;
 
         return $this;
     }

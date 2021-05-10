@@ -308,7 +308,12 @@ class TableClause extends ItemList {
         return $this->_joinParent($alias, $onTable, $parentField, Item::J_LEFT);
     }
 
-    public function a($alias): static {
+    /**
+     * @param string $alias
+     *
+     * @return $this
+     */
+    public function mainTableAs(string $alias): static {
         $mainItem = $this->mainItem();
         $mainItem->table()->as($alias);
         array_shift($this->items);
@@ -317,6 +322,9 @@ class TableClause extends ItemList {
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
     public function aliases(): array {
         return array_keys($this->items);
     }

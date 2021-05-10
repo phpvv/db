@@ -463,7 +463,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * @return SelectQuery
      */
     public function having($field, $value = null): SelectQuery {
-        return $this->condAnd($this->havingClause(), ...func_get_args());
+        return $this->condintionAnd($this->havingClause(), ...func_get_args());
     }
 
     /**

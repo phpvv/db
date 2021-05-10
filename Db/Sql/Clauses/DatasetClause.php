@@ -22,10 +22,8 @@ use VV\Db\Sql\Expressions\Expression;
 class DatasetClause extends ItemList {
 
     /**
-     * @ussed
-     *
-     * @param string|iterable|\VV\Db\Sql\Expressions\Expression    $field
-     * @param mixed|\VV\Db\Sql\Expressions\Expression|\VV\Db\Param $value
+     * @param iterable|string|Expression $field
+     * @param mixed|null                 $value
      *
      * @return $this
      */

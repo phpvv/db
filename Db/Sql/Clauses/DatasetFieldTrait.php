@@ -10,6 +10,9 @@
  */
 namespace VV\Db\Sql\Clauses;
 
+use JetBrains\PhpStorm\Pure;
+use VV\Db\Sql\Expressions\Expression;
+
 /**
  * Trait DatasetFieldTrait
  *
@@ -17,18 +20,17 @@ namespace VV\Db\Sql\Clauses;
  */
 trait DatasetFieldTrait {
 
-    private DatasetClause $datasetClause;
+    private ?DatasetClause $datasetClause = null;
 
     /**
      * Add set
      *
-     * @param string|array|\VV\Db\Sql\SelectQuery $field
-     * @param mixed                               $value
-     * @param bool                                $isExp
+     * @param iterable|string|Expression $field
+     * @param mixed|null                 $value
      *
      * @return $this
      */
-    public function set($field, $value = false) {
+    public function set(iterable|string|Expression $field, mixed $value = null): static {
         $this->datasetClause()->add(...func_get_args());
 
         return $this;
@@ -37,7 +39,7 @@ trait DatasetFieldTrait {
     /**
      * @return DatasetClause
      */
-    public function datasetClause() {
+    public function datasetClause(): DatasetClause {
         if (!$this->datasetClause) {
             $this->setDatasetClause($this->createDatasetClause());
         }
@@ -46,12 +48,12 @@ trait DatasetFieldTrait {
     }
 
     /**
-     * @param DatasetClause $datasetClause
+     * @param DatasetClause|null $clause
      *
      * @return $this
      */
-    public function setDatasetClause(DatasetClause $datasetClause) {
-        $this->datasetClause = $datasetClause;
+    public function setDatasetClause(?DatasetClause $clause): static {
+        $this->datasetClause = $clause;
 
         return $this;
     }
@@ -61,7 +63,7 @@ trait DatasetFieldTrait {
      *
      * @return DatasetClause
      */
-    public function clearDatasetClause() {
+    public function clearDatasetClause(): DatasetClause {
         try {
             return $this->datasetClause();
         } finally {
@@ -72,7 +74,8 @@ trait DatasetFieldTrait {
     /**
      * @return DatasetClause
      */
-    public function createDatasetClause() {
+    #[Pure]
+    public function createDatasetClause(): DatasetClause {
         return new DatasetClause;
     }
 }

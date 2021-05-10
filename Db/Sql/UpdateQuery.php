@@ -11,6 +11,7 @@
 namespace VV\Db\Sql;
 
 use VV\Db\Sql\Clauses\DatasetFieldTrait;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class Update
@@ -21,30 +22,24 @@ class UpdateQuery extends ModificatoryQuery {
 
     use DatasetFieldTrait;
 
-    const C_TABLE = 0x01,
+    public const C_TABLE = 0x01,
         C_DATASET = 0x02,
         C_WHERE = 0x04,
         C_RETURN_INTO = 0x08,
         C_HINT = 0x10;
 
-    public function __get($var): mixed {
-        if ($var == 'set')
-            return $this->nonEmptyClause($this->datasetClause());
-
-        return parent::__get($var);
-    }
-
     /**
      * Sets to null all fields in argument list
      *
-     * @param array $fields
+     * @param string|Expression ...$fields
      *
      * @return $this
      */
-    public function setNull(...$fields) {
+    public function setNull(string|Expression ...$fields): static {
         return $this->set(array_fill_keys($fields, null));
     }
 
+    /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
     protected function nonEmptyClausesMap(): array {
         return [
             self::C_TABLE => $this->tableClause(),
