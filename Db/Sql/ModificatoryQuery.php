@@ -10,18 +10,22 @@
  */
 namespace VV\Db\Sql;
 
+use JetBrains\PhpStorm\Pure;
+use VV\Db\Param;
+use VV\Db\Result;
+use VV\Db\Sql\Clauses\ReturnIntoClause;
+use VV\Db\Sql\Expressions\Expression;
 use VV\Db\Transaction;
 
 /**
- * Class Modify
+ * Class Statement
  *
- * @package VV\Db\Sql\Query
- *
+ * @package VV\Db\Sql
  * @property-read int $affectedRows Execute query and return number of rows affected during query execute
  */
-abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
+abstract class ModificatoryQuery extends Query {
 
-    protected ?Clauses\ReturnIntoClause $returnIntoClause = null;
+    protected ?ReturnIntoClause $returnIntoClause = null;
 
     public function __get($var): mixed {
         return match ($var) {
@@ -33,20 +37,22 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
     /**
      * Add `RETURNING INTO` clause (only for oracle)
      *
-     * @param string|array|\Traversable|\VV\Db\Sql\Expressions\Expression $field
-     * @param mixed|\VV\Db\Param                                          $param
-     * @param int|null                                                    $type \VV\Db\P::T_...
-     * @param string|null                                                 $name
-     * @param int|null                                                    $size Size of variable in bytes
+     * @param string|iterable|Expression $field
+     * @param mixed|Param                $param
+     * @param int|null                   $type \VV\Db\P::T_...
+     * @param string|null                $name
+     * @param int|null                   $size Size of variable in bytes
      *
      * @return $this
      */
-    public function returnInto($field, &$param = null, $type = null, $name = null, $size = null): self {
-        if ($field instanceof Clauses\ReturnIntoClause) {
-            $this->setReturnIntoClause($field);
-        } else {
-            $this->returnIntoClause()->add($field, $param, $type, $name, $size);
-        }
+    public function returnInto(
+        string|iterable|Expression $field,
+        mixed &$param = null,
+        int $type = null,
+        string $name = null,
+        int $size = null
+    ): static {
+        $this->returnIntoClause()->add($field, $param, $type, $name, $size);
 
         return $this;
     }
@@ -54,9 +60,9 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
     /**
      * Returns returnIntoClause
      *
-     * @return Clauses\ReturnIntoClause
+     * @return ReturnIntoClause
      */
-    public function returnIntoClause(): Clauses\ReturnIntoClause {
+    public function returnIntoClause(): ReturnIntoClause {
         if (!$this->returnIntoClause) {
             $this->setReturnIntoClause($this->createReturnIntoClause());
         }
@@ -67,11 +73,11 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
     /**
      * Sets returnIntoClause
      *
-     * @param Clauses\ReturnIntoClause|null $returnIntoClause
+     * @param ReturnIntoClause|null $returnIntoClause
      *
      * @return $this
      */
-    public function setReturnIntoClause(Clauses\ReturnIntoClause $returnIntoClause = null): self {
+    public function setReturnIntoClause(?ReturnIntoClause $returnIntoClause): static {
         $this->returnIntoClause = $returnIntoClause;
 
         return $this;
@@ -80,9 +86,9 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
     /**
      * Clears returnIntoClause property and returns previous value
      *
-     * @return Clauses\ReturnIntoClause
+     * @return ReturnIntoClause
      */
-    public function clearReturnIntoClause(): Clauses\ReturnIntoClause {
+    public function clearReturnIntoClause(): ReturnIntoClause {
         try {
             return $this->returnIntoClause();
         } finally {
@@ -93,10 +99,11 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
     /**
      * Creates default returnIntoClause
      *
-     * @return Clauses\ReturnIntoClause
+     * @return ReturnIntoClause
      */
-    public function createReturnIntoClause(): Clauses\ReturnIntoClause {
-        return new Clauses\ReturnIntoClause;
+    #[Pure]
+    public function createReturnIntoClause(): ReturnIntoClause {
+        return new ReturnIntoClause;
     }
 
     /**
@@ -104,11 +111,12 @@ abstract class ModificatoryQuery extends \VV\Db\Sql\Query {
      *
      * @param Transaction|null $transaction
      *
-     * @return \VV\Db\Result
+     * @return Result
      */
-    public function exec(Transaction $transaction = null): \VV\Db\Result {
-        if ($transaction) $this->setConnection($transaction->connection());
-        elseif ($this->connection()->isInTransaction()) {
+    public function exec(Transaction $transaction = null): Result {
+        if ($transaction) {
+            $this->setConnection($transaction->connection());
+        } elseif ($this->connection()->isInTransaction()) {
             throw new \LogicException('Statement execution outside current transaction');
         }
 
