@@ -56,13 +56,13 @@ class InsertQuery extends ModificatoryQuery {
     /**
      * Add `INTO` clause in sql
      *
-     * @param string|\VV\Db\Model\Table $tbl
+     * @param string|\VV\Db\Model\Table $table
      * @param string|null               $alias
      *
      * @return $this
      */
-    public function into($tbl, string $alias = null): static {
-        return $this->table($tbl, $alias);
+    public function into($table, string $alias = null): static {
+        return $this->table($table, $alias);
     }
 
     /**

@@ -258,12 +258,12 @@ class TableClause extends ItemList {
      * Adds (INNER) JOIN clause backward
      *
      * @param string|Table|Expression $table
-     * @param null                    $onTable
+     * @param string|null             $onTable
      * @param string|null             $alias
      *
      * @return $this
      */
-    public function joinBack(string|Table|Expression $table, $onTable = null, string $alias = null): static {
+    public function joinBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static {
         return $this->_joinBack($table, $onTable, $alias);
     }
 
@@ -445,7 +445,7 @@ class TableClause extends ItemList {
 
     /**
      * @param string|array|Condition|Predicate $on
-     * @param Item                  $item
+     * @param Item                             $item
      *
      * @return Condition
      */

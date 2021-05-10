@@ -11,10 +11,18 @@
  */
 namespace VV\Db\Sql;
 
+use JetBrains\PhpStorm\Pure;
 use VV\Db\Model\Table;
 use VV\Db\Sql;
-use VV\Db\Sql\Clauses\TableClause;
+use VV\Db\Sql\Clauses\{
+    ColumnsClause,
+    TableClause,
+    GroupByClause,
+    OrderByClause,
+    LimitClause,
+};
 use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Sql\Predicates\Predicate;
 
 /**
  * Class SelectQuery
@@ -49,11 +57,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
 
     protected const MAX_RESULT_FIELD_NAME_LEN = 30;
 
-    private ?Clauses\ColumnsClause $columnsClause = null;
-    private ?Clauses\GroupByClause $groupByClause = null;
-    private ?Clauses\OrderByClause $orderByClause = null;
+    private ?ColumnsClause $columnsClause = null;
+    private ?GroupByClause $groupByClause = null;
+    private ?OrderByClause $orderByClause = null;
     private ?Condition $havingClause = null;
-    private ?Clauses\LimitClause $limitClause = null;
+    private ?LimitClause $limitClause = null;
     private bool $distinctFlag = false;
     private bool $noCacheFlag = false;
     private string|bool $forUpdateClause = false;
@@ -246,147 +254,157 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     }
 
     /**
-     * See {@link TableClause::join}
+     * INNER JOIN.  See {@link TableClause::join}
      *
-     * @param Table|string $table
-     * @param string|null  $on
-     * @param string|null  $alias
+     * @param string|Table|Expression     $table
+     * @param string|array|Condition|null $on
+     * @param string|null                 $alias
      *
      * @return $this
      */
-    public function join(string|Table|TableClause $table, string $on = null, $alias = null): static {
+    public function join(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
         $this->tableClause()->join($table, $on, $alias);
 
         return $this;
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\TableClause::left}
+     * LEFT JOIN. See {@link TableClause::left}
      *
-     * @param Table|string $tbl
-     * @param string|null  $on
-     * @param string|null  $alias
+     * @param string|Table|Expression     $table
+     * @param string|array|Condition|null $on
+     * @param string|null                 $alias
      *
      * @return $this
      */
-    public function left($tbl, $on = null, $alias = null): static {
-        $this->tableClause()->left($tbl, $on, $alias);
+    public function left(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+        $this->tableClause()->left($table, $on, $alias);
 
         return $this;
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\TableClause::right}
+     * RIGHT JOIN. See {@link TableClause::right}
      *
-     * @param Table|string $tbl
-     * @param string|null  $on
-     * @param string|null  $alias
+     * @param string|Table|Expression     $table
+     * @param string|array|Condition|null $on
+     * @param string|null                 $alias
      *
      * @return $this
      */
-    public function right($tbl, $on = null, $alias = null): static {
-        $this->tableClause()->right($tbl, $on, $alias);
+    public function right(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+        $this->tableClause()->right($table, $on, $alias);
 
         return $this;
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\TableClause::full}
+     * FULL JOIN. {@link TableClause::full}
      *
-     * @param Table|string $tbl
-     * @param string|null  $on
-     * @param string|null  $alias
+     * @param string|Table|Expression     $table
+     * @param string|array|Condition|null $on
+     * @param string|null                 $alias
      *
      * @return $this
      */
-    public function full($tbl, $on = null, $alias = null): static {
-        $this->tableClause()->full($tbl, $on, $alias);
+    public function full(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+        $this->tableClause()->full($table, $on, $alias);
 
         return $this;
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\TableClause::joinBack}
+     * See {@link TableClause::joinBack}
      *
-     * @param Table|string $tbl
-     * @param string|null  $ontbl
-     * @param string|null  $alias
+     * @param string|Table|Expression $table
+     * @param string|null             $onTable
+     * @param string|null             $alias
      *
      * @return $this
      */
-    public function joinBack($tbl, $ontbl = null, $alias = null): static {
-        $this->tableClause()->joinBack($tbl, $ontbl, $alias);
+    public function joinBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static {
+        $this->tableClause()->joinBack($table, $onTable, $alias);
 
         return $this;
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\TableClause::leftBack}
+     * See {@link TableClause::leftBack}
      *
-     * @param Table|string $tbl
-     * @param string|null  $ontbl
-     * @param string|null  $alias
+     * @param string|Table|Expression $table
+     * @param string|null             $onTable
+     * @param string|null             $alias
      *
      * @return $this
      */
-    public function leftBack($tbl, $ontbl = null, $alias = null): static {
-        $this->tableClause()->leftBack($tbl, $ontbl, $alias);
+    public function leftBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static {
+        $this->tableClause()->leftBack($table, $onTable, $alias);
 
         return $this;
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\TableClause::joinParent}
+     * See {@link TableClause::joinParent}
      *
      * @param string      $alias
-     * @param string|null $ontbl
+     * @param string|null $onTable
      * @param string|null $parentField Default - "parent_id"
      *
      * @return $this
      */
-    public function joinParent(string $alias, $ontbl = null, $parentField = null): static {
-        $this->tableClause()->joinParent($alias, $ontbl, $parentField);
+    public function joinParent(string $alias, string $onTable = null, string $parentField = null): static {
+        $this->tableClause()->joinParent($alias, $onTable, $parentField);
 
         return $this;
     }
 
     /**
-     * See {@link \VV\Db\Sql\Clauses\TableClause::leftParent}
+     * See {@link TableClause::leftParent}
      *
      * @param string      $alias
-     * @param string|null $ontbl
+     * @param string|null $onTable
      * @param string|null $parentField Default - "parent_id"
      *
      * @return $this
      */
-    public function leftParent(string $alias, $ontbl = null, $parentField = null): static {
-        $this->tableClause()->leftParent($alias, $ontbl, $parentField);
+    public function leftParent(string $alias, string $onTable = null, string $parentField = null): static {
+        $this->tableClause()->leftParent($alias, $onTable, $parentField);
 
         return $this;
     }
 
     /**
-     * @param Table|SelectQuery|string $tbl
-     * @param string|Condition         $on
-     * @param string|null              $group
-     * @param string|null              $alias
+     * @param Table|SelectQuery           $table
+     * @param string|array|Condition|null $on
+     * @param array|string|null           $group
+     * @param string|null                 $alias
      *
      * @return $this
      */
-    public function joinAsColumnsGroup($tbl, $on, string $group = null, string $alias = null): static {
-        return $this->_joinAsColumnsGroup([$this, 'join'], $tbl, $on, $group, $alias);
+    public function joinAsColumnsGroup(
+        Table|SelectQuery $table,
+        string|array|Condition $on = null,
+        array|string $group = null,
+        string $alias = null,
+    ): static {
+        return $this->_joinAsColumnsGroup([$this, 'join'], $table, $on, $group, $alias);
     }
 
     /**
-     * @param Table|SelectQuery|string $tbl
-     * @param string|Condition         $on
-     * @param string|null              $group
-     * @param string|null              $alias
+     * @param Table|SelectQuery           $table
+     * @param string|array|Condition|null $on
+     * @param array|string|null           $group
+     * @param string|null                 $alias
      *
      * @return $this
      */
-    public function leftAsColumnsGroup($tbl, $on, string $group = null, string $alias = null): static {
-        return $this->_joinAsColumnsGroup([$this, 'left'], $tbl, $on, $group, $alias);
+    public function leftAsColumnsGroup(
+        Table|SelectQuery $table,
+        string|array|Condition $on = null,
+        array|string $group = null,
+        string $alias = null,
+    ): static {
+        return $this->_joinAsColumnsGroup([$this, 'left'], $table, $on, $group, $alias);
     }
 
     /**
@@ -444,11 +462,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Add from clause in sql
      *
-     * @param string|array $index
+     * @param array|string $index
      *
      * @return $this
      */
-    public function useIndex($index): static {
+    public function useIndex(array|string $index): static {
         $this->tableClause()->useIndex($index);
 
         return $this;
@@ -457,12 +475,12 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Add `HAVING` clause
      *
-     * @param Expression|string      $field
-     * @param Expression|array|mixed $value
+     * @param string|int|array|Expression|Predicate|null $field
+     * @param mixed                                      $value
      *
      * @return SelectQuery
      */
-    public function having($field, $value = null): SelectQuery {
+    public function having(string|int|array|Expression|Predicate|null $field, mixed $value = null): SelectQuery {
         return $this->condintionAnd($this->havingClause(), ...func_get_args());
     }
 
@@ -474,21 +492,10 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function limit(int $count, $offset = 0): static {
+    public function limit(int $count, int $offset = 0): static {
         $this->limitClause()->set($count, $offset);
 
         return $this;
-    }
-
-    /**
-     * @param null $flags
-     * @param null $decorator
-     *
-     * @return \VV\Db\Result
-     * @deprecated Use result method
-     */
-    public function query($flags = null, $decorator = null): \VV\Db\Result {
-        return $this->_result($flags, $decorator);
     }
 
     /**
@@ -506,9 +513,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * @param int      $index
      * @param int|null $flags
      *
-     * @return mixed|null
+     * @return mixed
      */
-    public function column(int $index = 0, $flags = null): mixed {
+    public function column(int $index = 0, int $flags = null): mixed {
         return $this->_result()->column($index, $flags);
     }
 
@@ -517,7 +524,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return array|null
      */
-    public function row($flags = null): ?array {
+    public function row(int $flags = null): ?array {
         return $this->_result()->row($flags);
     }
 
@@ -528,7 +535,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return array[]
      */
-    public function rows(int $flags = null, string $keyColumn = null, $decorator = null): array {
+    public function rows(int $flags = null, string $keyColumn = null, string|\Closure $decorator = null): array {
         return $this->_result()->rows($flags, $keyColumn, $decorator);
     }
 
@@ -538,16 +545,16 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return array
      */
-    public function assoc($keyColumn = null, $valueColumn = null): array {
+    public function assoc(string $keyColumn = null, string $valueColumn = null): array {
         return $this->_result()->assoc($keyColumn, $valueColumn);
     }
 
     /**
      * Returns columnsClause
      *
-     * @return Clauses\ColumnsClause
+     * @return ColumnsClause
      */
-    public function columnsClause(): ?Clauses\ColumnsClause {
+    public function columnsClause(): ColumnsClause {
         if (!$this->columnsClause) {
             $this->setColumnsClause($this->createColumnsClause());
         }
@@ -558,11 +565,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Sets columnsClause
      *
-     * @param Clauses\ColumnsClause|null $columnsClause
+     * @param ColumnsClause|null $columnsClause
      *
      * @return $this
      */
-    public function setColumnsClause(Clauses\ColumnsClause $columnsClause = null): static {
+    public function setColumnsClause(?ColumnsClause $columnsClause): static {
         $this->columnsClause = $columnsClause->setTableClause($this->tableClause());
 
         return $this;
@@ -571,9 +578,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Clears columnsClause property and returns previous value
      *
-     * @return Clauses\ColumnsClause
+     * @return ColumnsClause
      */
-    public function clearColumnsClause(): ?Clauses\ColumnsClause {
+    public function clearColumnsClause(): ColumnsClause {
         try {
             return $this->columnsClause();
         } finally {
@@ -584,18 +591,19 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Creates default columnsClause
      *
-     * @return Clauses\ColumnsClause
+     * @return ColumnsClause
      */
-    public function createColumnsClause(): Clauses\ColumnsClause {
-        return new Clauses\ColumnsClause;
+    #[Pure]
+    public function createColumnsClause(): ColumnsClause {
+        return new ColumnsClause;
     }
 
     /**
      * Returns groupByClause
      *
-     * @return Clauses\GroupByClause
+     * @return GroupByClause
      */
-    public function groupByClause(): ?Clauses\GroupByClause {
+    public function groupByClause(): GroupByClause {
         if (!$this->groupByClause) {
             $this->setGroupByClause($this->createGroupByClause());
         }
@@ -606,11 +614,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Sets groupByClause
      *
-     * @param Clauses\GroupByClause|null $groupByClause
+     * @param GroupByClause|null $groupByClause
      *
      * @return $this
      */
-    public function setGroupByClause(Clauses\GroupByClause $groupByClause = null): static {
+    public function setGroupByClause(?GroupByClause $groupByClause): static {
         $this->groupByClause = $groupByClause;
 
         return $this;
@@ -619,9 +627,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Clears groupByClause property and returns previous value
      *
-     * @return Clauses\GroupByClause
+     * @return GroupByClause
      */
-    public function clearGroupByClause(): ?Clauses\GroupByClause {
+    public function clearGroupByClause(): GroupByClause {
         try {
             return $this->groupByClause();
         } finally {
@@ -632,18 +640,19 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Creates default groupByClause
      *
-     * @return Clauses\GroupByClause
+     * @return GroupByClause
      */
-    public function createGroupByClause(): Clauses\GroupByClause {
-        return new Clauses\GroupByClause;
+    #[Pure]
+    public function createGroupByClause(): GroupByClause {
+        return new GroupByClause;
     }
 
     /**
      * Returns havingClause
      *
-     * @return Condition|null
+     * @return Condition
      */
-    public function havingClause(): ?Condition {
+    public function havingClause(): Condition {
         if (!$this->havingClause) {
             $this->setHavingClause($this->createHavingClause());
         }
@@ -658,7 +667,7 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function setHavingClause(Condition $havingClause = null): static {
+    public function setHavingClause(?Condition $havingClause): static {
         $this->havingClause = $havingClause;
 
         return $this;
@@ -689,9 +698,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Returns orderByClause
      *
-     * @return Clauses\OrderByClause
+     * @return OrderByClause
      */
-    public function orderByClause(): Clauses\OrderByClause {
+    public function orderByClause(): OrderByClause {
         if (!$this->orderByClause) {
             $this->setOrderByClause($this->createOrderByClause());
         }
@@ -702,11 +711,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Sets orderByClause
      *
-     * @param Clauses\OrderByClause|null $orderByClause
+     * @param OrderByClause|null $orderByClause
      *
      * @return $this
      */
-    public function setOrderByClause(Clauses\OrderByClause $orderByClause = null): static {
+    public function setOrderByClause(?OrderByClause $orderByClause): static {
         $this->orderByClause = $orderByClause;
 
         return $this;
@@ -715,9 +724,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Clears orderByClause property and returns previous value
      *
-     * @return Clauses\OrderByClause
+     * @return OrderByClause
      */
-    public function clearOrderByClause(): Clauses\OrderByClause {
+    public function clearOrderByClause(): OrderByClause {
         try {
             return $this->orderByClause();
         } finally {
@@ -728,18 +737,19 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Creates default orderByClause
      *
-     * @return Clauses\OrderByClause
+     * @return OrderByClause
      */
-    public function createOrderByClause(): Clauses\OrderByClause {
-        return new Clauses\OrderByClause;
+    #[Pure]
+    public function createOrderByClause(): OrderByClause {
+        return new OrderByClause;
     }
 
     /**
      * Returns limitClause
      *
-     * @return Clauses\LimitClause
+     * @return LimitClause
      */
-    public function limitClause(): ?Clauses\LimitClause {
+    public function limitClause(): LimitClause {
         if (!$this->limitClause) {
             $this->setLimitClause($this->createLimitClause());
         }
@@ -750,11 +760,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Sets limitClause
      *
-     * @param Clauses\LimitClause|null $limitClause
+     * @param LimitClause|null $limitClause
      *
      * @return $this
      */
-    public function setLimitClause(Clauses\LimitClause $limitClause = null): static {
+    public function setLimitClause(LimitClause $limitClause = null): static {
         $this->limitClause = $limitClause;
 
         return $this;
@@ -763,9 +773,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Clears limitClause property and returns previous value
      *
-     * @return Clauses\LimitClause
+     * @return LimitClause
      */
-    public function clearLimitClause(): ?Clauses\LimitClause {
+    public function clearLimitClause(): LimitClause {
         try {
             return $this->limitClause();
         } finally {
@@ -776,10 +786,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Creates default limitClause
      *
-     * @return Clauses\LimitClause
+     * @return LimitClause
      */
-    public function createLimitClause(): Clauses\LimitClause {
-        return new Clauses\LimitClause;
+    #[Pure]
+    public function createLimitClause(): LimitClause {
+        return new LimitClause;
     }
 
     /**
@@ -789,21 +800,23 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
         return $this->columnsClause()->resultFieldsMap();
     }
 
+    /**
+     * @inheritDoc
+     */
     public function expressionId(): string {
         return spl_object_hash($this);
     }
 
-    /**
-     * @param callable $joinClbc
-     * @param          $from
-     * @param null     $on
-     * @param null     $group
-     * @param null     $alias
-     *
-     * @return $this
-     */
-    protected function _joinAsColumnsGroup(callable $joinClbc, $from, $on = null, $group = null, $alias = null): static {
+    protected function _joinAsColumnsGroup(
+        callable $joinCallback,
+        Table|SelectQuery $from,
+        string|array|Condition $on = null,
+        array|string $group = null,
+        string $alias = null
+    ): static {
         if (!$group && $on) {
+            if (!is_string($on)) throw new \LogicException('$group not set and $on is not string');
+
             $namerx = Expressions\DbObject::NAME_RX;
             if (preg_match("/^$namerx\.($namerx)$", $on, $m)) {
                 $group = $m[1];
@@ -811,14 +824,16 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
         }
         if (!$alias) $alias = $group;
 
-        $joinClbc($from, $on, $alias);
+        $joinCallback($from, $on, $alias);
         $alias = $this->tableClause()->lastTableAlias();
 
         if (!is_array($group)) $group = [$group];
 
         if ($from instanceof Table) {
-            $this->addColumnsGroup($group, $alias, ...$from->fields()->names());
-        } elseif ($from instanceof SelectQuery) {
+            return $this->addColumnsGroup($group, $alias, ...$from->fields()->names());
+        }
+
+        if ($from instanceof SelectQuery) {
             $resultFields = $from->columnsClause()->resultFields();
             // todo: need review/refactoring
             if ($joinMap = $from->resultFieldsMap()) {
@@ -835,12 +850,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
 
                 $columnsClause->setResultFieldsMap($map);
             }
-            $this->addColumnsGroup($group, $alias, ...$resultFields);
-        } else {
-            throw new \InvalidArgumentException('Wrong $tbl type');
+
+            return $this->addColumnsGroup($group, $alias, ...$resultFields);
         }
 
-        return $this;
+        throw new \InvalidArgumentException('Wrong $table type');
     }
 
     protected function nonEmptyClausesMap(): array {

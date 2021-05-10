@@ -126,8 +126,8 @@ class InsertStringifier extends ModificatoryStringifier {
         $query = $this->insertQuery();
         $fieldsClause = $query->fieldsClause();
         if ($fieldsClause->isEmpty()) {
-            $mainTbl = $query->tableClause()->mainTableModel();
-            $fields = $mainTbl ? $mainTbl->fields()->names() : [];
+            $mainTable = $query->tableClause()->mainTableModel();
+            $fields = $mainTable ? $mainTable->fields()->names() : [];
         } else {
             $fields = $fieldsClause->items();
         }

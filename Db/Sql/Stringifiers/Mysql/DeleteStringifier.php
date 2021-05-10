@@ -19,21 +19,22 @@ use VV\Db\Sql;
  */
 class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier {
 
+    public function supportedClausesIds() {
+        return parent::supportedClausesIds() | \VV\Db\Sql\DeleteQuery::C_DEL_TABLES;
+    }
+
     protected function strDeleteClause(Sql\Clauses\DeleteTablesClause $tables, &$params) {
         $str = 'DELETE';
 
         if (!$tables->isEmpty()) {
             $tblstr = [];
             $exprStringifier = $this->exprStringifier();
-            foreach ($tables->items() as $item)
+            foreach ($tables->items() as $item) {
                 $tblstr[] = $exprStringifier->strSqlObj($item, $params);
+            }
             $str .= ' ' . implode(', ', $tblstr);
         }
 
         return $str;
-    }
-
-    public function supportedClausesIds() {
-        return parent::supportedClausesIds() | \VV\Db\Sql\DeleteQuery::C_DEL_TABLES;
     }
 }

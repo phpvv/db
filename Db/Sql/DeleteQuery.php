@@ -93,13 +93,13 @@ class DeleteQuery extends ModificatoryQuery {
     /**
      * Add from clause in sql
      *
-     * @param string|\VV\Db\Model\Table $tbl
+     * @param string|\VV\Db\Model\Table $table
      * @param string                    $alias
      *
      * @return $this
      */
-    public function from($tbl, $alias = null) {
-        return $this->table($tbl, $alias);
+    public function from($table, $alias = null) {
+        return $this->table($table, $alias);
     }
 
     protected function nonEmptyClausesMap(): array {

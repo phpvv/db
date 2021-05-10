@@ -191,8 +191,8 @@ abstract class QueryStringifier {
         }
 
         $owner = $field->owner();
-        $tblMdl = $tableClause->tableModelOrMain($owner ? $owner->name() : null);
-        if ($tblMdl) return $tblMdl->fields()->get($field->name());
+        $table = $tableClause->tableModelOrMain($owner ? $owner->name() : null);
+        if ($table) return $table->fields()->get($field->name());
 
         return null;
     }
@@ -236,19 +236,19 @@ abstract class QueryStringifier {
         $params = [];
         $useAlais = $this->useAliasForTable($table);
         foreach ($table->items() as $item) {
-            $tblNameStr = $this->strExpr($item->table(), $params, $useAlais);
+            $tableNameStr = $this->strExpr($item->table(), $params, $useAlais);
 
             // todo: reconsider (move to method or something else)
             if ($useidx = $item->useIndex()) {
-                $tblNameStr .= ' USE INDEX (' . (is_array($useidx) ? implode(', ', $useidx) : $useidx) . ') ';
+                $tableNameStr .= ' USE INDEX (' . (is_array($useidx) ? implode(', ', $useidx) : $useidx) . ') ';
             }
 
             if ($sql) {
                 $on = $condstr->buildConditionSql($item->joinOn());
 
-                $sql .= " {$item->joinType()} $tblNameStr ON ({$on->embed($params)})";
+                $sql .= " {$item->joinType()} $tableNameStr ON ({$on->embed($params)})";
             } else {
-                $sql = $tblNameStr;
+                $sql = $tableNameStr;
             }
         }
 

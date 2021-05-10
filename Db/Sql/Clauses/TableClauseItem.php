@@ -89,12 +89,12 @@ class TableClauseItem {
     }
 
     /**
-     * @param array|null $useIndex
+     * @param array|string|null $useIndex
      *
      * @return $this
      */
-    public function setUseIndex(?array $useIndex): static {
-        $this->useIndex = $useIndex;
+    public function setUseIndex(array|string|null $useIndex): static {
+        $this->useIndex = (array)$useIndex;
 
         return $this;
     }
