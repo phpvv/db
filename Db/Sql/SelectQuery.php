@@ -245,12 +245,12 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * Add from clause in sql
      *
-     * @param string|Table|TableClause $table
+     * @param string|Table|Expression $table
      * @param string|null              $alias
      *
      * @return $this
      */
-    public function from(string|Table|TableClause $table, string $alias = null): static {
+    public function from(string|Table|Expression $table, string $alias = null): static {
         return $this->table($table, $alias);
     }
 
