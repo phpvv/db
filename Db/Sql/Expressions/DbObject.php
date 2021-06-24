@@ -130,8 +130,8 @@ class DbObject implements Expressions\Expression {
      * @return static|null
      */
     public static function create(string|int|self $name, string|self $dfltOwner = null, bool $parseAlias = true): ?self {
-        if (!$name) throw new \InvalidArgumentException('DbObject Name is empty');
         if ($name instanceof static) return $name;
+        if ((string)$name == '') throw new \InvalidArgumentException('DbObject Name is empty');
 
         [$path, $alias] = static::parse((string)$name, $parseAlias);
         if (!$path) return null;
