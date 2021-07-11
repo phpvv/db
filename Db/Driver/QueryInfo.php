@@ -10,45 +10,35 @@
  */
 namespace VV\Db\Driver;
 
+use VV\Db\Exceptions\SqlSyntaxError;
+
 /**
  * Class QueryInfo
  *
  * @package VV\Db\Driver
  */
-class QueryInfo {
+class QueryInfo
+{
 
-    const T_SELECT = 'select',
+    public const T_SELECT = 'select',
         T_INSERT = 'insert',
         T_UPDATE = 'update',
         T_DELETE = 'delete',
         T_REPLACE = 'replace',
         T_MERGE = 'merge';
 
-    /**
-     * @var string
-     */
-    private $string;
+    private string $string;
+    private string $type;
+    private ?bool $isModificatory;
+    private ?array $resultFieldsMap;
 
-    /**
-     * @var string
-     */
-    private $type;
-
-    /**
-     * @var bool
-     */
-    private $isModificatory;
-
-    /**
-     * @var array
-     */
-    private $resultFieldsMap;
-
-    public function __construct($queryString, array $resultFieldsMap = null) {
+    public function __construct($queryString, array $resultFieldsMap = null)
+    {
         $this->string = $queryString;
 
-        if (!preg_match('/^(?:\s*\()?\s*([a-z]+)/i', $queryString, $m))
-            throw new \VV\Db\Exceptions\SqlSyntaxError('Can\'t determine sql type');
+        if (!preg_match('/^(?:\s*\()?\s*([a-z]+)/i', $queryString, $m)) {
+            throw new SqlSyntaxError('Can\'t determine sql type');
+        }
 
         $this->type = strtolower($m[1]);
         $this->isModificatory = null;
@@ -60,23 +50,27 @@ class QueryInfo {
     /**
      * @return string
      */
-    public function string() {
+    public function getString(): string
+    {
         return $this->string;
     }
 
     /**
      * @return string
      */
-    public function type() {
+    public function getType(): string
+    {
         return $this->type;
     }
 
     /**
      * @return bool
      */
-    public function isModificatory() {
-        if (null === $c = &$this->isModificatory)
+    public function isModificatory(): bool
+    {
+        if (null === $c = &$this->isModificatory) {
             $c = self::isModificatoryType($this->type);
+        }
 
         return $c;
     }
@@ -84,53 +78,61 @@ class QueryInfo {
     /**
      * @return bool
      */
-    public function isSelect() {
+    public function isSelect(): bool
+    {
         return $this->type == self::T_SELECT;
     }
 
     /**
      * @return bool
      */
-    public function isInsert() {
+    public function isInsert(): bool
+    {
         return $this->type == self::T_INSERT;
     }
 
     /**
      * @return bool
      */
-    public function isUpdate() {
+    public function isUpdate(): bool
+    {
         return $this->type == self::T_UPDATE;
     }
 
     /**
      * @return bool
      */
-    public function isDelete() {
+    public function isDelete(): bool
+    {
         return $this->type == self::T_DELETE;
     }
 
     /**
      * @return bool
      */
-    public function isReplace() {
+    public function isReplace(): bool
+    {
         return $this->type == self::T_REPLACE;
     }
 
     /**
      * @return bool
      */
-    public function isMerge() {
+    public function isMerge(): bool
+    {
         return $this->type == self::T_MERGE;
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function resultFieldsMap(): ?array {
+    public function getResultFieldsMap(): ?array
+    {
         return $this->resultFieldsMap;
     }
 
-    public static function isModificatoryType($type) {
+    public static function isModificatoryType($type): bool
+    {
         switch ($type) {
             case self::T_INSERT:
             case self::T_UPDATE:

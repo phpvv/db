@@ -19,7 +19,8 @@ use VV\Db\Sql\Expressions\Expression;
  * @package VV\Db\Sql\Clause
  * @method ReturnIntoClauseItem[] items():array
  */
-class ReturnIntoClause extends ItemList {
+class ReturnIntoClause extends ItemList
+{
 
     /**
      * @param iterable|string|Expression $expression
@@ -38,14 +39,16 @@ class ReturnIntoClause extends ItemList {
         int $size = null
     ): static {
         if (is_iterable($expression)) {
-            foreach ($expression as $k => &$v) $this->add($k, $v);
+            foreach ($expression as $k => &$v) {
+                $this->add($k, $v);
+            }
             unset($v);
 
             return $this;
         }
 
         $P = !$param instanceof Param
-            ? Param::ptr($type ?: Param::T_CHR, $param, $name, $size)
+            ? Param::getPointer($type ?: Param::T_CHR, $param, $name, $size)
             : $param;
 
         $item = $this->creteItem($expression, $P);
@@ -58,7 +61,8 @@ class ReturnIntoClause extends ItemList {
     /**
      * @return array
      */
-    public function split(): array {
+    public function split(): array
+    {
         $exprs = $params = [];
         foreach ($this->items() as $item) {
             $exprs[] = $item->expression();
@@ -74,7 +78,8 @@ class ReturnIntoClause extends ItemList {
      *
      * @return ReturnIntoClauseItem
      */
-    protected function creteItem(string|Expression $field, Param $param): ReturnIntoClauseItem {
+    protected function creteItem(string|Expression $field, Param $param): ReturnIntoClauseItem
+    {
         return new ReturnIntoClauseItem($field, $param);
     }
 }

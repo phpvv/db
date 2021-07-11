@@ -15,12 +15,10 @@ namespace VV\Db;
  *
  * @package VV\Db
  */
-final class Transaction {
-
+final class Transaction
+{
     private ?Connection $connection;
-
     private ?Driver\Connection $driverConnection;
-
     private bool $started = false;
 
     /**
@@ -29,7 +27,8 @@ final class Transaction {
      * @param Connection        $connection
      * @param Driver\Connection $driverConnection
      */
-    public function __construct(Connection $connection, Driver\Connection $driverConnection) {
+    public function __construct(Connection $connection, Driver\Connection $driverConnection)
+    {
         $this->connection = $connection;
         $this->driverConnection = $driverConnection;
     }
@@ -37,15 +36,19 @@ final class Transaction {
     /**
      * @return Connection
      */
-    public function connection(): Connection {
+    public function getConnection(): Connection
+    {
         return $this->connection;
     }
 
-    public function start(): self {
-        if ($this->started) throw new \LogicException('Transaction already started');
+    public function start(): self
+    {
+        if ($this->started) {
+            throw new \LogicException('Transaction already started');
+        }
         $this->throwIfFinished();
 
-        if ($this->connection->transaction() !== $this) {
+        if ($this->connection->getTransaction() !== $this) {
             throw new \LogicException('Improperly created Transaction. Please use Connection::startTransaction()');
         }
 
@@ -58,21 +61,24 @@ final class Transaction {
     /**
      * @return $this
      */
-    public function commit(): self {
+    public function commit(): self
+    {
         return $this->finish(true);
     }
 
     /**
      * @return $this
      */
-    public function rollback(): self {
+    public function rollback(): self
+    {
         return $this->finish(false);
     }
 
     /**
      * @return bool
      */
-    public function isFinished(): bool {
+    public function isFinished(): bool
+    {
         return !$this->connection;
     }
 
@@ -81,8 +87,11 @@ final class Transaction {
      *
      * @return $this
      */
-    private function finish(bool $commit): self {
-        if (!$this->started) throw new \LogicException('Transaction not started');
+    private function finish(bool $commit): self
+    {
+        if (!$this->started) {
+            throw new \LogicException('Transaction not started');
+        }
         $this->throwIfFinished();
 
         if ($commit) {
@@ -99,7 +108,8 @@ final class Transaction {
     /**
      * @return void
      */
-    private function throwIfFinished(): void {
+    private function throwIfFinished(): void
+    {
         if (!$this->connection) {
             throw new \LogicException('Transaction is already finished');
         }

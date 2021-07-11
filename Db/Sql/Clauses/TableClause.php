@@ -25,7 +25,8 @@ use VV\Db\Sql\Predicates\Predicate;
  * @package VV\Db\Sql\Clauses
  * @method Item[] items():array
  */
-class TableClause extends ItemList {
+class TableClause extends ItemList
+{
 
     private ?Item $mainItem = null;
     private ?Item $lastItem = null;
@@ -35,8 +36,11 @@ class TableClause extends ItemList {
      *
      * @return Item
      */
-    public function item(string $alias): Item {
-        if (!$this->hasItem($alias)) throw new \OutOfBoundsException("Item with alias '$alias' not found");
+    public function item(string $alias): Item
+    {
+        if (!$this->hasItem($alias)) {
+            throw new \OutOfBoundsException("Item with alias '$alias' not found");
+        }
 
         return $this->items()[$alias];
     }
@@ -44,8 +48,11 @@ class TableClause extends ItemList {
     /**
      * @return Item
      */
-    public function mainItem(): Item {
-        if (!$this->mainItem) throw new \LogicException('Main Item is not defined yet');
+    public function mainItem(): Item
+    {
+        if (!$this->mainItem) {
+            throw new \LogicException('Main Item is not defined yet');
+        }
 
         return $this->mainItem;
     }
@@ -53,8 +60,11 @@ class TableClause extends ItemList {
     /**
      * @return Item
      */
-    public function lastItem(): Item {
-        if (!$this->lastItem) throw new \LogicException('Last Item is not defined yet');
+    public function lastItem(): Item
+    {
+        if (!$this->lastItem) {
+            throw new \LogicException('Last Item is not defined yet');
+        }
 
         return $this->lastItem;
     }
@@ -64,7 +74,8 @@ class TableClause extends ItemList {
      *
      * @return bool
      */
-    public function hasItem(string $alias): bool {
+    public function hasItem(string $alias): bool
+    {
         return isset($this->items[$alias]);
     }
 
@@ -73,7 +84,8 @@ class TableClause extends ItemList {
      *
      * @return Item
      */
-    public function itemOrMain(string $alias): Item {
+    public function itemOrMain(string $alias): Item
+    {
         return $alias ? $this->item($alias) : $this->mainItem();
     }
 
@@ -82,7 +94,8 @@ class TableClause extends ItemList {
      *
      * @return Item
      */
-    public function itemOrLast(string $alias): Item {
+    public function itemOrLast(string $alias): Item
+    {
         return $alias ? $this->item($alias) : $this->lastItem();
     }
 
@@ -93,21 +106,24 @@ class TableClause extends ItemList {
      *
      * @return Table|null
      */
-    public function tableModel(string $alias): ?Table {
+    public function tableModel(string $alias): ?Table
+    {
         return $this->item($alias)->tableModel();
     }
 
     /**
      * @return Table|null
      */
-    public function mainTableModel(): ?Table {
+    public function mainTableModel(): ?Table
+    {
         return $this->mainItem()->tableModel();
     }
 
     /**
      * @return Table|null
      */
-    public function lastTableModel(): ?Table {
+    public function lastTableModel(): ?Table
+    {
         return $this->lastItem()->tableModel();
     }
 
@@ -118,7 +134,8 @@ class TableClause extends ItemList {
      *
      * @return Table|null
      */
-    public function tableModelOrMain(?string $alias): ?Table {
+    public function tableModelOrMain(?string $alias): ?Table
+    {
         return $alias
             ? $this->tableModel($alias)
             : $this->mainTableModel();
@@ -131,7 +148,8 @@ class TableClause extends ItemList {
      *
      * @return Table|null
      */
-    public function tableModelOrLast(string $alias): ?Table {
+    public function tableModelOrLast(string $alias): ?Table
+    {
         return $alias
             ? $this->tableModel($alias)
             : $this->lastTableModel();
@@ -140,14 +158,16 @@ class TableClause extends ItemList {
     /**
      * @return string|null
      */
-    public function mainTableAlias(): ?string {
+    public function mainTableAlias(): ?string
+    {
         return $this->mainItem()->table()->alias();
     }
 
     /**
      * @return string|null
      */
-    public function lastTableAlias(): ?string {
+    public function lastTableAlias(): ?string
+    {
         return $this->lastItem()->table()->alias();
     }
 
@@ -158,8 +178,9 @@ class TableClause extends ItemList {
      *
      * @return string|null
      */
-    public function tablePk(string $alias): ?string {
-        return ($table = $this->tableModel($alias)) ? $table->pk() : null;
+    public function tablePk(string $alias): ?string
+    {
+        return ($table = $this->tableModel($alias)) ? $table->getPk() : null;
     }
 
     /**
@@ -167,8 +188,9 @@ class TableClause extends ItemList {
      *
      * @return string|null
      */
-    public function mainTablePk(): ?string {
-        return ($table = $this->mainTableModel()) ? $table->pk() : null;
+    public function mainTablePk(): ?string
+    {
+        return ($table = $this->mainTableModel()) ? $table->getPk() : null;
     }
 
     /**
@@ -176,8 +198,9 @@ class TableClause extends ItemList {
      *
      * @return string|null
      */
-    public function lastTablePk(): ?string {
-        return ($lable = $this->lastTableModel()) ? $lable->pk() : null;
+    public function lastTablePk(): ?string
+    {
+        return ($lable = $this->lastTableModel()) ? $lable->getPk() : null;
     }
 
     /**
@@ -187,11 +210,13 @@ class TableClause extends ItemList {
      *
      * @return string|null
      */
-    public function pkByAlias(string $alias): ?string {
-        return ($table = $this->tableModel($alias)) ? $table->pk() : null;
+    public function pkByAlias(string $alias): ?string
+    {
+        return ($table = $this->tableModel($alias)) ? $table->getPk() : null;
     }
 
-    public function setMainTable(string|Table|Expression $table, string $alias = null): static {
+    public function setMainTable(string|Table|Expression $table, string $alias = null): static
+    {
         $this->items = [];
         $this->mainItem = null;
         $this->add($table, null, $alias);
@@ -208,7 +233,11 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    public function join(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+    public function join(
+        string|Table|Expression $table,
+        string|array|Condition $on = null,
+        string $alias = null
+    ): static {
         return $this->_join($table, $on, $alias);
     }
 
@@ -221,7 +250,11 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    public function left(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+    public function left(
+        string|Table|Expression $table,
+        string|array|Condition $on = null,
+        string $alias = null
+    ): static {
         return $this->_join($table, $on, $alias, Item::J_LEFT);
     }
 
@@ -234,7 +267,11 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    public function right(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+    public function right(
+        string|Table|Expression $table,
+        string|array|Condition $on = null,
+        string $alias = null
+    ): static {
         return $this->_join($table, $on, $alias, Item::J_RIGHT);
     }
 
@@ -247,7 +284,11 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    public function full(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+    public function full(
+        string|Table|Expression $table,
+        string|array|Condition $on = null,
+        string $alias = null
+    ): static {
         return $this->_join($table, $on, $alias, Item::J_FULL);
     }
 
@@ -263,7 +304,8 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    public function joinBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static {
+    public function joinBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static
+    {
         return $this->_joinBack($table, $onTable, $alias);
     }
 
@@ -276,7 +318,8 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    public function leftBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static {
+    public function leftBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static
+    {
         return $this->_joinBack($table, $onTable, $alias, Item::J_LEFT);
     }
 
@@ -292,7 +335,8 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    public function joinParent(string $alias, string $onTable = null, string $parentField = null): static {
+    public function joinParent(string $alias, string $onTable = null, string $parentField = null): static
+    {
         return $this->_joinParent($alias, $onTable, $parentField);
     }
 
@@ -305,7 +349,8 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    public function leftParent(string $alias, string $onTable = null, string $parentField = null): static {
+    public function leftParent(string $alias, string $onTable = null, string $parentField = null): static
+    {
         return $this->_joinParent($alias, $onTable, $parentField, Item::J_LEFT);
     }
 
@@ -314,7 +359,8 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    public function mainTableAs(string $alias): static {
+    public function mainTableAs(string $alias): static
+    {
         $mainItem = $this->mainItem();
         $mainItem->table()->as($alias);
         array_shift($this->items);
@@ -326,17 +372,20 @@ class TableClause extends ItemList {
     /**
      * @return string[]
      */
-    public function aliases(): array {
+    public function aliases(): array
+    {
         return array_keys($this->items);
     }
 
-    public function useIndex($index): static {
+    public function useIndex($index): static
+    {
         $this->lastItem()->setUseIndex($index);
 
         return $this;
     }
 
-    public function addItem(Item $item): static {
+    public function addItem(Item $item): static
+    {
         $alias = $item->table()->alias();
         if (!$alias) {
             throw new \InvalidArgumentException('Alias is not defined for table');
@@ -346,7 +395,9 @@ class TableClause extends ItemList {
         }
 
         $this->items[$alias] = $item;
-        if (!$this->mainItem) $this->setMainItem($item);
+        if (!$this->mainItem) {
+            $this->setMainItem($item);
+        }
 
         return $this->setLastItem($item);
     }
@@ -357,14 +408,16 @@ class TableClause extends ItemList {
      *
      * @return Item
      */
-    public function createItem(string|Table|Expression $table, string $alias = null): Item {
+    public function createItem(string|Table|Expression $table, string $alias = null): Item
+    {
         return new Item($table, $alias);
     }
 
     /**
      * @return Condition
      */
-    protected function createCondition(): Condition {
+    protected function createCondition(): Condition
+    {
         return \VV\Db\Sql::condition();
     }
 
@@ -373,7 +426,8 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    private function setMainItem(Item $firstItem): static {
+    private function setMainItem(Item $firstItem): static
+    {
         $this->mainItem = $firstItem;
 
         return $this;
@@ -384,45 +438,62 @@ class TableClause extends ItemList {
      *
      * @return $this
      */
-    private function setLastItem(Item $lastItem): static {
+    private function setLastItem(Item $lastItem): static
+    {
         $this->lastItem = $lastItem;
 
         return $this;
     }
 
-    private function _join($tbl, $on, $alias, $joinType = null): static {
-        if (!$this->items) throw new \LogicException('Main table does not set yet');
+    private function _join($tbl, $on, $alias, $joinType = null): static
+    {
+        if (!$this->items) {
+            throw new \LogicException('Main table does not set yet');
+        }
 
         return $this->add($tbl, $on, $alias, $joinType);
     }
 
-    private function _joinBack($table, $backTableAlias = null, $alias = null, $joinType = null): static {
+    private function _joinBack($table, $backTableAlias = null, $alias = null, $joinType = null): static
+    {
         $backItem = $this->itemOrLast($backTableAlias);
         $backTableModel = $backItem->tableModel();
-        if (!$backTableModel) throw new \LogicException('Can\'t determine pk field of relation table');
+        if (!$backTableModel) {
+            throw new \LogicException('Can\'t determine pk field of relation table');
+        }
 
-        if (!$backTableAlias) $backTableAlias = $backItem->table()->alias();
+        if (!$backTableAlias) {
+            $backTableAlias = $backItem->table()->alias();
+        }
 
-        return $this->_join($table, "$backTableAlias.{$backTableModel->pk()}", $alias, $joinType);
+        return $this->_join($table, "$backTableAlias.{$backTableModel->getPk()}", $alias, $joinType);
     }
 
-    private function _joinParent($alias, $parentTableAlias, $parentField, $joinType = null): static {
+    private function _joinParent($alias, $parentTableAlias, $parentField, $joinType = null): static
+    {
         $parentItem = $this->itemOrLast($parentTableAlias);
         $parentTblMdl = $parentItem->tableModel();
-        if (!$parentTblMdl) throw new \LogicException('Can\'t determine pk field of relation table');
+        if (!$parentTblMdl) {
+            throw new \LogicException('Can\'t determine pk field of relation table');
+        }
 
-        if (!$parentTableAlias) $parentTableAlias = $parentItem->table()->alias();
-        if (!$parentField) $parentField = 'parent_id';
+        if (!$parentTableAlias) {
+            $parentTableAlias = $parentItem->table()->alias();
+        }
+        if (!$parentField) {
+            $parentField = 'parent_id';
+        }
 
         $on = new ComparePredicate(
-            DbObject::create("$alias.{$parentTblMdl->pk()}"),
+            DbObject::create("$alias.{$parentTblMdl->getPk()}"),
             DbObject::create("$parentTableAlias.$parentField")
         );
 
         return $this->_join($parentTblMdl, $on, $alias, $joinType);
     }
 
-    private function add($table, $on = null, $alias = null, $joinType = null): static {
+    private function add($table, $on = null, $alias = null, $joinType = null): static
+    {
         $item = $this->createItem($table, $alias);
         if ($this->items) {
             $on = $this->prepareOnCondition($on, $item);
@@ -437,14 +508,19 @@ class TableClause extends ItemList {
      *
      * @return array|null
      */
-    private function parseCustomCompare(string $cmpstr): ?array {
+    private function parseCustomCompare(string $cmpstr): ?array
+    {
         $objs = explode('=', $cmpstr);
-        if (count($objs) != 2) return null;
+        if (count($objs) != 2) {
+            return null;
+        }
 
         $leftObj = DbObject::create($objs[0]);
         $rightObj = DbObject::create($objs[1]);
 
-        if ($leftObj && $rightObj) return [$leftObj, $rightObj];
+        if ($leftObj && $rightObj) {
+            return [$leftObj, $rightObj];
+        }
 
         return null;
     }
@@ -455,8 +531,11 @@ class TableClause extends ItemList {
      *
      * @return Condition
      */
-    private function prepareOnCondition(mixed $on, Item $item): Condition {
-        if ($on instanceof Condition) return $on;
+    private function prepareOnCondition(mixed $on, Item $item): Condition
+    {
+        if ($on instanceof Condition) {
+            return $on;
+        }
 
         $condition = $this->createCondition();
         if ($on instanceof Predicate) {
@@ -469,7 +548,9 @@ class TableClause extends ItemList {
 
         // todo: need comment with examples
         $lastItem = $this->lastItem();
-        if (!$on) $on = $lastItem->table()->alias();
+        if (!$on) {
+            $on = $lastItem->table()->alias();
+        }
 
         /** @var DbObject $rightField */
         $rightField = null;
@@ -490,7 +571,7 @@ class TableClause extends ItemList {
                         throw new \LogicException('Can\'t determine previous table PK field');
                     }
 
-                    $rightField = $rightField->createChild($tableModel->pk());
+                    $rightField = $rightField->createChild($tableModel->getPk());
                 }
             }
         }

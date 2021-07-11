@@ -15,7 +15,7 @@ namespace VV\Db\Model;
  *
  * @package VV\Db\Model
  */
-abstract class View extends DataObject {
-
-    const DFLT_PREFIXES = ['vw_', 'v_'];
+abstract class View extends DataObject
+{
+    public const DFLT_PREFIXES = ['vw_', 'v_'];
 }

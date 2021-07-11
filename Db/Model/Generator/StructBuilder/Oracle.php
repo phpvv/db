@@ -18,24 +18,26 @@ use VV\Db\Model\Generator\ObjectInfo;
  *
  * @package VV\Db\ModelGenerator\StructBuilder
  */
-class Oracle implements \VV\Db\Model\Generator\StructBuilder {
+class Oracle implements \VV\Db\Model\Generator\StructBuilder
+{
 
-    public function objectIterator(\VV\Db\Connection $connection): iterable {
+    public function objectIterator(\VV\Db\Connection $connection): iterable
+    {
         // todo: variable to properties and setters
         $tblPrefix = 'tbl_';
         $vwPrefix = 'vw_';
 
         $tables = $connection->query(
             <<<SQL
-SELECT object_id, object_name 
-FROM user_objects 
-WHERE 
-    object_type IN ('TABLE', 'VIEW') 
+SELECT object_id, object_name
+FROM user_objects
+WHERE
+    object_type IN ('TABLE', 'VIEW')
     AND (
         object_name LIKE '$tblPrefix%'
-        OR 
+        OR
         object_name LIKE '$vwPrefix%'
-    ) 
+    )
 SQL
         )->assoc;
 
@@ -56,12 +58,13 @@ SQL
                 FROM all_constraints cons, all_cons_columns cols
                 WHERE cols.table_name = :p1 AND cons.constraint_type = \'P\' AND cons.owner = :p2 AND
                       cons.constraint_name = cols.constraint_name AND cons.owner = cols.owner
-                ORDER BY cols.table_name, cols.position', [$table, $connection->user()]
+                ORDER BY cols.table_name, cols.position',
+                [$table, $connection->getUser()]
             )->assoc;
 
             $result = $connection->query(
                 'SELECT column_name, data_type, data_length, data_precision, data_scale, data_default, nullable FROM all_tab_columns WHERE table_name = :p1 AND owner = :p2 ORDER BY column_id',
-                [$table, $connection->user()]
+                [$table, $connection->getUser()]
             );
 
             foreach ($result as $row) {

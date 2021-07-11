@@ -19,7 +19,8 @@ use VV\Db\Sql\Expressions\Expression;
  * @package VV\Db\Sql\Clauses
  * @method \VV\Db\Sql\Clauses\DatasetClauseItem[] items():array
  */
-class DatasetClause extends ItemList {
+class DatasetClause extends ItemList
+{
 
     /**
      * @param iterable|string|Expression $field
@@ -27,7 +28,8 @@ class DatasetClause extends ItemList {
      *
      * @return $this
      */
-    public function add(iterable|string|Expression $field, mixed $value = null): static {
+    public function add(iterable|string|Expression $field, mixed $value = null): static
+    {
         if ($field) {
             if (is_iterable($field)) {
                 foreach ($field as $k => $v) {
@@ -56,7 +58,8 @@ class DatasetClause extends ItemList {
      *
      * @return array
      */
-    public function split(): array {
+    public function split(): array
+    {
         $fields = $values = [];
         foreach ($this->items() as $item) {
             $fields[] = $item->field();
@@ -69,7 +72,8 @@ class DatasetClause extends ItemList {
     /**
      * @return array
      */
-    public function fieldsNamesValuesMap(): array {
+    public function fieldsNamesValuesMap(): array
+    {
         $map = [];
         foreach ($this->items() as $item) {
             $map[$item->field()->name()] = $item->value();
@@ -84,7 +88,8 @@ class DatasetClause extends ItemList {
      *
      * @return $this
      */
-    protected function setItem(mixed $field, mixed $value): static {
+    protected function setItem(mixed $field, mixed $value): static
+    {
         if (is_array($value)) {
             [$field, $expr] = explode('=', $field);
             $value = \VV\Db\Sql::plain($expr, $value);
@@ -103,7 +108,8 @@ class DatasetClause extends ItemList {
      *
      * @return DatasetClauseItem
      */
-    protected function creteItem(string|DbObject $field, mixed $value): DatasetClauseItem {
+    protected function creteItem(string|DbObject $field, mixed $value): DatasetClauseItem
+    {
         return new DatasetClauseItem($field, $value);
     }
 }

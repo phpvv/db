@@ -15,7 +15,8 @@ namespace VV\Db\Model\Generator;
  *
  * @package VV\Db\ModelGenerator
  */
-interface StructBuilder {
+interface StructBuilder
+{
 
     /**
      * @param \VV\Db\Connection $connection

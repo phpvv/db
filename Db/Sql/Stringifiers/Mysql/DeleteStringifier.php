@@ -17,13 +17,16 @@ use VV\Db\Sql;
  *
  * @package VV\Db\Driver\Mysql\SqlStringifier
  */
-class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier {
+class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier
+{
 
-    public function supportedClausesIds() {
+    public function supportedClausesIds()
+    {
         return parent::supportedClausesIds() | \VV\Db\Sql\DeleteQuery::C_DEL_TABLES;
     }
 
-    protected function strDeleteClause(Sql\Clauses\DeleteTablesClause $tables, &$params) {
+    protected function strDeleteClause(Sql\Clauses\DeleteTablesClause $tables, &$params)
+    {
         $str = 'DELETE';
 
         if (!$tables->isEmpty()) {

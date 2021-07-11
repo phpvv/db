@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /*
@@ -21,8 +22,8 @@ use VV\Db\Sql\Predicates\Predicate;
  *
  * @package VV\Db\Sql\Clauses
  */
-trait QueryWhereTrait {
-
+trait QueryWhereTrait
+{
     private ?Condition $whereClause = null;
 
     /**
@@ -33,8 +34,9 @@ trait QueryWhereTrait {
      *
      * @return $this
      */
-    public function where(string|int|array|Expression|Predicate|null $field, mixed $value = null): static {
-        return $this->condintionAnd($this->whereClause(), ...func_get_args());
+    public function where(string|int|array|Expression|Predicate|null $field, mixed $value = null): static
+    {
+        return $this->condintionAnd($this->getWhereClause(), ...func_get_args());
     }
 
     /**
@@ -45,7 +47,8 @@ trait QueryWhereTrait {
      *
      * @return $this
      */
-    public function whereId(string|int|Expression $id): static {
+    public function whereId(string|int|Expression $id): static
+    {
         $this->where($this->mainTablePk(), $id);
 
         return $this;
@@ -53,24 +56,26 @@ trait QueryWhereTrait {
 
     /**
      * @param string|int|Expression $field
-     * @param mixed|Expression  ...$values
+     * @param mixed|Expression      ...$values
      *
      * @return $this
      */
-    public function whereIn(string|int|Expression $field, ...$values): static {
-        $this->whereClause()->and($field)->in(...$values);
+    public function whereIn(string|int|Expression $field, ...$values): static
+    {
+        $this->getWhereClause()->and($field)->in(...$values);
 
         return $this;
     }
 
     /**
      * @param string|int|Expression $field
-     * @param mixed|Expression  ...$values
+     * @param mixed|Expression      ...$values
      *
      * @return $this
      */
-    public function whereNotIn(string|int|Expression $field, ...$values): static {
-        $this->whereClause()->and($field)->not->in(...$values);
+    public function whereNotIn(string|int|Expression $field, ...$values): static
+    {
+        $this->getWhereClause()->and($field)->not->in(...$values);
 
         return $this;
     }
@@ -80,7 +85,8 @@ trait QueryWhereTrait {
      *
      * @return $this
      */
-    public function whereIdIn(mixed ...$values): static {
+    public function whereIdIn(mixed ...$values): static
+    {
         return $this->whereIn($this->mainTablePk(), ...$values);
     }
 
@@ -89,14 +95,16 @@ trait QueryWhereTrait {
      *
      * @return $this
      */
-    public function whereIdNotIn(mixed ...$values): static {
+    public function whereIdNotIn(mixed ...$values): static
+    {
         return $this->whereNotIn($this->mainTablePk(), ...$values);
     }
 
     /**
      * @return Condition
      */
-    public function whereClause(): Condition {
+    public function getWhereClause(): Condition
+    {
         if (!$this->whereClause) {
             $this->setWhereClause($this->createWhereClause());
         }
@@ -109,7 +117,8 @@ trait QueryWhereTrait {
      *
      * @return $this
      */
-    public function setWhereClause(?Condition $whereClause): static {
+    public function setWhereClause(?Condition $whereClause): static
+    {
         $this->whereClause = $whereClause;
 
         return $this;
@@ -120,9 +129,10 @@ trait QueryWhereTrait {
      *
      * @return Condition
      */
-    public function clearWhereClause(): Condition {
+    public function clearWhereClause(): Condition
+    {
         try {
-            return $this->whereClause();
+            return $this->getWhereClause();
         } finally {
             $this->setWhereClause(null);
         }
@@ -131,7 +141,8 @@ trait QueryWhereTrait {
     /**
      * @return Condition
      */
-    public function createWhereClause(): Condition {
+    public function createWhereClause(): Condition
+    {
         return Sql::condition();
     }
 
@@ -146,7 +157,9 @@ trait QueryWhereTrait {
             } elseif ($field instanceof Condition) {
                 $condition->and($field);
             } else {
-                if (func_num_args() < 3) $value = [];
+                if (func_num_args() < 3) {
+                    $value = [];
+                }
                 if (is_array($value)) {
                     $condition->and($field)->custom(...$value);
                 } else {

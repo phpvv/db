@@ -17,7 +17,8 @@ use VV\Db\Sql\Expressions\DbObject;
  *
  * @package VV\Db\Sql\Clauses
  */
-class DatasetClauseItem {
+class DatasetClauseItem
+{
 
     private DbObject $field;
     /** @var mixed|\VV\Db\Sql\Expressions\Expression|\VV\Db\Param */
@@ -30,22 +31,27 @@ class DatasetClauseItem {
      * @param mixed|\VV\Db\Sql\Expressions\Expression|\VV\Db\Param $value
      *
      */
-    public function __construct(string|DbObject $field, mixed $value = null) {
+    public function __construct(string|DbObject $field, mixed $value = null)
+    {
         $this->setField($field);
-        if (func_num_args() > 1) $this->setValue($value);
+        if (func_num_args() > 1) {
+            $this->setValue($value);
+        }
     }
 
     /**
      * @return DbObject
      */
-    public function field(): DbObject {
+    public function field(): DbObject
+    {
         return $this->field;
     }
 
     /**
      * @return mixed
      */
-    public function value(): mixed {
+    public function value(): mixed
+    {
         return $this->value;
     }
 
@@ -54,7 +60,8 @@ class DatasetClauseItem {
      *
      * @return $this
      */
-    public function setValue(mixed $value): static {
+    public function setValue(mixed $value): static
+    {
         $this->value = $value;
 
         return $this;
@@ -65,12 +72,15 @@ class DatasetClauseItem {
      *
      * @return $this
      */
-    protected function setField(DbObject|string $field): static {
+    protected function setField(DbObject|string $field): static
+    {
         if (!$field instanceof DbObject) {
             $field = DbObject::create($field);
         }
 
-        if (!$field) throw new \InvalidArgumentException;
+        if (!$field) {
+            throw new \InvalidArgumentException();
+        }
         $this->field = $field;
 
         return $this;

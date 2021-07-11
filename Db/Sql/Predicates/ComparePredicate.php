@@ -17,7 +17,8 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Predicates
  */
-class ComparePredicate extends PredicateBase {
+class ComparePredicate extends PredicateBase
+{
 
     public const OP_EQ = '=',
         OP_NE = '<>',
@@ -39,7 +40,8 @@ class ComparePredicate extends PredicateBase {
      * @param string|null $operator
      * @param bool        $not
      */
-    public function __construct(Expression $left, Expression $right, string $operator = null, bool $not = false) {
+    public function __construct(Expression $left, Expression $right, string $operator = null, bool $not = false)
+    {
         $this->leftExpression = $left;
         $this->rightExpression = $right;
         $this->not = $not;
@@ -67,21 +69,24 @@ class ComparePredicate extends PredicateBase {
     /**
      * @return Expression
      */
-    public function leftExpression(): Expression {
+    public function leftExpression(): Expression
+    {
         return $this->leftExpression;
     }
 
     /**
      * @return Expression
      */
-    public function rightExpression(): Expression {
+    public function rightExpression(): Expression
+    {
         return $this->rightExpression;
     }
 
     /**
      * @return string
      */
-    public function operator(): string {
+    public function operator(): string
+    {
         return $this->operator;
     }
 }

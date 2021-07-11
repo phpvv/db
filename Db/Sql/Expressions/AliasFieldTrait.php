@@ -15,14 +15,16 @@ namespace VV\Db\Sql\Expressions;
  *
  * @package VV\Db\Sql
  */
-trait AliasFieldTrait {
+trait AliasFieldTrait
+{
 
     private ?string $alias = null;
 
     /**
      * @return string|null
      */
-    public function alias(): ?string {
+    public function alias(): ?string
+    {
         return $this->alias;
     }
 
@@ -31,7 +33,8 @@ trait AliasFieldTrait {
      *
      * @return $this
      */
-    public function as(?string $alias): static {
+    public function as(?string $alias): static
+    {
         $this->alias = $alias;
 
         return $this;

@@ -15,7 +15,8 @@ namespace VV\Db;
  *
  * @package VV\Db
  */
-final class Statement {
+final class Statement
+{
 
     const DATETIME_FORMAT = 'Y-m-d H:i:s';
 
@@ -32,12 +33,17 @@ final class Statement {
     /**
      * Prepared constructor.
      *
-     * @param Driver\Statement  $driver
-     * @param Connection        $connection
+     * @param Driver\Statement $driver
+     * @param Connection $connection
      * @param Driver\Connection $driverConnection
-     * @param Driver\QueryInfo  $queryInfo
+     * @param Driver\QueryInfo $queryInfo
      */
-    public function __construct(Driver\Statement $driver, Connection $connection, Driver\Connection $driverConnection, Driver\QueryInfo $queryInfo) {
+    public function __construct(
+        Driver\Statement $driver,
+        Connection $connection,
+        Driver\Connection $driverConnection,
+        Driver\QueryInfo $queryInfo
+    ) {
         $this->driver = $driver;
         $this->connection = $connection;
         $this->driverConnection = $driverConnection;
@@ -47,14 +53,16 @@ final class Statement {
     /**
      * @return Driver\QueryInfo
      */
-    public function queryInfo(): Driver\QueryInfo {
+    public function getQueryInfo(): Driver\QueryInfo
+    {
         return $this->queryInfo;
     }
 
     /**
      * @return int|null
      */
-    public function fetchSize(): ?int {
+    public function getFetchSize(): ?int
+    {
         return $this->fetchSize;
     }
 
@@ -63,8 +71,9 @@ final class Statement {
      *
      * @return $this|Statement
      */
-    public function setFetchSize(int $fetchSize): self {
-        $this->driverOrThrow()->setFetchSize($this->fetchSize = $fetchSize);
+    public function setFetchSize(int $fetchSize): self
+    {
+        $this->getDriverOrThrow()->setFetchSize($this->fetchSize = $fetchSize);
 
         return $this;
     }
@@ -74,9 +83,10 @@ final class Statement {
      *
      * @return $this|Statement
      */
-    public function bind(array $params): self {
+    public function bind(array $params): self
+    {
         $this->castParamList($params);
-        $this->driverOrThrow()->bind($params);
+        $this->getDriverOrThrow()->bind($params);
 
         return $this;
     }
@@ -84,12 +94,13 @@ final class Statement {
     /**
      * @return Result
      */
-    public function exec(): Result {
+    public function exec(): Result
+    {
         $connection = $this->connection;
         // enable fatal error stub (paralel execution)
         $connection->acqureExecution();
         try {
-            $driverResult = $this->driverOrThrow()->exec();
+            $driverResult = $this->getDriverOrThrow()->exec();
             $result = new Result($driverResult, $this);
 
             // auto commit for modificatory queries if no transaction was started
@@ -108,14 +119,16 @@ final class Statement {
      *
      * @return Result
      */
-    public function result(): Result {
+    public function result(): Result
+    {
         return $this->exec();
     }
 
     /**
      * @return $this|Statement
      */
-    public function close(): self {
+    public function close(): self
+    {
         if (!$this->isClosed()) {
             $this->driver->close();
             $this->driver = null;
@@ -125,17 +138,21 @@ final class Statement {
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
-    public function isClosed(): bool {
+    public function isClosed(): bool
+    {
         return empty($this->driver);
     }
 
     /**
      * @return Driver\Statement
      */
-    protected function driverOrThrow(): Driver\Statement {
-        if (!$this->driver) throw new \LogicException('Prepared Query is already closed');
+    protected function getDriverOrThrow(): Driver\Statement
+    {
+        if (!$this->driver) {
+            throw new \LogicException('Prepared Query is already closed');
+        }
 
         return $this->driver;
     }
@@ -143,10 +160,11 @@ final class Statement {
     /**
      * @param $params
      */
-    protected function castParamList(&$params): void {
+    protected function castParamList(&$params): void
+    {
         foreach ($params as &$param) {
             if ($param instanceof Param) {
-                $param->setValue($this->castParam($param->value()));
+                $param->setValue($this->castParam($param->getValue()));
             } else {
                 $param = $this->castParam($param);
             }
@@ -158,7 +176,8 @@ final class Statement {
      *
      * @return mixed
      */
-    protected function castParam(mixed $param): mixed {
+    protected function castParam(mixed $param): mixed
+    {
         return match (true) {
             $param instanceof \DateTimeInterface => $this->formatDateTime($param),
             default => $param,
@@ -170,7 +189,8 @@ final class Statement {
      *
      * @return string
      */
-    protected function formatDateTime(\DateTimeInterface $datetime): string {
+    protected function formatDateTime(\DateTimeInterface $datetime): string
+    {
         return $datetime->format(self::DATETIME_FORMAT);
     }
 }

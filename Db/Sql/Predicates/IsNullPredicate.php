@@ -17,7 +17,8 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Predicates
  */
-class IsNullPredicate extends PredicateBase {
+class IsNullPredicate extends PredicateBase
+{
 
     private Expression $expression;
 
@@ -27,7 +28,8 @@ class IsNullPredicate extends PredicateBase {
      * @param Expression $expression
      * @param bool       $not
      */
-    public function __construct(Expression $expression, bool $not = false) {
+    public function __construct(Expression $expression, bool $not = false)
+    {
         $this->expression = $expression;
         $this->not = $not;
     }
@@ -35,7 +37,8 @@ class IsNullPredicate extends PredicateBase {
     /**
      * @return Expression
      */
-    public function expression(): Expression {
+    public function expression(): Expression
+    {
         return $this->expression;
     }
 }

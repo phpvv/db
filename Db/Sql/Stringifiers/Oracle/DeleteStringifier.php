@@ -15,11 +15,13 @@ namespace VV\Db\Sql\Stringifiers\Oracle;
  *
  * @package VV\Db\Driver\Oracle\SqlStringifier
  */
-class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier {
+class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier
+{
 
     use CommonUtils;
 
-    public function supportedClausesIds() {
+    public function supportedClausesIds()
+    {
         return parent::supportedClausesIds() | \VV\Db\Sql\DeleteQuery::C_RETURN_INTO;
     }
 }

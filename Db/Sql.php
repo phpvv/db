@@ -12,20 +12,20 @@ namespace VV\Db;
 
 use JetBrains\PhpStorm\Pure;
 use VV\Db\Sql\Condition;
+use VV\Db\Sql\Expressions\CaseExpression;
+use VV\Db\Sql\Expressions\DbObject;
+use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Sql\Expressions\PlainSql;
+use VV\Db\Sql\Expressions\SqlParam;
 use VV\Db\Sql\Predicates\Predicate;
-use VV\Db\Sql\Expressions\{
-    CaseExpression,
-    DbObject,
-    Expression,
-    PlainSql,
-    SqlParam,};
 
 /**
  * Static class with factory methods
  *
  * @package VV\Db
  */
-final class Sql {
+final class Sql
+{
 
     /**
      * @param string|int|Expression $expression
@@ -33,7 +33,8 @@ final class Sql {
      *
      * @return Expression
      */
-    public static function expression(string|int|Expression $expression, array $params = []): Expression {
+    public static function expression(string|int|Expression $expression, array $params = []): Expression
+    {
         if (is_object($expression)) {
             if (!$expression instanceof Expression) {
                 throw new \InvalidArgumentException('Wrong object type');
@@ -42,7 +43,9 @@ final class Sql {
             return $expression;
         }
 
-        if ($o = DbObject::create($expression)) return $o;
+        if ($o = DbObject::create($expression)) {
+            return $o;
+        }
 
         return self::plain((string)$expression, $params);
     }
@@ -52,8 +55,11 @@ final class Sql {
      *
      * @return Expression
      */
-    public static function param(mixed $param): Expression {
-        if ($param instanceof Expression) return $param;
+    public static function param(mixed $param): Expression
+    {
+        if ($param instanceof Expression) {
+            return $param;
+        }
 
         return new SqlParam($param);
     }
@@ -65,7 +71,10 @@ final class Sql {
      * @return PlainSql
      */
     #[Pure]
-    public static function plain(string|int $sql, array $params = []): PlainSql {
+    public static function plain(
+        string|int $sql,
+        array $params = []
+    ): PlainSql {
         return new PlainSql($sql, $params);
     }
 
@@ -74,9 +83,10 @@ final class Sql {
      *
      * @return Condition
      */
-    public static function condition(array|string|int|Expression|Predicate $condition = null): Condition {
+    public static function condition(array|string|int|Expression|Predicate $condition = null): Condition
+    {
         if (!$condition) {
-            return new Condition;
+            return new Condition();
         }
 
         if ($condition instanceof Condition) {
@@ -84,28 +94,37 @@ final class Sql {
         }
 
         if ($condition instanceof Predicate) {
-            return (new Condition)->addPredicItem($condition);
+            return (new Condition())->addPredicItem($condition);
         }
 
         if (is_array($condition)) {
-            return (new Condition)->and($condition);
+            return (new Condition())->and($condition);
         }
 
-        return (new Condition)->expr($condition);
+        return (new Condition())->expr($condition);
     }
 
     /**
-     * @param string|int|Expression|null                 $case
+     * @param string|int|Expression|null $case
      * @param string|int|Expression|Predicate|array|null $when
-     * @param string|int|Expression|null                 $then
-     * @param string|int|Expression|null                 $else
+     * @param string|int|Expression|null $then
+     * @param string|int|Expression|null $else
      *
      * @return CaseExpression
      */
-    public static function case(mixed $case = null, mixed $when = null, mixed $then = null, mixed $else = null): CaseExpression {
+    public static function case(
+        mixed $case = null,
+        mixed $when = null,
+        mixed $then = null,
+        mixed $else = null
+    ): CaseExpression {
         $caseExpr = new CaseExpression($case);
-        if ($when !== null) $caseExpr->when($when)->then($then);
-        if ($else !== null) $caseExpr->else($else);
+        if ($when !== null) {
+            $caseExpr->when($when)->then($then);
+        }
+        if ($else !== null) {
+            $caseExpr->else($else);
+        }
 
         return $caseExpr;
     }

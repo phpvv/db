@@ -18,9 +18,11 @@ use VV\Db\Model\Generator\ObjectInfo;
  *
  * @package VV\Db\ModelGenerator\StructBuilder
  */
-class Mysql implements \VV\Db\Model\Generator\StructBuilder {
+class Mysql implements \VV\Db\Model\Generator\StructBuilder
+{
 
-    public function objectIterator(\VV\Db\Connection $connection): iterable {
+    public function objectIterator(\VV\Db\Connection $connection): iterable
+    {
         $tables = $connection->query('SHOW TABLES')->rows(\VV\Db::FETCH_ASSOC);
 
         $typed = ModelGenerator::buildTypeDecorator([

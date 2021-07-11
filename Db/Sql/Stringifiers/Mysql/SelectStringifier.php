@@ -15,6 +15,7 @@ namespace VV\Db\Sql\Stringifiers\Mysql;
  *
  * @package VV\Db\Driver\Mysql\SqlStringifier
  */
-class SelectStringifier extends \VV\Db\Sql\Stringifiers\SelectStringifier {
+class SelectStringifier extends \VV\Db\Sql\Stringifiers\SelectStringifier
+{
 
 }

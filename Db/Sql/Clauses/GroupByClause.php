@@ -18,15 +18,18 @@ use VV\Db\Sql;
  * @package VV\Db\Sql\Clauses
  * @method Sql\Expressions\Expression[] items():array
  */
-class GroupByClause extends ColumnList {
+class GroupByClause extends ColumnList
+{
 
-    protected function _add(array $columns) {
+    protected function _add(array $columns)
+    {
         foreach ($columns as $col) {
             $this->appendItems(Sql::expression($col));
         }
     }
 
-    protected function allowedObjectTypes(): array {
+    protected function allowedObjectTypes(): array
+    {
         return [Sql\Expressions\Expression::class];
     }
 }

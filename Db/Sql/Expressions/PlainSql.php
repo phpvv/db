@@ -15,7 +15,8 @@ namespace VV\Db\Sql\Expressions;
  *
  * @package VV\Db\Sql
  */
-class PlainSql implements Expression {
+class PlainSql implements Expression
+{
 
     use AliasFieldTrait;
 
@@ -26,7 +27,8 @@ class PlainSql implements Expression {
      * @param string $sql
      * @param array  $params
      */
-    public function __construct(string $sql, array $params = []) {
+    public function __construct(string $sql, array $params = [])
+    {
         $this->sql = $sql;
         $this->params = $params;
     }
@@ -34,18 +36,21 @@ class PlainSql implements Expression {
     /**
      * @return array
      */
-    public function params(): array {
+    public function params(): array
+    {
         return $this->params;
     }
 
     /**
      * @return string
      */
-    public function sql(): string {
+    public function sql(): string
+    {
         return $this->sql;
     }
 
-    public function expressionId(): string {
+    public function expressionId(): string
+    {
         return $this->sql;
     }
 }

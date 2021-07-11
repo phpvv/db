@@ -15,14 +15,16 @@ namespace VV\Db\Sql\Predicates;
  *
  * @package VV\Db\Sql\Predicates
  */
-abstract class PredicateBase implements Predicate {
+abstract class PredicateBase implements Predicate
+{
 
     protected bool $not = false;
 
     /**
      * @return bool
      */
-    public function isNegative(): bool {
+    public function isNegative(): bool
+    {
         return $this->not;
     }
 }

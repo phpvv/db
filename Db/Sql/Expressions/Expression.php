@@ -15,8 +15,8 @@ namespace VV\Db\Sql\Expressions;
  *
  * @package VV\Db\Sql
  */
-interface Expression extends AliasableExpression {
-
+interface Expression extends AliasableExpression
+{
     /**
      * Returns unique ID of Expression
      *

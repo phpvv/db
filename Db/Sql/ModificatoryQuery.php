@@ -23,11 +23,13 @@ use VV\Db\Transaction;
  * @package VV\Db\Sql
  * @property-read int $affectedRows Execute query and return number of rows affected during query execute
  */
-abstract class ModificatoryQuery extends Query {
+abstract class ModificatoryQuery extends Query
+{
 
     protected ?ReturnIntoClause $returnIntoClause = null;
 
-    public function __get($var): mixed {
+    public function __get($var): mixed
+    {
         return match ($var) {
             'affectedRows' => $this->affectedRows(),
             default => throw new \LogicException("Undefined property $var"),
@@ -62,7 +64,8 @@ abstract class ModificatoryQuery extends Query {
      *
      * @return ReturnIntoClause
      */
-    public function returnIntoClause(): ReturnIntoClause {
+    public function returnIntoClause(): ReturnIntoClause
+    {
         if (!$this->returnIntoClause) {
             $this->setReturnIntoClause($this->createReturnIntoClause());
         }
@@ -77,7 +80,8 @@ abstract class ModificatoryQuery extends Query {
      *
      * @return $this
      */
-    public function setReturnIntoClause(?ReturnIntoClause $returnIntoClause): static {
+    public function setReturnIntoClause(?ReturnIntoClause $returnIntoClause): static
+    {
         $this->returnIntoClause = $returnIntoClause;
 
         return $this;
@@ -88,7 +92,8 @@ abstract class ModificatoryQuery extends Query {
      *
      * @return ReturnIntoClause
      */
-    public function clearReturnIntoClause(): ReturnIntoClause {
+    public function clearReturnIntoClause(): ReturnIntoClause
+    {
         try {
             return $this->returnIntoClause();
         } finally {
@@ -102,8 +107,9 @@ abstract class ModificatoryQuery extends Query {
      * @return ReturnIntoClause
      */
     #[Pure]
-    public function createReturnIntoClause(): ReturnIntoClause {
-        return new ReturnIntoClause;
+    public function createReturnIntoClause(): ReturnIntoClause
+    {
+        return new ReturnIntoClause();
     }
 
     /**
@@ -113,9 +119,10 @@ abstract class ModificatoryQuery extends Query {
      *
      * @return Result
      */
-    public function exec(Transaction $transaction = null): Result {
+    public function exec(Transaction $transaction = null): Result
+    {
         if ($transaction) {
-            $this->setConnection($transaction->connection());
+            $this->setConnection($transaction->getConnection());
         } elseif ($this->connection()->isInTransaction()) {
             throw new \LogicException('Statement execution outside current transaction');
         }
@@ -128,7 +135,8 @@ abstract class ModificatoryQuery extends Query {
      *
      * @return int
      */
-    public function affectedRows(Transaction $transaction = null): int {
+    public function affectedRows(Transaction $transaction = null): int
+    {
         return $this->exec($transaction)->affectedRows;
     }
 }

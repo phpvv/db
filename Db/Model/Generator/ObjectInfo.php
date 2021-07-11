@@ -15,13 +15,14 @@ namespace VV\Db\Model\Generator;
  *
  * @package VV\Db\ModelGenerator
  */
-class ObjectInfo {
+class ObjectInfo
+{
 
     private string $name;
     private string $type;
     /** @var array[] */
     private array $columns = [];
-     /** @var array[] */
+    /** @var array[] */
     private array $foreignKeys = [];
     private string $typePlural;
 
@@ -31,7 +32,8 @@ class ObjectInfo {
      * @param string $name
      * @param string $type
      */
-    public function __construct(string $name, string $type, string $typePlural = null) {
+    public function __construct(string $name, string $type, string $typePlural = null)
+    {
         $this->name = $name;
         $this->type = $type;
         $this->typePlural = $typePlural ?: $type . 's';
@@ -40,35 +42,40 @@ class ObjectInfo {
     /**
      * @return string
      */
-    public function name(): string {
+    public function name(): string
+    {
         return $this->name;
     }
 
     /**
      * @return string
      */
-    public function type(): string {
+    public function type(): string
+    {
         return $this->type;
     }
 
     /**
      * @return string
      */
-    public function typePlural(): string {
+    public function typePlural(): string
+    {
         return $this->typePlural;
     }
 
     /**
      * @return array[]
      */
-    public function columns(): array {
+    public function columns(): array
+    {
         return $this->columns;
     }
 
     /**
      * @return array[]
      */
-    public function foreignKeys(): array {
+    public function foreignKeys(): array
+    {
         return $this->foreignKeys;
     }
 
@@ -97,7 +104,8 @@ class ObjectInfo {
         ];
     }
 
-    public function addForeignKey(string $name, array $fromColumns, string $toTable, array $toColumns) {
+    public function addForeignKey(string $name, array $fromColumns, string $toTable, array $toColumns)
+    {
         $this->foreignKeys[$name] = [$fromColumns, $toTable, $toColumns];
     }
 }

@@ -19,7 +19,8 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Query
  */
-class UpdateQuery extends ModificatoryQuery {
+class UpdateQuery extends ModificatoryQuery
+{
 
     use QueryDatasetTrait;
     use QueryWhereTrait;
@@ -37,16 +38,18 @@ class UpdateQuery extends ModificatoryQuery {
      *
      * @return $this
      */
-    public function setNull(string|Expression ...$fields): static {
+    public function setNull(string|Expression ...$fields): static
+    {
         return $this->set(array_fill_keys($fields, null));
     }
 
     /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
-    protected function nonEmptyClausesMap(): array {
+    protected function nonEmptyClausesMap(): array
+    {
         return [
             self::C_TABLE => $this->tableClause(),
             self::C_DATASET => $this->datasetClause(),
-            self::C_WHERE => $this->whereClause(),
+            self::C_WHERE => $this->getWhereClause(),
             self::C_RETURN_INTO => $this->returnIntoClause(),
             self::C_HINT => $this->hintClause(),
         ];

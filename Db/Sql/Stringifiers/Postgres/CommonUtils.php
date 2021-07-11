@@ -17,21 +17,27 @@ use VV\Db\Sql\Stringifiers\QueryStringifier;
  *
  * @package VV\Db\Postgres\QueryStringifiers
  */
-trait CommonUtils {
+trait CommonUtils
+{
 
-    protected function stringifyFinalDecorate($sql) {
+    protected function stringifyFinalDecorate($sql)
+    {
         $sql = str_replace('"', "'", $sql);
 
-        $sql = preg_replace_callback('/`([\w\$]+)`/', function ($m) {
-            return '"' . $m[1] . '"';
-        }, $sql
+        $sql = preg_replace_callback('/`([\w\$]+)`/',
+            function ($m) {
+                return '"' . $m[1] . '"';
+            },
+            $sql
         );
 
-        $sql = preg_replace_callback('/\?/', function () {
-            static $i = 0;
+        $sql = preg_replace_callback('/\?/',
+            function () {
+                static $i = 0;
 
-            return ':p' . (++$i);
-        }, $sql
+                return ':p' . (++$i);
+            },
+            $sql
         );
 
         return $sql;
@@ -40,12 +46,14 @@ trait CommonUtils {
     /**
      * @return ExpressoinStringifier
      */
-    protected function createExprStringifier() {
+    protected function createExprStringifier()
+    {
         /** @var QueryStringifier $this */
         return new ExpressoinStringifier($this);
     }
 
-    protected function createConditionStringifier() {
+    protected function createConditionStringifier()
+    {
         /** @var QueryStringifier $this */
         return new ConditionStringifier($this);
     }

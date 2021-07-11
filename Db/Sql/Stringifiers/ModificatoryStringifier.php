@@ -21,34 +21,40 @@ use VV\Db\Sql\Clauses\ReturnIntoClauseItem;
  *
  * @package VV\Db\Driver\Sql\Stringifier
  */
-abstract class ModificatoryStringifier extends QueryStringifier {
+abstract class ModificatoryStringifier extends QueryStringifier
+{
 
     private $advReturnInto = [];
 
     /**
      * @return ReturnIntoClauseItem[]
      */
-    protected function advReturnInto() {
+    protected function advReturnInto()
+    {
         return $this->advReturnInto;
     }
 
-    protected function addAdvReturnInto($field, $value) {
+    protected function addAdvReturnInto($field, $value)
+    {
         $this->advReturnInto[] = new ReturnIntoClauseItem($field, $value);
     }
 
     /**
      * @param Sql\Clauses\ReturnIntoClause $returnInto
-     * @param                       $params
+     * @param                              $params
      *
      * @return string
      */
-    protected function strReturnIntoClause(Sql\Clauses\ReturnIntoClause $returnInto, &$params) {
+    protected function strReturnIntoClause(Sql\Clauses\ReturnIntoClause $returnInto, &$params)
+    {
         $items = $returnInto->items();
         if ($advReturnInto = $this->advReturnInto()) {
             array_push($items, ...$advReturnInto);
         }
 
-        if (!$items) return '';
+        if (!$items) {
+            return '';
+        }
 
         $vars = $exprs = [];
         foreach ($items as $item) {
@@ -61,7 +67,8 @@ abstract class ModificatoryStringifier extends QueryStringifier {
         return ' RETURNING ' . implode(', ', $exprs) . ' INTO ' . implode(', ', $vars);
     }
 
-    protected function strValueToSave($value, $field, &$params) {
+    protected function strValueToSave($value, $field, &$params)
+    {
         if ($value instanceof Sql\Expressions\Expression) {
             $tmparams = [];
             $str = $this->strColumn($value, $tmparams);
@@ -82,9 +89,9 @@ abstract class ModificatoryStringifier extends QueryStringifier {
                 $value = Param::blob($value);
             } elseif ($fieldModel && $value !== null) {
                 // auto detect large strings to b/clob
-                if ($fieldModel->type() == Field::T_TEXT) {
+                if ($fieldModel->getType() == Field::T_TEXT) {
                     $value = Param::text($value);
-                } elseif ($fieldModel->type() == Field::T_BLOB) {
+                } elseif ($fieldModel->getType() == Field::T_BLOB) {
                     $value = Param::blob($value);
                 }
             }
@@ -94,7 +101,7 @@ abstract class ModificatoryStringifier extends QueryStringifier {
             // prepare value according db table model
             if ($value instanceof Param) {
                 /** @var Param $value */
-                $value->setValue($fieldModel->prepareValueToSave($value->value()));
+                $value->setValue($fieldModel->prepareValueToSave($value->getValue()));
             } else {
                 $value = $fieldModel->prepareValueToSave($value);
             }
@@ -108,7 +115,8 @@ abstract class ModificatoryStringifier extends QueryStringifier {
         return $this->strParam($value, $params);
     }
 
-    protected function strDataset(Sql\Clauses\DatasetClause $dataset, &$params) {
+    protected function strDataset(Sql\Clauses\DatasetClause $dataset, &$params)
+    {
         $set = [];
         $exprStringifier = $this->exprStringifier();
         foreach ($dataset->items() as $item) {
@@ -126,7 +134,8 @@ abstract class ModificatoryStringifier extends QueryStringifier {
      *
      * @return \VV\Db\Sql\Stringifiers\PlainSql|null
      */
-    protected function exprValueToSave($value, $field) {
+    protected function exprValueToSave($value, $field)
+    {
         return null;
     }
 }

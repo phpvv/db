@@ -1,5 +1,5 @@
-<?php declare(strict_types=1);
-/** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
+<?php /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
+declare(strict_types=1);
 
 /*
  * This file is part of the VV package.
@@ -14,13 +14,12 @@ namespace VV\Db\Sql;
 use JetBrains\PhpStorm\Pure;
 use VV\Db\Model\Table;
 use VV\Db\Sql;
-use VV\Db\Sql\Clauses\{
-    ColumnsClause,
-    GroupByClause,
-    LimitClause,
-    OrderByClause,
-    TableClause,
-    QueryWhereTrait};
+use VV\Db\Sql\Clauses\ColumnsClause;
+use VV\Db\Sql\Clauses\GroupByClause;
+use VV\Db\Sql\Clauses\LimitClause;
+use VV\Db\Sql\Clauses\OrderByClause;
+use VV\Db\Sql\Clauses\QueryWhereTrait;
+use VV\Db\Sql\Clauses\TableClause;
 use VV\Db\Sql\Expressions\Expression;
 use VV\Db\Sql\Predicates\Predicate;
 
@@ -39,8 +38,8 @@ use VV\Db\Sql\Predicates\Predicate;
  * @property SelectQuery        $noCahce   Sets NO CACHE flag to true and returns $this
  * @property SelectQuery        $forUpdate Sets FOR UPDATE flag to true and returns $this
  */
-class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
-
+class SelectQuery extends Query implements Expressions\Expression
+{
     use Expressions\AliasFieldTrait;
     use QueryWhereTrait;
 
@@ -67,7 +66,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     private bool $noCacheFlag = false;
     private string|bool $forUpdateClause = false;
 
-    public function __get($var) {
+    public function __get($var)
+    {
         switch ($var) {
             // call method wo params
             case 'result':
@@ -95,7 +95,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * @return boolean
      */
-    public function isNoCache(): bool {
+    public function isNoCache(): bool
+    {
         return $this->noCacheFlag;
     }
 
@@ -106,7 +107,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function noCache(bool $flag = true): static {
+    public function noCache(bool $flag = true): static
+    {
         $this->noCacheFlag = $flag;
 
         return $this;
@@ -115,7 +117,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * @return bool
      */
-    public function isDistinct(): bool {
+    public function isDistinct(): bool
+    {
         return $this->distinctFlag;
     }
 
@@ -126,7 +129,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function distinct(bool $flag = true): static {
+    public function distinct(bool $flag = true): static
+    {
         $this->distinctFlag = $flag;
 
         return $this;
@@ -135,7 +139,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
     /**
      * @return bool|string
      */
-    public function forUpdateClause(): bool|string {
+    public function forUpdateClause(): bool|string
+    {
         return $this->forUpdateClause;
     }
 
@@ -146,7 +151,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function forUpdate(bool|string $flag = true): static {
+    public function forUpdate(bool|string $flag = true): static
+    {
         $this->forUpdateClause = $flag;
 
         return $this;
@@ -159,7 +165,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function columns(...$columns): static {
+    public function columns(...$columns): static
+    {
         $clause = $this->createColumnsClause()->add(...$columns);
 
         return $this->setColumnsClause($clause);
@@ -172,7 +179,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function addColumns(...$columns): static {
+    public function addColumns(...$columns): static
+    {
         $this->columnsClause()->add(...$columns);
 
         return $this;
@@ -183,7 +191,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function addAliasedColumns(iterable $columns): static {
+    public function addAliasedColumns(iterable $columns): static
+    {
         foreach ($columns as $alias => $column) {
             if (is_string($column) && strtolower($column) == strtolower($alias)) {
                 $this->addColumns($column);
@@ -209,7 +218,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
         string $dfltTableAlias,
         string|int|Expression ...$columns
     ): static {
-        if (!is_array($group)) $group = [$group];
+        if (!is_array($group)) {
+            $group = [$group];
+        }
 
         // todo: need review/refactoring
         $columnsClause = $this->columnsClause();
@@ -246,11 +257,12 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * Add from clause in sql
      *
      * @param string|Table|Expression $table
-     * @param string|null              $alias
+     * @param string|null             $alias
      *
      * @return $this
      */
-    public function from(string|Table|Expression $table, string $alias = null): static {
+    public function from(string|Table|Expression $table, string $alias = null): static
+    {
         return $this->table($table, $alias);
     }
 
@@ -263,7 +275,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function join(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+    public function join(
+        string|Table|Expression $table,
+        string|array|Condition $on = null,
+        string $alias = null
+    ): static {
         $this->tableClause()->join($table, $on, $alias);
 
         return $this;
@@ -278,7 +294,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function left(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+    public function left(
+        string|Table|Expression $table,
+        string|array|Condition $on = null,
+        string $alias = null
+    ): static {
         $this->tableClause()->left($table, $on, $alias);
 
         return $this;
@@ -293,7 +313,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function right(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+    public function right(
+        string|Table|Expression $table,
+        string|array|Condition $on = null,
+        string $alias = null
+    ): static {
         $this->tableClause()->right($table, $on, $alias);
 
         return $this;
@@ -308,7 +332,11 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function full(string|Table|Expression $table, string|array|Condition $on = null, string $alias = null): static {
+    public function full(
+        string|Table|Expression $table,
+        string|array|Condition $on = null,
+        string $alias = null
+    ): static {
         $this->tableClause()->full($table, $on, $alias);
 
         return $this;
@@ -323,7 +351,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function joinBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static {
+    public function joinBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static
+    {
         $this->tableClause()->joinBack($table, $onTable, $alias);
 
         return $this;
@@ -338,7 +367,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function leftBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static {
+    public function leftBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static
+    {
         $this->tableClause()->leftBack($table, $onTable, $alias);
 
         return $this;
@@ -353,7 +383,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function joinParent(string $alias, string $onTable = null, string $parentField = null): static {
+    public function joinParent(string $alias, string $onTable = null, string $parentField = null): static
+    {
         $this->tableClause()->joinParent($alias, $onTable, $parentField);
 
         return $this;
@@ -368,7 +399,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function leftParent(string $alias, string $onTable = null, string $parentField = null): static {
+    public function leftParent(string $alias, string $onTable = null, string $parentField = null): static
+    {
         $this->tableClause()->leftParent($alias, $onTable, $parentField);
 
         return $this;
@@ -415,7 +447,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function orderBy(...$columns): static {
+    public function orderBy(...$columns): static
+    {
         $clause = $this->createOrderByClause()->add(...$columns);
 
         return $this->setOrderByClause($clause);
@@ -428,7 +461,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function addOrderBy(...$columns): static {
+    public function addOrderBy(...$columns): static
+    {
         $this->orderByClause()->add(...$columns);
 
         return $this;
@@ -441,7 +475,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function groupBy(...$columns): static {
+    public function groupBy(...$columns): static
+    {
         $clause = $this->createGroupByClause()->add(...$columns);
 
         return $this->setGroupByClause($clause);
@@ -454,7 +489,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function addGroupBy(...$columns): static {
+    public function addGroupBy(...$columns): static
+    {
         $this->groupByClause()->add(...$columns);
 
         return $this;
@@ -467,7 +503,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function useIndex(array|string $index): static {
+    public function useIndex(array|string $index): static
+    {
         $this->tableClause()->useIndex($index);
 
         return $this;
@@ -481,7 +518,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return SelectQuery
      */
-    public function having(string|int|array|Expression|Predicate|null $field, mixed $value = null): SelectQuery {
+    public function having(string|int|array|Expression|Predicate|null $field, mixed $value = null): SelectQuery
+    {
         return $this->condintionAnd($this->havingClause(), ...func_get_args());
     }
 
@@ -493,7 +531,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function limit(int $count, int $offset = 0): static {
+    public function limit(int $count, int $offset = 0): static
+    {
         $this->limitClause()->set($count, $offset);
 
         return $this;
@@ -506,7 +545,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return \VV\Db\Result
      */
-    public function result($flags = null, $decorator = null, $fetchSize = null): \VV\Db\Result {
+    public function result($flags = null, $decorator = null, $fetchSize = null): \VV\Db\Result
+    {
         return $this->_result($flags, $decorator, $fetchSize);
     }
 
@@ -516,7 +556,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return mixed
      */
-    public function column(int $index = 0, int $flags = null): mixed {
+    public function column(int $index = 0, int $flags = null): mixed
+    {
         return $this->_result()->column($index, $flags);
     }
 
@@ -525,7 +566,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return array|null
      */
-    public function row(int $flags = null): ?array {
+    public function row(int $flags = null): ?array
+    {
         return $this->_result()->row($flags);
     }
 
@@ -536,7 +578,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return array[]
      */
-    public function rows(int $flags = null, string $keyColumn = null, string|\Closure $decorator = null): array {
+    public function rows(int $flags = null, string $keyColumn = null, string|\Closure $decorator = null): array
+    {
         return $this->_result()->rows($flags, $keyColumn, $decorator);
     }
 
@@ -546,7 +589,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return array
      */
-    public function assoc(string $keyColumn = null, string $valueColumn = null): array {
+    public function assoc(string $keyColumn = null, string $valueColumn = null): array
+    {
         return $this->_result()->assoc($keyColumn, $valueColumn);
     }
 
@@ -555,7 +599,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return ColumnsClause
      */
-    public function columnsClause(): ColumnsClause {
+    public function columnsClause(): ColumnsClause
+    {
         if (!$this->columnsClause) {
             $this->setColumnsClause($this->createColumnsClause());
         }
@@ -570,7 +615,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function setColumnsClause(?ColumnsClause $columnsClause): static {
+    public function setColumnsClause(?ColumnsClause $columnsClause): static
+    {
         $this->columnsClause = $columnsClause->setTableClause($this->tableClause());
 
         return $this;
@@ -581,7 +627,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return ColumnsClause
      */
-    public function clearColumnsClause(): ColumnsClause {
+    public function clearColumnsClause(): ColumnsClause
+    {
         try {
             return $this->columnsClause();
         } finally {
@@ -595,8 +642,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * @return ColumnsClause
      */
     #[Pure]
-    public function createColumnsClause(): ColumnsClause {
-        return new ColumnsClause;
+    public function createColumnsClause(): ColumnsClause
+    {
+        return new ColumnsClause();
     }
 
     /**
@@ -604,7 +652,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return GroupByClause
      */
-    public function groupByClause(): GroupByClause {
+    public function groupByClause(): GroupByClause
+    {
         if (!$this->groupByClause) {
             $this->setGroupByClause($this->createGroupByClause());
         }
@@ -619,7 +668,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function setGroupByClause(?GroupByClause $groupByClause): static {
+    public function setGroupByClause(?GroupByClause $groupByClause): static
+    {
         $this->groupByClause = $groupByClause;
 
         return $this;
@@ -630,7 +680,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return GroupByClause
      */
-    public function clearGroupByClause(): GroupByClause {
+    public function clearGroupByClause(): GroupByClause
+    {
         try {
             return $this->groupByClause();
         } finally {
@@ -644,8 +695,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * @return GroupByClause
      */
     #[Pure]
-    public function createGroupByClause(): GroupByClause {
-        return new GroupByClause;
+    public function createGroupByClause(): GroupByClause
+    {
+        return new GroupByClause();
     }
 
     /**
@@ -653,7 +705,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return Condition
      */
-    public function havingClause(): Condition {
+    public function havingClause(): Condition
+    {
         if (!$this->havingClause) {
             $this->setHavingClause($this->createHavingClause());
         }
@@ -668,7 +721,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function setHavingClause(?Condition $havingClause): static {
+    public function setHavingClause(?Condition $havingClause): static
+    {
         $this->havingClause = $havingClause;
 
         return $this;
@@ -679,7 +733,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return Condition
      */
-    public function clearHavingClause(): Condition {
+    public function clearHavingClause(): Condition
+    {
         try {
             return $this->havingClause();
         } finally {
@@ -692,7 +747,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return Condition
      */
-    public function createHavingClause(): Condition {
+    public function createHavingClause(): Condition
+    {
         return Sql::condition();
     }
 
@@ -701,7 +757,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return OrderByClause
      */
-    public function orderByClause(): OrderByClause {
+    public function orderByClause(): OrderByClause
+    {
         if (!$this->orderByClause) {
             $this->setOrderByClause($this->createOrderByClause());
         }
@@ -716,7 +773,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function setOrderByClause(?OrderByClause $orderByClause): static {
+    public function setOrderByClause(?OrderByClause $orderByClause): static
+    {
         $this->orderByClause = $orderByClause;
 
         return $this;
@@ -727,7 +785,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return OrderByClause
      */
-    public function clearOrderByClause(): OrderByClause {
+    public function clearOrderByClause(): OrderByClause
+    {
         try {
             return $this->orderByClause();
         } finally {
@@ -741,8 +800,9 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * @return OrderByClause
      */
     #[Pure]
-    public function createOrderByClause(): OrderByClause {
-        return new OrderByClause;
+    public function createOrderByClause(): OrderByClause
+    {
+        return new OrderByClause();
     }
 
     /**
@@ -750,7 +810,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return LimitClause
      */
-    public function limitClause(): LimitClause {
+    public function limitClause(): LimitClause
+    {
         if (!$this->limitClause) {
             $this->setLimitClause($this->createLimitClause());
         }
@@ -765,7 +826,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return $this
      */
-    public function setLimitClause(LimitClause $limitClause = null): static {
+    public function setLimitClause(LimitClause $limitClause = null): static
+    {
         $this->limitClause = $limitClause;
 
         return $this;
@@ -776,7 +838,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return LimitClause
      */
-    public function clearLimitClause(): LimitClause {
+    public function clearLimitClause(): LimitClause
+    {
         try {
             return $this->limitClause();
         } finally {
@@ -790,21 +853,24 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      * @return LimitClause
      */
     #[Pure]
-    public function createLimitClause(): LimitClause {
-        return new LimitClause;
+    public function createLimitClause(): LimitClause
+    {
+        return new LimitClause();
     }
 
     /**
      * @return array|null
      */
-    public function resultFieldsMap(): ?array {
+    public function resultFieldsMap(): ?array
+    {
         return $this->columnsClause()->resultFieldsMap();
     }
 
     /**
      * @inheritDoc
      */
-    public function expressionId(): string {
+    public function expressionId(): string
+    {
         return spl_object_hash($this);
     }
 
@@ -816,22 +882,28 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
         string $alias = null
     ): static {
         if (!$group && $on) {
-            if (!is_string($on)) throw new \LogicException('$group not set and $on is not string');
+            if (!is_string($on)) {
+                throw new \LogicException('$group not set and $on is not string');
+            }
 
             $namerx = Expressions\DbObject::NAME_RX;
             if (preg_match("/^$namerx\.($namerx)$", $on, $m)) {
                 $group = $m[1];
             }
         }
-        if (!$alias) $alias = $group;
+        if (!$alias) {
+            $alias = $group;
+        }
 
         $joinCallback($from, $on, $alias);
         $alias = $this->tableClause()->lastTableAlias();
 
-        if (!is_array($group)) $group = [$group];
+        if (!is_array($group)) {
+            $group = [$group];
+        }
 
         if ($from instanceof Table) {
-            return $this->addColumnsGroup($group, $alias, ...$from->fields()->names());
+            return $this->addColumnsGroup($group, $alias, ...$from->getFields()->getNames());
         }
 
         if ($from instanceof SelectQuery) {
@@ -858,11 +930,12 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
         throw new \InvalidArgumentException('Wrong $table type');
     }
 
-    protected function nonEmptyClausesMap(): array {
+    protected function nonEmptyClausesMap(): array
+    {
         return [
             self::C_COLUMNS => $this->columnsClause(),
             self::C_TABLE => $this->tableClause(),
-            self::C_WHERE => $this->whereClause(),
+            self::C_WHERE => $this->getWhereClause(),
             self::C_GROUP_BY => $this->groupByClause(),
             self::C_HAVING => $this->havingClause(),
             self::C_ORDER_BY => $this->orderByClause(),
@@ -880,7 +953,8 @@ class SelectQuery extends \VV\Db\Sql\Query implements Expressions\Expression {
      *
      * @return string
      */
-    public static function buildColumnsGroupAlias(array $path, ?array $resultFieldsMap): string {
+    public static function buildColumnsGroupAlias(array $path, ?array $resultFieldsMap): string
+    {
         $sqlAlias = '$' . implode('_', $path);
         $maxlen = static::MAX_RESULT_FIELD_NAME_LEN;
         $len = strlen($sqlAlias);

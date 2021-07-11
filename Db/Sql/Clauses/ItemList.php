@@ -15,34 +15,39 @@ namespace VV\Db\Sql\Clauses;
  *
  * @package VV\Db\Sql\Clauses
  */
-abstract class ItemList implements Clause {
+abstract class ItemList implements Clause
+{
 
     protected array $items = [];
 
     /**
      * @return bool
      */
-    public function isEmpty(): bool {
+    public function isEmpty(): bool
+    {
         return !$this->items;
     }
 
     /**
      * @return array
      */
-    public function items(): array {
+    public function items(): array
+    {
         return $this->items;
     }
 
     /**
      * @return $this
      */
-    public function clear(): static {
+    public function clear(): static
+    {
         $this->items = [];
 
         return $this;
     }
 
-    protected function appendItems(...$newItems): static {
+    protected function appendItems(...$newItems): static
+    {
         $this->items = array_merge($this->items, $newItems);
 
         return $this;

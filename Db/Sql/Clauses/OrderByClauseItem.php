@@ -18,7 +18,8 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Clause\OrderBy
  */
-class OrderByClauseItem {
+class OrderByClauseItem
+{
 
     private Expression $expression;
     private bool $desc;
@@ -31,7 +32,8 @@ class OrderByClauseItem {
      * @param bool|null                                $desc
      * @param bool|null                                $nullsLast
      */
-    public function __construct(string|Expression $expression, bool $desc = null, bool $nullsLast = null) {
+    public function __construct(string|Expression $expression, bool $desc = null, bool $nullsLast = null)
+    {
         if (!$expression instanceof Expression) {
             if (!preg_match('/^(-)? (.+?) (?:\s+(asc|desc))? (?:\s+nulls\s+(first|last))?$/xi', $expression, $m)) {
                 throw new \InvalidArgumentException('Wrong ORDER BY string');
@@ -54,14 +56,16 @@ class OrderByClauseItem {
     /**
      * @return Expression
      */
-    public function expression(): Expression {
+    public function expression(): Expression
+    {
         return $this->expression;
     }
 
     /**
      * @return bool
      */
-    public function isDesc(): bool {
+    public function isDesc(): bool
+    {
         return $this->desc;
     }
 
@@ -70,7 +74,8 @@ class OrderByClauseItem {
      *
      * @return $this
      */
-    public function setDesc(bool $desc): static {
+    public function setDesc(bool $desc): static
+    {
         $this->desc = $desc;
 
         return $this;
@@ -80,7 +85,8 @@ class OrderByClauseItem {
      * @return bool
      */
     #[Pure]
-    public function isNullsLast(): bool {
+    public function isNullsLast(): bool
+    {
         if ($this->nullsLast === null) {
             return $this->isDesc();
         }
@@ -93,7 +99,8 @@ class OrderByClauseItem {
      *
      * @return $this
      */
-    public function setNullsLast(?bool $nullsLast): static {
+    public function setNullsLast(?bool $nullsLast): static
+    {
         $this->nullsLast = $nullsLast;
 
         return $this;
@@ -104,7 +111,8 @@ class OrderByClauseItem {
      *
      * @return $this
      */
-    protected function setExpression(string|Expression $expression): static {
+    protected function setExpression(string|Expression $expression): static
+    {
         $this->expression = \VV\Db\Sql::expression($expression);
 
         return $this;
@@ -115,13 +123,18 @@ class OrderByClauseItem {
      *
      * @return static|null
      */
-    public static function create(string|Expression $expression): ?static {
-        if (!$expression) throw new \InvalidArgumentException('Expression is empty');
+    public static function create(string|Expression $expression): ?static
+    {
+        if (!$expression) {
+            throw new \InvalidArgumentException('Expression is empty');
+        }
         if ($expression instanceof Expression) {
             return new static($expression);
         }
 
-        if (!is_scalar($expression)) return null;
+        if (!is_scalar($expression)) {
+            return null;
+        }
 
         if (!preg_match('/^(-)? (.+?) (?:\s+(asc|desc))? (?:\s+nulls\s+(first|last))?$/xi', $expression, $m)) {
             return null;

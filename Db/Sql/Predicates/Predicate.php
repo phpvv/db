@@ -15,7 +15,8 @@ namespace VV\Db\Sql\Predicates;
  *
  * @package VV\Db\Sql
  */
-interface Predicate {
+interface Predicate
+{
 
     /**
      * @return bool

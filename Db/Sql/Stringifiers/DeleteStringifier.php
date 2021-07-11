@@ -19,7 +19,8 @@ use VV\Db\Sql\DeleteQuery as DeleteQuery;
  *
  * @package VV\Db\Driver\Sql\Stringifier
  */
-class DeleteStringifier extends ModificatoryStringifier {
+class DeleteStringifier extends ModificatoryStringifier
+{
 
     private DeleteQuery $deleteQuery;
 
@@ -29,7 +30,8 @@ class DeleteStringifier extends ModificatoryStringifier {
      * @param DeleteQuery $deleteQuery
      * @param Driver      $factory
      */
-    public function __construct(DeleteQuery $deleteQuery, Factory $factory) {
+    public function __construct(DeleteQuery $deleteQuery, Factory $factory)
+    {
         parent::__construct($factory);
         $this->deleteQuery = $deleteQuery;
     }
@@ -37,56 +39,66 @@ class DeleteStringifier extends ModificatoryStringifier {
     /**
      * @return DeleteQuery
      */
-    public function deleteQuery() {
+    public function deleteQuery()
+    {
         return $this->deleteQuery;
     }
 
-    public function supportedClausesIds() {
+    public function supportedClausesIds()
+    {
         return DeleteQuery::C_TABLE
                | DeleteQuery::C_WHERE;
     }
 
-    public function stringifyRaw(&$params) {
+    public function stringifyRaw(&$params)
+    {
         $query = $this->deleteQuery();
         $this->checkQueryToStr($query);
 
         $sql = $this->strDeleteClause($query->delTablesClause(), $params)
                . $this->strTableClause($query->tableClause(), $params)
-               . $this->strWhereClause($query->whereClause(), $params);
+               . $this->strWhereClause($query->getWhereClause(), $params);
 
         return $sql;
-    }
-
-    protected function strDeleteClause(Sql\Clauses\DeleteTablesClause $tables, &$params) {
-        return 'DELETE';
-    }
-
-    protected function strTableClause(Sql\Clauses\TableClause $table, &$params) {
-        return ' FROM ' . $this->buildTableSql($table)->embed($params);
     }
 
     /**
      * @return Sql\Clauses\TableClause
      */
-    public function queryTableClause() {
+    public function queryTableClause()
+    {
         return $this->deleteQuery()->tableClause();
+    }
+
+    protected function strDeleteClause(Sql\Clauses\DeleteTablesClause $tables, &$params)
+    {
+        return 'DELETE';
+    }
+
+    protected function strTableClause(Sql\Clauses\TableClause $table, &$params)
+    {
+        return ' FROM ' . $this->buildTableSql($table)->embed($params);
     }
 
     /**
      * @param $query
      */
-    protected function checkQueryToStr(DeleteQuery $query) {
+    protected function checkQueryToStr(DeleteQuery $query)
+    {
         $checkEmptyMap = [
             [$table = $query->tableClause(), '&Table is not selected'],
-            [$where = $query->whereClause(), '&There is no where clause'],
+            [$where = $query->getWhereClause(), '&There is no where clause'],
         ];
         /** @var Sql\Clauses\Clause $c */
         foreach ($checkEmptyMap as [$c, $m]) {
-            if ($c->isEmpty()) throw new \InvalidArgumentException($m);
+            if ($c->isEmpty()) {
+                throw new \InvalidArgumentException($m);
+            }
         }
     }
 
-    protected function useAliasForTable(Sql\Clauses\TableClause $table) {
+    protected function useAliasForTable(Sql\Clauses\TableClause $table)
+    {
         return count($table->items()) > 1;
     }
 }

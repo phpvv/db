@@ -18,9 +18,11 @@ use VV\Db\Model\Generator\ObjectInfo;
  *
  * @package VV\Db\ModelGenerator\StructBuilder
  */
-class Postgres implements \VV\Db\Model\Generator\StructBuilder {
+class Postgres implements \VV\Db\Model\Generator\StructBuilder
+{
 
-    public function objectIterator(\VV\Db\Connection $connection): iterable {
+    public function objectIterator(\VV\Db\Connection $connection): iterable
+    {
         $typed = ModelGenerator::buildTypeDecorator([
                 'NUM' => ['.*int', 'decimal', 'integer', 'numeric', 'double', 'float', 'real'],
                 'TEXT' => '.*text',
@@ -100,7 +102,6 @@ SQL;
             }
 
 
-
             $query = <<<SQL
                 SELECT constraint_name
                 FROM information_schema.table_constraints
@@ -134,14 +135,16 @@ SQL;
                     );
 
                 foreach ($result as [$tbl, $col]) {
-                    if (!$toTable) $toTable = $tbl;
-                    elseif ($tbl != $toTable) throw new \RuntimeException;
+                    if (!$toTable) {
+                        $toTable = $tbl;
+                    } elseif ($tbl != $toTable) {
+                        throw new \RuntimeException();
+                    }
 
                     $toCols[] = $col;
                 }
 
                 $objectInfo->addForeignKey($name, $fromCols, $toTable, $toCols);
-
             }
 
             yield $objectInfo;

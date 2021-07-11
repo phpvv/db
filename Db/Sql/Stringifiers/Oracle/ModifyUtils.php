@@ -15,17 +15,19 @@ namespace VV\Db\Sql\Stringifiers\Oracle;
  *
  * @package VV\Db\Driver\Oracle\SqlStringifier
  */
-trait ModifyUtils {
+trait ModifyUtils
+{
 
-    protected function exprValueToSave($value, $field) {
+    protected function exprValueToSave($value, $field)
+    {
         if ($value instanceof \VV\Db\Param && $value->isLob()) {
-            $type = $value->type();
+            $type = $value->getType();
             if ($type == \VV\Db\Param::T_TEXT) {
                 $emtyLobFunc = 'empty_clob()';
             } elseif ($type == \VV\Db\Param::T_BLOB) {
                 $emtyLobFunc = 'empty_blob()';
             } else {
-                throw new \UnexpectedValueException;
+                throw new \UnexpectedValueException();
             }
 
             $value->setForUpload(true);

@@ -13,7 +13,8 @@ namespace VV\Db\Model\Generator;
 
 use VV\Db\Driver\Driver;
 
-class ModelGenerator {
+class ModelGenerator
+{
 
     private \VV\Db\Connection $connection;
     private string $ns;
@@ -27,15 +28,20 @@ class ModelGenerator {
         /** Created by VV Db Model Generator */
         CODE;
 
-    public function __construct(\VV\Db $db) {
-        $connection = $this->connection = $db->connection();
-        if (!$connection->isConnected()) $connection->connect();
+    public function __construct(\VV\Db $db)
+    {
+        $connection = $this->connection = $db->getConnection();
+        if (!$connection->isConnected()) {
+            $connection->connect();
+        }
 
         $reflect = new \ReflectionObject($db);
         $this->ns = $reflect->getName();
 
         $this->dir = $dir = dirname($reflect->getFileName()) . \VV\DS . $reflect->getShortName() . \VV\DS;
-        if (!file_exists($dir)) mkdir($dir);
+        if (!file_exists($dir)) {
+            mkdir($dir);
+        }
 
         $this->dataObjectsGetterPhpdoc = array_fill_keys($a = ['Table', 'View'], '');
         $this->todel = array_fill_keys($a, []);
@@ -43,14 +49,17 @@ class ModelGenerator {
             $d = "$dir$k/";
             if (file_exists($d)) {
                 foreach (scandir($d) as $f) {
-                    if ($f != '.' && $f != '..') $v[$f] = $d . $f;
+                    if ($f != '.' && $f != '..') {
+                        $v[$f] = $d . $f;
+                    }
                 }
             }
         }
         unset($v);
     }
 
-    public function build() {
+    public function build()
+    {
         echo "Added/updated classes:\r\n";
 
         $structBuilder = $this->createStructBuilder($this->connection);
@@ -64,17 +73,18 @@ class ModelGenerator {
             $className = $dataObjectType . 'List';
 
             $file = "$this->dir$className.php";
-            file_put_contents($file, <<<CODE
+            file_put_contents($file,
+                <<<CODE
                 $this->dfltTop
                 namespace $this->ns;
-                
+
                 /**
                  * Class $className
                  *
                  * @package $this->ns
                 $v */
                 class $className extends \\VV\\Db\\Model\\$className {
-                
+
                 }
                 CODE
             );
@@ -83,17 +93,18 @@ class ModelGenerator {
             $className = $dataObjectType;
             $file = $this->dir . $className . ".php";
             if (!file_exists($file)) {
-                file_put_contents($file, <<<CODE
+                file_put_contents($file,
+                    <<<CODE
                     $this->dfltTop
                     namespace $this->ns;
-                    
+
                     /**
                      * Class $className
                      *
                      * @package $this->ns
                      */
                     class $className extends \\VV\\Db\\Model\\$className {
-                    
+
                     }
                     CODE
                 );
@@ -110,17 +121,19 @@ class ModelGenerator {
         }
     }
 
-    protected function createStructBuilder(\VV\Db\Connection $connection): StructBuilder {
-        return match ($connection->dbms()) {
-            Driver::DBMS_MYSQL => new StructBuilder\Mysql,
-            Driver::DBMS_ORACLE => new StructBuilder\Oracle,
-            Driver::DBMS_POSTGRES => new StructBuilder\Postgres,
+    protected function createStructBuilder(\VV\Db\Connection $connection): StructBuilder
+    {
+        return match ($connection->getDbmsName()) {
+            Driver::DBMS_MYSQL => new StructBuilder\Mysql(),
+            Driver::DBMS_ORACLE => new StructBuilder\Oracle(),
+            Driver::DBMS_POSTGRES => new StructBuilder\Postgres(),
         };
     }
 
-    protected function processObject(ObjectInfo $object) {
+    protected function processObject(ObjectInfo $object)
+    {
         $type = $object->type();
-        $tableWopfx = \VV\Db\Model\DataObject::wopfx($object->name());
+        $tableWopfx = \VV\Db\Model\DataObject::trimPrefix($object->name());
         $name = \VV\camelCase($tableWopfx);
         $className = ucfirst($name) . $type;
         $relNs = $object->typePlural();
@@ -135,7 +148,9 @@ class ModelGenerator {
         foreach ($object->columns() as $k => $v) {
             $data = [];
             foreach ($v as $ck => $cv) {
-                if (!is_int($ck)) continue;
+                if (!is_int($ck)) {
+                    continue;
+                }
 
                 if (!$data) {
                     $data[] = "Field::T_$cv";
@@ -151,7 +166,9 @@ class ModelGenerator {
             }
 
             $fieldsConstContent .= "        '$k' => [" . implode(', ', $data) . "],\n";
-            if (!empty($v['pk'])) $pkFields[] = $k;
+            if (!empty($v['pk'])) {
+                $pkFields[] = $k;
+            }
         }
 
         // write foreign keys
@@ -171,7 +188,7 @@ class ModelGenerator {
 
         $pkConst = implode(', ', $pkFields);
         $pkFieldsConst = implode("', '", $pkFields);
-        $alias = \VV\Db\Model\DataObject::name2alias($tableWopfx, []);
+        $alias = \VV\Db\Model\DataObject::nameToAlias($tableWopfx, []);
 
         [$phpDoc, $advTopContent, $advBottomContent] = $this->parseClassAdvContent($fqcn);
 
@@ -201,8 +218,11 @@ class ModelGenerator {
         file_put_contents($file, $content);
     }
 
-    protected function parseClassAdvContent(string $fqcn): ?array {
-        if (!class_exists($fqcn)) return null;
+    protected function parseClassAdvContent(string $fqcn): ?array
+    {
+        if (!class_exists($fqcn)) {
+            return null;
+        }
 
         /** @noinspection PhpUnhandledExceptionInspection */
         $reflector = new \ReflectionClass($fqcn);
@@ -212,19 +232,21 @@ class ModelGenerator {
             $reflector->getEndLine() - $start - 1
         );
         $phpDoc = $reflector->getDocComment();
-        if ($phpDoc) $phpDoc .= "\n";
+        if ($phpDoc) {
+            $phpDoc .= "\n";
+        }
 
         $topLines = $bottomLines = [];
         $stage = 0;
         foreach ($classLines as $line) {
-            $starts = fn($with) => str_starts_with(trim($line), $with);
+            $starts = fn ($with) => str_starts_with(trim($line), $with);
 
             switch ($stage) {
                 case 0:
                     if ($starts('protected const NAME =')) {
                         $stage = 1;
                         $lastIdx = count($topLines) - 1;
-                        if ($lastIdx >=0 && str_starts_with(trim($topLines[$lastIdx]), '//')) {
+                        if ($lastIdx >= 0 && str_starts_with(trim($topLines[$lastIdx]), '//')) {
                             unset($topLines[$lastIdx]);
                         }
                         break;
@@ -232,38 +254,51 @@ class ModelGenerator {
                     $topLines[] = $line;
                     break;
                 case 1:
-                    if ($starts('protected const FOREING_KEYS =')) $stage = 2;
+                    if ($starts('protected const FOREING_KEYS =')) {
+                        $stage = 2;
+                    }
                     break;
                 case 2:
-                    if ($starts('];')) $stage = 3;
+                    if ($starts('];')) {
+                        $stage = 3;
+                    }
                     break;
                 /** @noinspection PhpMissingBreakStatementInspection */
                 case 3:
                     $stage = 4;
-                    if ($starts('//')) break;
+                    if ($starts('//')) {
+                        break;
+                    }
                 case 4:
                     $bottomLines[] = $line;
             }
         }
 
-        $lines2code = fn($lines) => $lines && array_filter($lines, fn($v) => trim($v))
+        $lines2code = fn ($lines) => $lines && array_filter($lines, fn ($v) => trim($v))
             ? implode('', $lines)
             : '';
 
         $advTopContent = $lines2code($topLines);
-        if ($advTopContent) $advTopContent = '    ' . ltrim("$advTopContent");
+        if ($advTopContent) {
+            $advTopContent = '    ' . ltrim("$advTopContent");
+        }
 
         $advBottomContent = $lines2code($bottomLines);
-        if ($advBottomContent) $advBottomContent = rtrim("\n$advBottomContent");
+        if ($advBottomContent) {
+            $advBottomContent = rtrim("\n$advBottomContent");
+        }
 
         return [$phpDoc, $advTopContent, $advBottomContent];
     }
 
-    public static function buildTypeDecorator($map): \Closure {
+    public static function buildTypeDecorator($map): \Closure
+    {
         return function ($t) use ($map) {
             foreach ($map as $k => $v) {
                 foreach ((array)$v as $rx) {
-                    if (preg_match('/^' . $rx . '$/i', $t)) return $k;
+                    if (preg_match('/^' . $rx . '$/i', $t)) {
+                        return $k;
+                    }
                 }
             }
 

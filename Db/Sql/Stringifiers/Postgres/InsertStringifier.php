@@ -17,7 +17,8 @@ use VV\Db\Sql\Clauses\InsertedIdClause;
  *
  * @package VV\Db\Postgres\QueryStringifiers
  */
-class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
+class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
+{
 
     use CommonUtils;
 
@@ -25,19 +26,24 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
 
     private ?string $insertedIdField = null;
 
-    public function supportedClausesIds() {
+    public function supportedClausesIds()
+    {
         return parent::supportedClausesIds()
                | \VV\Db\Sql\InsertQuery::C_RETURN_INS_ID;
     }
 
-    protected function applyInsertedIdClause(InsertedIdClause $retinsId) {
-        if ($retinsId->isEmpty()) return;
+    protected function applyInsertedIdClause(InsertedIdClause $retinsId)
+    {
+        if ($retinsId->isEmpty()) {
+            return;
+        }
 
         $this->insertedIdParam = ($retinsId->param() ?: \VV\Db\Param::chr())->setForInsertedId();
         $this->insertedIdField = $retinsId->pk() ?: $this->insertQuery()->mainTablePk();
     }
 
-    protected function strStdInsert(&$params) {
+    protected function strStdInsert(&$params)
+    {
         $sql = parent::strStdInsert($params);
 
         if ($this->insertedIdParam) {

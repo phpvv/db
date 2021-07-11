@@ -10,30 +10,38 @@
  */
 namespace VV\Db\Model;
 
+use VV\Db;
+
+use function VV\camelCase;
+
 /**
  * Class ObjectList
  *
  * @package VV\Db\Model
  */
-abstract class ObjectList {
-
+abstract class ObjectList
+{
     protected const SUBNS = '';
     protected const SUFFIX = '';
     protected const DFLT_PREFIXES = [];
 
-    private \VV\Db $db;
+    private Db $db;
     private string $ns;
     /** @var DbObject[] */
     private array $objects = [];
 
-    final public function __construct(\VV\Db $db) {
+    final public function __construct(Db $db)
+    {
         $this->db = $db;
         $this->ns = preg_replace('/\w+$/', '', get_class($this)) . $this->subns() . '\\';
     }
 
-    final public function __get($camelName) {
-        $item = $this->getByCamel($camelName);
-        if (!$item) throw new \LogicException("Table '$camelName' not found");
+    final public function __get($camelName)
+    {
+        $item = $this->getByCamelName($camelName);
+        if (!$item) {
+            throw new \LogicException("Table '$camelName' not found");
+        }
 
         return $item;
     }
@@ -46,11 +54,12 @@ abstract class ObjectList {
      *
      * @return DbObject|null
      */
-    public function get(string $name, array $prefixes = null): ?DbObject {
-        $wopfx = DbObject::wopfx($name, $prefixes ?? static::DFLT_PREFIXES);
-        $camelName = \VV\camelCase($wopfx);
+    public function get(string $name, array $prefixes = null): ?DbObject
+    {
+        $wopfx = DbObject::trimPrefix($name, $prefixes ?? static::DFLT_PREFIXES);
+        $camelName = camelCase($wopfx);
 
-        return $this->getByCamel($camelName);
+        return $this->getByCamelName($camelName);
     }
 
     /**
@@ -58,7 +67,8 @@ abstract class ObjectList {
      *
      * @return DbObject|null
      */
-    public function getByCamel(string $camelName): ?DbObject {
+    public function getByCamelName(string $camelName): ?DbObject
+    {
         $item = &$this->objects[$camelName];
         if ($item === null) {
             $class = $this->ns . ucfirst($camelName) . $this->suffix();
@@ -75,14 +85,16 @@ abstract class ObjectList {
     /**
      * @return string
      */
-    public function subns(): string {
+    public function subns(): string
+    {
         return static::SUBNS;
     }
 
     /**
      * @return string
      */
-    public function suffix(): string {
+    public function suffix(): string
+    {
         return static::SUFFIX;
     }
 }

@@ -18,9 +18,11 @@ use VV\Db\Sql\InsertQuery as InsertQuery;
  *
  * @package VV\Db\Driver\Mysql\SqlStringifier
  */
-class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
+class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
+{
 
-    public function supportedClausesIds() {
+    public function supportedClausesIds()
+    {
         return parent::supportedClausesIds()
                | InsertQuery::C_ONDUPKEY
                | InsertQuery::C_RETURN_INS_ID;
@@ -32,8 +34,11 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
      *
      * @return string|void
      */
-    protected function strOnDupKeyClause(OnDupKeyClause $ondupkey, &$params) {
-        if ($ondupkey->isEmpty()) return '';
+    protected function strOnDupKeyClause(OnDupKeyClause $ondupkey, &$params)
+    {
+        if ($ondupkey->isEmpty()) {
+            return '';
+        }
 
         return ' ON DUPLICATE KEY UPDATE ' . $this->strDataset($ondupkey, $params);
     }
@@ -41,7 +46,10 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
     /**
      * @inheritDoc
      */
-    protected function applyInsertedIdClause(\VV\Db\Sql\Clauses\InsertedIdClause $retinsId) {
-        if ($retinsId->isEmpty()) return;
+    protected function applyInsertedIdClause(\VV\Db\Sql\Clauses\InsertedIdClause $retinsId)
+    {
+        if ($retinsId->isEmpty()) {
+            return;
+        }
     }
 }

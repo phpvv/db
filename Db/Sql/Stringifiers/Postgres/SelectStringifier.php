@@ -15,15 +15,18 @@ namespace VV\Db\Sql\Stringifiers\Postgres;
  *
  * @package VV\Db\Postgres\QueryStringifiers
  */
-class SelectStringifier extends \VV\Db\Sql\Stringifiers\SelectStringifier {
+class SelectStringifier extends \VV\Db\Sql\Stringifiers\SelectStringifier
+{
 
     use CommonUtils;
 
-    protected function applyLimitClause(&$sql, int $count, int $offset): void {
+    protected function applyLimitClause(&$sql, int $count, int $offset): void
+    {
         $sql .= " LIMIT $count" . ($offset ? " OFFSET $offset" : '');
     }
 
-    protected function applyOderByItemNullsLast(&$str, $colstr, \VV\Db\Sql\Clauses\OrderByClauseItem $item): void {
+    protected function applyOderByItemNullsLast(&$str, $colstr, \VV\Db\Sql\Clauses\OrderByClauseItem $item): void
+    {
         $str .= ' NULLS ' . ($item->isNullsLast() ? 'LAST' : 'FIRST');
     }
 }

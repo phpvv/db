@@ -17,7 +17,8 @@ use VV\Db\Sql;
  *
  * @package VV\Db\Sql\Clauses
  */
-class InsertValuesClause extends ItemList {
+class InsertValuesClause extends ItemList
+{
 
     /**
      * Add field(s)
@@ -26,7 +27,8 @@ class InsertValuesClause extends ItemList {
      *
      * @return $this
      */
-    public function add(mixed ...$values): static {
+    public function add(mixed ...$values): static
+    {
         if (count($values) == 1 && $values[0] instanceof Sql\SelectQuery) {
             $values = $values[0];
         } else {

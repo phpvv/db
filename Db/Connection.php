@@ -12,6 +12,8 @@ namespace VV\Db;
 
 use JetBrains\PhpStorm\Pure;
 use VV\Db\Exceptions\ConnectionError;
+use VV\Db\Exceptions\ConnectionIsBusy;
+use VV\Db\Sql\Expressions\Expression;
 use VV\Db\Sql\Query;
 use VV\Db\Sql\Stringifiers\Factory as SqlStringifiersFactory;
 use VV\Db\Sql\Stringifiers\QueryStringifier;
@@ -21,12 +23,13 @@ use VV\Db\Sql\Stringifiers\QueryStringifier;
  *
  * @package VV\Db
  */
-final class Connection {
+final class Connection
+{
 
     private Driver\Driver $driver;
     private ?string $host = null;
     private ?string $user = null;
-    private ?string $passwd = null;
+    private ?string $password = null;
     private ?string $scheme = null;
     private ?string $charset = null;
 
@@ -47,45 +50,68 @@ final class Connection {
      * @param string|null   $scheme
      * @param string|null   $charset
      */
-    public function __construct(Driver\Driver $driver, string $host = null, string $user = null, string $passwd = null, string $scheme = null, string $charset = null) {
+    public function __construct(
+        Driver\Driver $driver,
+        string $host = null,
+        string $user = null,
+        string $passwd = null,
+        string $scheme = null,
+        string $charset = null
+    ) {
         $this->driver = $driver;
-        if ($charset !== null) $this->setCharset($charset);
-        if ($scheme !== null) $this->setScheme($scheme);
-        if ($passwd !== null) $this->setPasswd($passwd);
-        if ($user !== null) $this->setUser($user);
-        if ($host !== null) $this->setHost($host);
+        if ($charset !== null) {
+            $this->setCharset($charset);
+        }
+        if ($scheme !== null) {
+            $this->setScheme($scheme);
+        }
+        if ($passwd !== null) {
+            $this->setPassword($passwd);
+        }
+        if ($user !== null) {
+            $this->setUser($user);
+        }
+        if ($host !== null) {
+            $this->setHost($host);
+        }
     }
 
-    public function __wakeup() {
+    public function __wakeup()
+    {
         $this->connectionError = null;
         $this->driverConnection = null;
         $this->connect();
     }
 
     #[Pure]
-    public function isSame(self $connection): bool {
-        return $this === $connection || $this->hash() == $connection->hash();
+    public function isSame(
+        self $connection
+    ): bool {
+        return $this === $connection || $this->getHash() == $connection->getHash();
     }
 
     /**
      * @return $this
      */
-    public function connect(): self {
+    public function connect(): self
+    {
         $this->throwIfConnected();
 
         if ($this->connectionError) {
             throw new ConnectionError('Connection Error found for instance', null, $this->connectionError);
         }
 
-        if (!$this->host()) throw new \LogicException('Host is not set');
+        if (!$this->getHost()) {
+            throw new \LogicException('Host is not set');
+        }
 
         try {
             $this->driverConnection = $this->driver->connect(
-                $this->host(),
-                $this->user(),
-                $this->passwd(),
-                $this->scheme(),
-                $this->charset()
+                $this->getHost(),
+                $this->getUser(),
+                $this->getPassword(),
+                $this->getScheme(),
+                $this->getCharset()
             );
         } catch (\Exception $e) {
             if (!$e instanceof ConnectionError) {
@@ -105,7 +131,8 @@ final class Connection {
     /**
      * @return $this
      */
-    public function disconnect(): self {
+    public function disconnect(): self
+    {
         $this->throwIfNoConnection();
 
         $this->driverConnection->disconnect();
@@ -117,7 +144,8 @@ final class Connection {
     /**
      * @return $this
      */
-    public function reconnect(): self {
+    public function reconnect(): self
+    {
         if ($this->isConnected()) {
             $this->disconnect();
         }
@@ -132,7 +160,8 @@ final class Connection {
      *
      * @return Statement
      */
-    public function prepare(Query|string $query, array $params = null, int $fetchSize = null): Statement {
+    public function prepare(Query|string $query, array $params = null, int $fetchSize = null): Statement
+    {
         $this->tryAutoConnect();
 
         $resultFieldsMap = null;
@@ -149,8 +178,12 @@ final class Connection {
 
         $driverPrepared = $this->driverConnection->prepare($queryInfo);
         $prepared = new Statement($driverPrepared, $this, $this->driverConnection, $queryInfo);
-        if ($params) $prepared->bind($params);
-        if ($fetchSize !== null) $prepared->setFetchSize($fetchSize);
+        if ($params) {
+            $prepared->bind($params);
+        }
+        if ($fetchSize !== null) {
+            $prepared->setFetchSize($fetchSize);
+        }
 
         return $prepared;
     }
@@ -166,14 +199,24 @@ final class Connection {
      *
      * @return Result
      */
-    public function query(Query|string $query, array $params = null, int $flags = null, $decorator = null, int $fetchSize = null): Result {
+    public function query(
+        Query|string $query,
+        array $params = null,
+        int $flags = null,
+        $decorator = null,
+        int $fetchSize = null
+    ): Result {
         $prepared = $this->prepare($query);
 
         if ($params) {
-            if (is_string($params) || is_numeric($params)) $params = [$params];
+            if (is_string($params) || is_numeric($params)) {
+                $params = [$params];
+            }
             $prepared->bind($params);
         }
-        if ($fetchSize !== null) $prepared->setFetchSize($fetchSize);
+        if ($fetchSize !== null) {
+            $prepared->setFetchSize($fetchSize);
+        }
 
         return $prepared->exec()
             ->setFlags($flags)
@@ -185,7 +228,8 @@ final class Connection {
      * @return bool
      */
     #[Pure]
-    public function isInTransaction(): bool {
+    public function isInTransaction(): bool
+    {
         return $this->transaction && !$this->transaction->isFinished();
     }
 
@@ -193,14 +237,16 @@ final class Connection {
      * @return Transaction|null
      * @internal
      */
-    public function transaction(): ?Transaction {
+    public function getTransaction(): ?Transaction
+    {
         return $this->transaction;
     }
 
     /**
      * @return Transaction
      */
-    public function startTransaction(): Transaction {
+    public function startTransaction(): Transaction
+    {
         $this->tryAutoConnect();
 
         // disallow to implicit start sub transaction
@@ -216,9 +262,12 @@ final class Connection {
     /**
      * @return $this
      */
-    public function commit(): self {
+    public function commit(): self
+    {
         $this->throwIfNoConnection();
-        if (!$this->transaction) throw new \LogicException('Nothing to commit');
+        if (!$this->transaction) {
+            throw new \LogicException('Nothing to commit');
+        }
 
         $this->transaction = null;
         $this->driverConnection->commit();
@@ -229,8 +278,11 @@ final class Connection {
     /**
      * @return $this
      */
-    public function rollback(): self {
-        if (!$this->transaction) return $this;
+    public function rollback(): self
+    {
+        if (!$this->transaction) {
+            return $this;
+        }
 
         $this->throwIfNoConnection();
         $this->transaction = null;
@@ -242,7 +294,8 @@ final class Connection {
     /**
      * @return bool
      */
-    public function isUnderExecution(): bool {
+    public function isUnderExecution(): bool
+    {
         return $this->underExecution;
     }
 
@@ -251,10 +304,13 @@ final class Connection {
      *
      * @return $this
      */
-    public function acqureExecution(): self {
-        if ($this->underExecution) throw new \VV\Db\Exceptions\ConnectionIsBusy;
+    public function acqureExecution(): self
+    {
+        if ($this->underExecution) {
+            throw new ConnectionIsBusy();
+        }
 
-        // set stub for accidentaly paralel execution
+        // set stub for accidentally parallel execution
         $this->underExecution = true;
 
         return $this;
@@ -265,8 +321,9 @@ final class Connection {
      *
      * @return $this
      */
-    public function releaseExecution(): self {
-        // removes stub for accidentaly paralel execution
+    public function releaseExecution(): self
+    {
+        // removes stub for accidentally parallel execution
         $this->underExecution = false;
 
         return $this;
@@ -275,7 +332,8 @@ final class Connection {
     /**
      * @return string|null
      */
-    public function host(): ?string {
+    public function getHost(): ?string
+    {
         return $this->host;
     }
 
@@ -284,7 +342,8 @@ final class Connection {
      *
      * @return $this
      */
-    public function setHost(?string $host): self {
+    public function setHost(?string $host): self
+    {
         $this->throwIfConnected();
         $this->host = $host;
 
@@ -294,7 +353,8 @@ final class Connection {
     /**
      * @return string|null
      */
-    public function user(): ?string {
+    public function getUser(): ?string
+    {
         return $this->user;
     }
 
@@ -303,7 +363,8 @@ final class Connection {
      *
      * @return $this
      */
-    public function setUser(?string $user): self {
+    public function setUser(?string $user): self
+    {
         $this->throwIfConnected();
         $this->user = $user;
 
@@ -311,13 +372,14 @@ final class Connection {
     }
 
     /**
-     * @param string|null $passwd
+     * @param string|null $password
      *
      * @return $this
      */
-    public function setPasswd(?string $passwd): self {
+    public function setPassword(?string $password): self
+    {
         $this->throwIfConnected();
-        $this->passwd = $passwd;
+        $this->password = $password;
 
         return $this;
     }
@@ -326,9 +388,10 @@ final class Connection {
      * @return string|null
      */
     #[Pure]
-    public function scheme(): ?string {
+    public function getScheme(): ?string
+    {
         if ($this->scheme === null) {
-            return $this->user();
+            return $this->getUser();
         }
 
         return $this->scheme;
@@ -339,7 +402,8 @@ final class Connection {
      *
      * @return $this
      */
-    public function setScheme(?string $scheme): self {
+    public function setScheme(?string $scheme): self
+    {
         $this->throwIfConnected();
         $this->scheme = $scheme;
 
@@ -349,7 +413,8 @@ final class Connection {
     /**
      * @return string|null
      */
-    public function charset(): ?string {
+    public function getCharset(): ?string
+    {
         return $this->charset;
     }
 
@@ -358,7 +423,8 @@ final class Connection {
      *
      * @return $this
      */
-    public function setCharset(?string $charset): self {
+    public function setCharset(?string $charset): self
+    {
         $this->throwIfConnected();
         $this->charset = $charset;
 
@@ -368,7 +434,8 @@ final class Connection {
     /**
      * @return bool
      */
-    public function isAutoConnect(): bool {
+    public function isAutoConnect(): bool
+    {
         return $this->autoConnect;
     }
 
@@ -377,7 +444,8 @@ final class Connection {
      *
      * @return $this
      */
-    public function setAutoConnect(bool $autoConnect): self {
+    public function setAutoConnect(bool $autoConnect): self
+    {
         $this->autoConnect = $autoConnect;
 
         return $this;
@@ -386,35 +454,40 @@ final class Connection {
     /**
      * @return bool
      */
-    public function isMysql(): bool {
-        return $this->dbms() == Driver\Driver::DBMS_MYSQL;
+    public function isMysql(): bool
+    {
+        return $this->getDbmsName() == Driver\Driver::DBMS_MYSQL;
     }
 
     /**
      * @return bool
      */
-    public function isPostgresql(): bool {
-        return $this->dbms() == Driver\Driver::DBMS_POSTGRES;
+    public function isPostgresql(): bool
+    {
+        return $this->getDbmsName() == Driver\Driver::DBMS_POSTGRES;
     }
 
     /**
      * @return bool
      */
-    public function isOracle(): bool {
-        return $this->dbms() == Driver\Driver::DBMS_ORACLE;
+    public function isOracle(): bool
+    {
+        return $this->getDbmsName() == Driver\Driver::DBMS_ORACLE;
     }
 
     /**
      * @return bool
      */
-    public function isMssql(): bool {
-        return $this->dbms() == Driver\Driver::DBMS_MSSQL;
+    public function isMssql(): bool
+    {
+        return $this->getDbmsName() == Driver\Driver::DBMS_MSSQL;
     }
 
     /**
      * @return bool
      */
-    public function isConnected(): bool {
+    public function isConnected(): bool
+    {
         return !empty($this->driverConnection);
     }
 
@@ -422,18 +495,20 @@ final class Connection {
      * @return bool
      */
     #[Pure]
-    public function isBusy(): bool {
+    public function isBusy(): bool
+    {
         return $this->isInTransaction() || $this->isUnderExecution();
     }
 
     /**
      * Create select query
      *
-     * @param string[]|\VV\Db\Sql\Expressions\Expression[] $columns
+     * @param string[]|Expression[] $columns
      *
      * @return Sql\SelectQuery
      */
-    public function select(...$columns): Sql\SelectQuery {
+    public function select(...$columns): Sql\SelectQuery
+    {
         return (new Sql\SelectQuery($this))->columns(...$columns);
     }
 
@@ -444,9 +519,12 @@ final class Connection {
      *
      * @return Sql\InsertQuery
      */
-    public function insert(array $data = null): Sql\InsertQuery {
+    public function insert(array $data = null): Sql\InsertQuery
+    {
         $insert = (new Sql\InsertQuery($this));
-        if ($data) $insert->set($data);
+        if ($data) {
+            $insert->set($data);
+        }
 
         return $insert;
     }
@@ -458,9 +536,12 @@ final class Connection {
      *
      * @return Sql\UpdateQuery
      */
-    public function update(array $data = null): Sql\UpdateQuery {
+    public function update(array $data = null): Sql\UpdateQuery
+    {
         $update = (new Sql\UpdateQuery($this));
-        if ($data) $update->set($data);
+        if ($data) {
+            $update->set($data);
+        }
 
         return $update;
     }
@@ -470,22 +551,25 @@ final class Connection {
      *
      * @return Sql\DeleteQuery
      */
-    public function delete(): Sql\DeleteQuery {
+    public function delete(): Sql\DeleteQuery
+    {
         return (new Sql\DeleteQuery($this));
     }
 
     /**
      * @return ConnectionError|null
      */
-    public function connectionError(): ?ConnectionError {
+    public function connectionError(): ?ConnectionError
+    {
         return $this->connectionError;
     }
 
     /**
      * @return string
      */
-    public function dbms(): string {
-        return $this->driver->dbms();
+    public function getDbmsName(): string
+    {
+        return $this->driver->getDbmsName();
     }
 
     /**
@@ -494,9 +578,12 @@ final class Connection {
      *
      * @return string
      */
-    public function stringifyQuery(Query $query, &$params): string {
-        $stringifier = $this->stringifierForQuery($query);
-        if (!$stringifier) throw new \InvalidArgumentException('Unknown query type');
+    public function stringifyQuery(Query $query, &$params): string
+    {
+        $stringifier = $this->getStringifierForQuery($query);
+        if (!$stringifier) {
+            throw new \InvalidArgumentException('Unknown query type');
+        }
 
         $noemtClauses = $query->nonEmptyClausesIds();
         $suprtClauses = $stringifier->supportedClausesIds();
@@ -512,14 +599,16 @@ final class Connection {
     /**
      * @return string|null
      */
-    protected function passwd(): ?string {
-        return $this->passwd;
+    protected function getPassword(): ?string
+    {
+        return $this->password;
     }
 
     /**
      * @return $this
      */
-    protected function tryAutoConnect(): self {
+    protected function tryAutoConnect(): self
+    {
         if (!$this->isConnected()) {
             if (!$this->isAutoConnect()) {
                 throw new \LogicException('No Connection');
@@ -534,7 +623,8 @@ final class Connection {
     /**
      * @return $this
      */
-    protected function throwIfNoConnection(): self {
+    protected function throwIfNoConnection(): self
+    {
         if (!$this->isConnected()) {
             throw new \LogicException('No Connection');
         }
@@ -545,8 +635,11 @@ final class Connection {
     /**
      * @return $this
      */
-    protected function throwIfConnected(): self {
-        if ($this->isConnected()) throw new \LogicException('Already connected');
+    protected function throwIfConnected(): self
+    {
+        if ($this->isConnected()) {
+            throw new \LogicException('Already connected');
+        }
 
         return $this;
     }
@@ -556,7 +649,8 @@ final class Connection {
      *
      * @return QueryStringifier
      */
-    private function stringifierForQuery(Query $query): QueryStringifier {
+    private function getStringifierForQuery(Query $query): QueryStringifier
+    {
         $factory = $this->sqlStringifiersFactory();
 
         return match (true) {
@@ -568,28 +662,35 @@ final class Connection {
         };
     }
 
-    private function sqlStringifiersFactory(): SqlStringifiersFactory {
+    private function sqlStringifiersFactory(): SqlStringifiersFactory
+    {
         $factory = &$this->sqlStringifiersFactory;
-        if (!$factory) $factory = $this->driver->sqlStringifiersFactory();
         if (!$factory) {
-            $factory = match ($this->driver->dbms()) {
-                Driver\Driver::DBMS_MYSQL => new \VV\Db\Sql\Stringifiers\Mysql\Factory,
-                Driver\Driver::DBMS_ORACLE => new \VV\Db\Sql\Stringifiers\Oracle\Factory,
-                Driver\Driver::DBMS_POSTGRES => new \VV\Db\Sql\Stringifiers\Postgres\Factory,
+            $factory = $this->driver->getSqlStringifiersFactory();
+        }
+        if (!$factory) {
+            $factory = match ($this->driver->getDbmsName()) {
+                Driver\Driver::DBMS_MYSQL => new \VV\Db\Sql\Stringifiers\Mysql\Factory(),
+                Driver\Driver::DBMS_ORACLE => new \VV\Db\Sql\Stringifiers\Oracle\Factory(),
+                Driver\Driver::DBMS_POSTGRES => new \VV\Db\Sql\Stringifiers\Postgres\Factory(),
             };
         }
 
         return $factory;
     }
 
-    private function hash(): string {
-        return md5(join(';', [
-            get_class($this->driver),
-            $this->charset,
-            $this->scheme,
-            $this->passwd,
-            $this->user,
-            $this->host,
-        ]));
+    private function getHash(): string
+    {
+        return md5(join(
+            ';',
+            [
+                get_class($this->driver),
+                $this->charset,
+                $this->scheme,
+                $this->password,
+                $this->user,
+                $this->host,
+            ]
+        ));
     }
 }

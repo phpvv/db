@@ -19,7 +19,8 @@ use VV\Db\Sql\Expressions\Expression;
  * @package VV\Db\Sql\Clauses
  * @method DbObject[] items():array
  */
-class DeleteTablesClause extends ItemList {
+class DeleteTablesClause extends ItemList
+{
 
     /**
      * Add field(s)
@@ -28,8 +29,11 @@ class DeleteTablesClause extends ItemList {
      *
      * @return $this
      */
-    public function add(string|Expression ...$tables): static {
-        if (!$tables) return $this;
+    public function add(string|Expression ...$tables): static
+    {
+        if (!$tables) {
+            return $this;
+        }
 
         foreach ($tables as $i => $tbl) {
             if (!$tbl = DbObject::create($tbl)) {

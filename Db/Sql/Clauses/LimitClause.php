@@ -17,7 +17,8 @@ use JetBrains\PhpStorm\Pure;
  *
  * @package VV\Db\Sql\Clauses
  */
-class LimitClause implements Clause {
+class LimitClause implements Clause
+{
 
     private int $count = 0;
     private int $offset = 0;
@@ -25,14 +26,16 @@ class LimitClause implements Clause {
     /**
      * @return int
      */
-    public function count(): int {
+    public function count(): int
+    {
         return $this->count;
     }
 
     /**
      * @return int
      */
-    public function offset(): int {
+    public function offset(): int
+    {
         return $this->offset;
     }
 
@@ -40,7 +43,8 @@ class LimitClause implements Clause {
      * @param int $count
      * @param int $offset
      */
-    public function set(int $count, int $offset = 0) {
+    public function set(int $count, int $offset = 0)
+    {
         $this->count = $count;
         $this->offset = $offset;
     }
@@ -49,7 +53,8 @@ class LimitClause implements Clause {
      * @return bool
      */
     #[Pure]
-    public function isEmpty(): bool {
+    public function isEmpty(): bool
+    {
         return !$this->count();
     }
 }

@@ -18,19 +18,22 @@ use VV\Db\Sql;
  * @package VV\Db\Sql\Clauses
  * @method OrderByClauseItem[] items():array
  */
-class OrderByClause extends ColumnList {
+class OrderByClause extends ColumnList
+{
 
-    protected function _add(array $columns) {
+    protected function _add(array $columns)
+    {
         foreach ($columns as $col) {
             if ($item = OrderByClauseItem::create($col)) {
                 $this->appendItems($item);
             } else {
-                throw new \InvalidArgumentException;
+                throw new \InvalidArgumentException();
             }
         }
     }
 
-    protected function allowedObjectTypes(): array {
+    protected function allowedObjectTypes(): array
+    {
         return [OrderByClauseItem::class, Sql\Expressions\Expression::class];
     }
 }

@@ -17,7 +17,8 @@ use VV\Db\Sql;
  *
  * @package VV\Db\Sql\Clauses
  */
-class ColumnsClause extends ColumnList {
+class ColumnsClause extends ColumnList
+{
 
     private ?TableClause $tableClause = null;
     private ?array $resultFields = null;
@@ -26,14 +27,16 @@ class ColumnsClause extends ColumnList {
     /**
      * @return \VV\Db\Sql\Expressions\Expression[]
      */
-    public function items(): array {
+    public function items(): array
+    {
         return parent::items() ?: [Sql\Expressions\DbObject::create('*')];
     }
 
     /**
      * @inheritDoc
      */
-    public function isEmpty(): bool {
+    public function isEmpty(): bool
+    {
         return false; // can't be empty (*)
     }
 
@@ -42,14 +45,16 @@ class ColumnsClause extends ColumnList {
      *
      * @return bool
      */
-    public function isAllColumns(): bool {
+    public function isAllColumns(): bool
+    {
         return !parent::items();
     }
 
     /**
      * @return string[]
      */
-    public function resultFields(): array {
+    public function resultFields(): array
+    {
         $rf = &$this->resultFields;
         if ($rf === null) {
             $rf = [];
@@ -61,13 +66,17 @@ class ColumnsClause extends ColumnList {
                         $a = $col->name();
                         if ($a == '*') {
                             $tableClause = $this->tableClause();
-                            if (!$tableClause) throw new \LogicException('Table clause is not set');
+                            if (!$tableClause) {
+                                throw new \LogicException('Table clause is not set');
+                            }
 
                             $owner = ($o = $col->owner()) ? $o->name() : null;
                             $tbl = $tableClause->tableModelOrMain($owner);
-                            if (!$tbl) throw new \LogicException("Can't get result fields: no table model for *");
+                            if (!$tbl) {
+                                throw new \LogicException("Can't get result fields: no table model for *");
+                            }
 
-                            $rf = array_merge($rf, $tbl->fields()->names());
+                            $rf = array_merge($rf, $tbl->getFields()->getNames());
                             continue;
                         }
                     }
@@ -75,7 +84,9 @@ class ColumnsClause extends ColumnList {
                     $a = $col->alias();
                 }
 
-                if (!$a) throw new \LogicException("Alias for field $col is not set");
+                if (!$a) {
+                    throw new \LogicException("Alias for field $col is not set");
+                }
 
                 $rf[] = $a;
             }
@@ -87,7 +98,8 @@ class ColumnsClause extends ColumnList {
     /**
      * @return TableClause|null
      */
-    public function tableClause(): ?TableClause {
+    public function tableClause(): ?TableClause
+    {
         return $this->tableClause;
     }
 
@@ -96,7 +108,8 @@ class ColumnsClause extends ColumnList {
      *
      * @return $this
      */
-    public function setTableClause(?TableClause $clause): static {
+    public function setTableClause(?TableClause $clause): static
+    {
         $this->tableClause = $clause;
 
         return $this;
@@ -105,7 +118,8 @@ class ColumnsClause extends ColumnList {
     /**
      * @return array|null
      */
-    public function resultFieldsMap(): ?array {
+    public function resultFieldsMap(): ?array
+    {
         return $this->resultFieldsMap;
     }
 
@@ -114,13 +128,15 @@ class ColumnsClause extends ColumnList {
      *
      * @return $this|ColumnsClause
      */
-    public function setResultFieldsMap(?array $resultFieldsMap): self {
+    public function setResultFieldsMap(?array $resultFieldsMap): self
+    {
         $this->resultFieldsMap = $resultFieldsMap;
 
         return $this;
     }
 
-    protected function _add(array $columns) {
+    protected function _add(array $columns)
+    {
         foreach ($columns as $col) {
             $expr = Sql::expression($col);
             if ($expr instanceof Sql\Expressions\PlainSql) {
@@ -137,7 +153,8 @@ class ColumnsClause extends ColumnList {
     /**
      * @return array
      */
-    protected function allowedObjectTypes(): array {
+    protected function allowedObjectTypes(): array
+    {
         return [Sql\Expressions\Expression::class];
     }
 }

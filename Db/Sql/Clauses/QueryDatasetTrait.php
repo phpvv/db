@@ -18,7 +18,8 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Clauses
  */
-trait QueryDatasetTrait {
+trait QueryDatasetTrait
+{
 
     private ?DatasetClause $datasetClause = null;
 
@@ -30,7 +31,8 @@ trait QueryDatasetTrait {
      *
      * @return $this
      */
-    public function set(iterable|string|Expression $field, mixed $value = null): static {
+    public function set(iterable|string|Expression $field, mixed $value = null): static
+    {
         $this->datasetClause()->add(...func_get_args());
 
         return $this;
@@ -39,7 +41,8 @@ trait QueryDatasetTrait {
     /**
      * @return DatasetClause
      */
-    public function datasetClause(): DatasetClause {
+    public function datasetClause(): DatasetClause
+    {
         if (!$this->datasetClause) {
             $this->setDatasetClause($this->createDatasetClause());
         }
@@ -52,7 +55,8 @@ trait QueryDatasetTrait {
      *
      * @return $this
      */
-    public function setDatasetClause(?DatasetClause $clause): static {
+    public function setDatasetClause(?DatasetClause $clause): static
+    {
         $this->datasetClause = $clause;
 
         return $this;
@@ -63,7 +67,8 @@ trait QueryDatasetTrait {
      *
      * @return DatasetClause
      */
-    public function clearDatasetClause(): DatasetClause {
+    public function clearDatasetClause(): DatasetClause
+    {
         try {
             return $this->datasetClause();
         } finally {
@@ -75,7 +80,8 @@ trait QueryDatasetTrait {
      * @return DatasetClause
      */
     #[Pure]
-    public function createDatasetClause(): DatasetClause {
-        return new DatasetClause;
+    public function createDatasetClause(): DatasetClause
+    {
+        return new DatasetClause();
     }
 }

@@ -17,7 +17,8 @@ use VV\Db\Sql\Predicates\Predicate;
  *
  * @package VV\Db\Sql\Clause\Condition
  */
-class ConditionItem {
+class ConditionItem
+{
 
     public const CONN_AND = 'AND',
         CONN_OR = 'OR';
@@ -31,7 +32,8 @@ class ConditionItem {
      * @param Predicate   $predicate
      * @param string|null $connector
      */
-    public function __construct(Predicate $predicate, string $connector = null) {
+    public function __construct(Predicate $predicate, string $connector = null)
+    {
         $this->predicate = $predicate;
 
         if ($connector) {
@@ -47,14 +49,16 @@ class ConditionItem {
     /**
      * @return Predicate
      */
-    public function predicate(): Predicate {
+    public function predicate(): Predicate
+    {
         return $this->predicate;
     }
 
     /**
      * @return string
      */
-    public function connector(): string {
+    public function connector(): string
+    {
         return $this->connector;
     }
 }

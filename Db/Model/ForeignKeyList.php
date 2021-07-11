@@ -15,15 +15,15 @@ namespace VV\Db\Model;
  *
  * @package VV\Db\Model
  */
-class ForeignKeyList implements \IteratorAggregate {
-
+class ForeignKeyList implements \IteratorAggregate
+{
     /** @var ForeignKey[] */
     private array $foreignKeys = [];
-
     /** @var string[] */
     private array $names = [];
 
-    public function __construct(array $foreignKeysData) {
+    public function __construct(array $foreignKeysData)
+    {
         foreach ($foreignKeysData as $name => $data) {
             $this->names[] = $name;
             $this->foreignKeys[$name] = new ForeignKey($name, $data);
@@ -37,7 +37,8 @@ class ForeignKeyList implements \IteratorAggregate {
      *
      * @return ForeignKey| null
      */
-    public function get(string $name): ?ForeignKey {
+    public function get(string $name): ?ForeignKey
+    {
         return $this->foreignKeys[$name] ?? null;
     }
 
@@ -48,12 +49,15 @@ class ForeignKeyList implements \IteratorAggregate {
      *
      * @return ForeignKey| null
      */
-    public function fromFields(array $fieldsNames): ?ForeignKey {
+    public function getFromFields(array $fieldsNames): ?ForeignKey
+    {
         $cnt = count($fieldsNames);
         foreach ($this->foreignKeys as $fk) {
-            $fromField = $fk->fromField();
+            $fromField = $fk->getFromField();
 
-            if (count($fromField) != $cnt) continue;
+            if (count($fromField) != $cnt) {
+                continue;
+            }
             if ($cnt == 1) {
                 if ($fromField === $fieldsNames) {
                     return $fk;
@@ -67,9 +71,10 @@ class ForeignKeyList implements \IteratorAggregate {
     }
 
     /**
-     * @return string[]
+     * @return string[]|null
      */
-    public function names(): ?array {
+    public function getNames(): ?array
+    {
         return $this->names;
     }
 
@@ -77,7 +82,8 @@ class ForeignKeyList implements \IteratorAggregate {
      * @inheritDoc
      * @return ForeignKey[]
      */
-    public function getIterator() {
+    public function getIterator(): iterable
+    {
         foreach ($this->foreignKeys as $k => $v) {
             yield $k => $v;
         }

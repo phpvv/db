@@ -15,19 +15,23 @@ namespace VV\Db\Sql\Stringifiers\Oracle;
  *
  * @package VV\Db\Driver\Oracle\SqlStringifier
  */
-class ExpressoinStringifier extends \VV\Db\Sql\Stringifiers\ExpressoinStringifier {
+class ExpressoinStringifier extends \VV\Db\Sql\Stringifiers\ExpressoinStringifier
+{
 
     /**
      * @inheritDoc
      */
-    public function strParam($param, &$params) {
+    public function strParam($param, &$params)
+    {
         $res = parent::strParam($param, $params);
 
         $dbp = $param instanceof \VV\Db\Sql\Expressions\SqlParam ? $param->param() : $param;
         if ($dbp instanceof \VV\Db\Param) {
-            if (!$dbp->name()) $dbp->setNextName();
+            if (!$dbp->getName()) {
+                $dbp->setNextName();
+            }
 
-            return ':' . $dbp->name();
+            return ':' . $dbp->getName();
         }
 
         return $res;

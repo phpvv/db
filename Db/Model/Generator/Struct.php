@@ -15,7 +15,8 @@ namespace VV\Db\Model\Generator;
  *
  * @package VV\Db\ModelGenerator
  */
-class Struct {
+class Struct
+{
 
     private $tables = [];
 }

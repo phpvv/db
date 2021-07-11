@@ -17,7 +17,8 @@ use VV\Db\Sql;
  *
  * @package VV\Db\Driver\Sql\Stringifier
  */
-class ExpressoinStringifier {
+class ExpressoinStringifier
+{
 
     private QueryStringifier $queryStringifier;
 
@@ -26,18 +27,21 @@ class ExpressoinStringifier {
      *
      * @param QueryStringifier $queryStringifier
      */
-    public function __construct(QueryStringifier $queryStringifier) {
+    public function __construct(QueryStringifier $queryStringifier)
+    {
         $this->queryStringifier = $queryStringifier;
     }
 
     /**
      * @return QueryStringifier
      */
-    public function queryStringifier() {
+    public function queryStringifier()
+    {
         return $this->queryStringifier;
     }
 
-    public function strExpr(Sql\Expressions\Expression $expr, &$params, $withAlias = false) {
+    public function strExpr(Sql\Expressions\Expression $expr, &$params, $withAlias = false)
+    {
         switch (true) {
             case $expr instanceof Sql\SelectQuery:
                 $str = $this->strSelectQuery($expr, $params);
@@ -58,12 +62,15 @@ class ExpressoinStringifier {
                 throw new \InvalidArgumentException('Wrong expression type');
         }
 
-        if ($withAlias && $a = $expr->alias()) $str .= " `$a`";
+        if ($withAlias && $a = $expr->alias()) {
+            $str .= " `$a`";
+        }
 
         return $str;
     }
 
-    public function strSelectQuery(Sql\SelectQuery $select, &$params) {
+    public function strSelectQuery(Sql\SelectQuery $select, &$params)
+    {
         $str = $this->queryStringifier()
             ->factory()
             ->createSelectStringifier($select)
@@ -72,13 +79,15 @@ class ExpressoinStringifier {
         return "($str)";
     }
 
-    public function strPlainSql(Sql\Expressions\PlainSql $plain, &$params) {
+    public function strPlainSql(Sql\Expressions\PlainSql $plain, &$params)
+    {
         ($p = $plain->params()) && array_push($params, ...$p);
 
         return $plain->sql();
     }
 
-    public function strSqlObj(Sql\Expressions\DbObject $obj, &$params) {
+    public function strSqlObj(Sql\Expressions\DbObject $obj, &$params)
+    {
         $path = $obj->path();
 
         $parts = [];
@@ -95,7 +104,8 @@ class ExpressoinStringifier {
      *
      * @return string
      */
-    public function strParam($param, &$params) {
+    public function strParam($param, &$params)
+    {
         if ($param instanceof Sql\Expressions\SqlParam) {
             $param = $param->param();
         } // pam fuiiiww
@@ -105,7 +115,8 @@ class ExpressoinStringifier {
         return '?';
     }
 
-    public function strCaseExpr(Sql\Expressions\CaseExpression $caseExpr, &$params) {
+    public function strCaseExpr(Sql\Expressions\CaseExpression $caseExpr, &$params)
+    {
         $str = 'CASE ';
 
         if ($mainExpr = $caseExpr->mainExpression()) {

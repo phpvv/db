@@ -18,7 +18,8 @@ use VV\Db\Sql\Expressions;
  *
  * @package VV\Db\Sql
  */
-class DbObject implements Expressions\Expression {
+class DbObject implements Expressions\Expression
+{
 
     use Expressions\AliasFieldTrait;
 
@@ -27,20 +28,27 @@ class DbObject implements Expressions\Expression {
     private string $name;
     private ?DbObject $owner = null;
 
-    protected function __construct(string $name = null, DbObject|string $owner = null) {
-        if ($name) $this->setName($name);
-        if ($owner) $this->setOwner($owner);
+    protected function __construct(string $name = null, DbObject|string $owner = null)
+    {
+        if ($name) {
+            $this->setName($name);
+        }
+        if ($owner) {
+            $this->setOwner($owner);
+        }
     }
 
     /**
      * @return string
      */
-    public function name(): string {
+    public function name(): string
+    {
         return $this->name;
     }
 
     #[Pure]
-    public function resultName(): string {
+    public function resultName(): string
+    {
         return $this->alias() ?: $this->name();
     }
 
@@ -49,10 +57,15 @@ class DbObject implements Expressions\Expression {
      *
      * @return $this
      */
-    public function setName(string $name): static {
-        if (!$name = trim($name)) throw new \InvalidArgumentException('Name is empty');
+    public function setName(string $name): static
+    {
+        if (!$name = trim($name)) {
+            throw new \InvalidArgumentException('Name is empty');
+        }
         [$path, $alias] = static::parse($name);
-        if (!$path) throw new \InvalidArgumentException('Incorrect name syntax');
+        if (!$path) {
+            throw new \InvalidArgumentException('Incorrect name syntax');
+        }
 
         return $this->setParsedData($path, $alias);
     }
@@ -60,7 +73,8 @@ class DbObject implements Expressions\Expression {
     /**
      * @return array
      */
-    public function path(): array {
+    public function path(): array
+    {
         $path = [];
         $cur = $this;
         do {
@@ -73,7 +87,8 @@ class DbObject implements Expressions\Expression {
     /**
      * @return DbObject|null
      */
-    public function owner(): ?DbObject {
+    public function owner(): ?DbObject
+    {
         return $this->owner;
     }
 
@@ -82,7 +97,8 @@ class DbObject implements Expressions\Expression {
      *
      * @return $this
      */
-    public function setOwner(DbObject|string $owner = null): static {
+    public function setOwner(DbObject|string $owner = null): static
+    {
         if ($owner && !$owner instanceof static) {
             $owner = new static($owner);
         }
@@ -91,11 +107,13 @@ class DbObject implements Expressions\Expression {
         return $this;
     }
 
-    public function createChild($name): static {
+    public function createChild($name): static
+    {
         return new static($name, $this);
     }
 
-    public function expressionId(): string {
+    public function expressionId(): string
+    {
         return implode('-', $this->path());
     }
 
@@ -105,18 +123,22 @@ class DbObject implements Expressions\Expression {
      *
      * @return $this
      */
-    protected function setParsedData(array $names, string $alias = null): static {
+    protected function setParsedData(array $names, string $alias = null): static
+    {
         $this->setPlainName(array_pop($names));
-        if ($alias) $this->as($alias);
+        if ($alias) {
+            $this->as($alias);
+        }
         if ($names) {
-            $owner = (new static)->setParsedData($names);
+            $owner = (new static())->setParsedData($names);
             $this->setOwner($owner);
         }
 
         return $this;
     }
 
-    protected function setPlainName($name): static {
+    protected function setPlainName($name): static
+    {
         $this->name = $name;
 
         return $this;
@@ -129,15 +151,24 @@ class DbObject implements Expressions\Expression {
      *
      * @return static|null
      */
-    public static function create(string|int|self $name, string|self $dfltOwner = null, bool $parseAlias = true): ?self {
-        if ($name instanceof static) return $name;
-        if ((string)$name == '') throw new \InvalidArgumentException('DbObject Name is empty');
+    public static function create(string|int|self $name, string|self $dfltOwner = null, bool $parseAlias = true): ?self
+    {
+        if ($name instanceof static) {
+            return $name;
+        }
+        if ((string)$name == '') {
+            throw new \InvalidArgumentException('DbObject Name is empty');
+        }
 
         [$path, $alias] = static::parse((string)$name, $parseAlias);
-        if (!$path) return null;
+        if (!$path) {
+            return null;
+        }
 
-        $obj = (new static)->setParsedData($path, $alias);
-        if ($dfltOwner && !$obj->owner()) $obj->setOwner($dfltOwner);
+        $obj = (new static())->setParsedData($path, $alias);
+        if ($dfltOwner && !$obj->owner()) {
+            $obj->setOwner($dfltOwner);
+        }
 
         return $obj;
     }
@@ -148,7 +179,8 @@ class DbObject implements Expressions\Expression {
      *
      * @return array|null
      */
-    public static function parse(string $name, bool $parseAlias = true): ?array {
+    public static function parse(string $name, bool $parseAlias = true): ?array
+    {
         $namerx = static::NAME_RX;
 
         $alias = $parseAlias ? static::parseAlias($name, $name) : null;
@@ -157,7 +189,9 @@ class DbObject implements Expressions\Expression {
         $outNames = [];
         foreach ($names as $i => $name) {
             if ($name == '*') {
-                if ($i != count($names) - 1) return null;
+                if ($i != count($names) - 1) {
+                    return null;
+                }
                 $outNames[] = $name;
                 continue;
             }
@@ -178,7 +212,8 @@ class DbObject implements Expressions\Expression {
      *
      * @return string|null
      */
-    public static function parseAlias(string $name, string &$nameWoAlias = null): ?string {
+    public static function parseAlias(string $name, string &$nameWoAlias = null): ?string
+    {
         $namerx = static::NAME_RX;
 
         /** @noinspection RegExpRepeatedSpace */
@@ -194,9 +229,11 @@ $
 /xi
 RX;
         $alias = null;
-        $nameWoAlias = preg_replace_callback($aliasRx, function ($m) use (&$alias) {
-            $alias = $m[2];
-        }, $name);
+        $nameWoAlias = preg_replace_callback($aliasRx,
+            function ($m) use (&$alias) {
+                $alias = $m[2];
+            },
+            $name);
 
         return $alias;
     }

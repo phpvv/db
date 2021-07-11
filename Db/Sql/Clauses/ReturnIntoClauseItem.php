@@ -19,7 +19,8 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Clause\ReturnInto
  */
-class ReturnIntoClauseItem {
+class ReturnIntoClauseItem
+{
 
     private Expression $expression;
     private Param $param;
@@ -31,11 +32,14 @@ class ReturnIntoClauseItem {
      * @param Param                                    $param
      *
      */
-    public function __construct(string|Expression $expression, Param $param) {
+    public function __construct(string|Expression $expression, Param $param)
+    {
         if (!$expression instanceof Expression) {
             /** @var DbObject $expression */
             $expression = DbObject::create($expression);
-            if (!$expression) throw new \InvalidArgumentException;
+            if (!$expression) {
+                throw new \InvalidArgumentException();
+            }
         }
 
         $this->expression = $expression;
@@ -45,14 +49,16 @@ class ReturnIntoClauseItem {
     /**
      * @return \VV\Db\Sql\Expressions\Expression
      */
-    public function expression(): Expression {
+    public function expression(): Expression
+    {
         return $this->expression;
     }
 
     /**
      * @return Param
      */
-    public function param(): Param {
+    public function param(): Param
+    {
         return $this->param;
     }
 }

@@ -17,7 +17,8 @@ use VV\Db\Sql\Condition;
  *
  * @package VV\Db\Sql\CaseExpr
  */
-class CaseExpressionThenItem {
+class CaseExpressionThenItem
+{
 
     private ?Condition $whenCondition;
     private ?Expression $whenExpression;
@@ -30,7 +31,8 @@ class CaseExpressionThenItem {
      * @param Expression|null           $whenExpression
      * @param Expression                $thenExpression
      */
-    public function __construct(?Condition $whenCondition, ?Expression $whenExpression, Expression $thenExpression) {
+    public function __construct(?Condition $whenCondition, ?Expression $whenExpression, Expression $thenExpression)
+    {
         if (!$whenCondition && !$whenExpression) {
             throw new \InvalidArgumentException('$whenCondition or $whenExpression must be non empty');
         }
@@ -43,21 +45,24 @@ class CaseExpressionThenItem {
     /**
      * @return \VV\Db\Sql\Condition|null
      */
-    public function whenCondition(): ?Condition {
+    public function whenCondition(): ?Condition
+    {
         return $this->whenCondition;
     }
 
     /**
      * @return Expression|null
      */
-    public function whenExpression(): ?Expression {
+    public function whenExpression(): ?Expression
+    {
         return $this->whenExpression;
     }
 
     /**
      * @return Expression
      */
-    public function thenExpression(): Expression {
+    public function thenExpression(): Expression
+    {
         return $this->thenExpression;
     }
 }

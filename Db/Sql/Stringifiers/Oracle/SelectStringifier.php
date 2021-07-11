@@ -15,17 +15,20 @@ namespace VV\Db\Sql\Stringifiers\Oracle;
  *
  * @package VV\Db\Driver\Oracle\SqlStringifier
  */
-class SelectStringifier extends \VV\Db\Sql\Stringifiers\SelectStringifier {
+class SelectStringifier extends \VV\Db\Sql\Stringifiers\SelectStringifier
+{
 
     use CommonUtils;
 
-    protected function applyLimitClause(&$sql, int $count, int $offset): void {
+    protected function applyLimitClause(&$sql, int $count, int $offset): void
+    {
         $rn = 'ora_rownum_field';
         $fields = '`' . implode('`, `', $this->selectQuery()->columnsClause()->resultFields()) . '`';
         $sql = "SELECT $fields FROM (SELECT t.*, rownum AS $rn FROM ($sql) t) WHERE $rn>$offset AND $rn<=$count+$offset";
     }
 
-    protected function applyOderByItemNullsLast(&$str, $colstr, \VV\Db\Sql\Clauses\OrderByClauseItem $item): void {
+    protected function applyOderByItemNullsLast(&$str, $colstr, \VV\Db\Sql\Clauses\OrderByClauseItem $item): void
+    {
         $str .= ' NULLS ' . ($item->isNullsLast() ? 'LAST' : 'FIRST');
     }
 }

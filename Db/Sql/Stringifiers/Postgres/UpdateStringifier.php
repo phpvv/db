@@ -17,11 +17,13 @@ use VV\Db\Sql\UpdateQuery as UpdateQuery;
  *
  * @package VV\Db\Postgres\QueryStringifiers
  */
-class UpdateStringifier extends \VV\Db\Sql\Stringifiers\UpdateStringifier {
+class UpdateStringifier extends \VV\Db\Sql\Stringifiers\UpdateStringifier
+{
 
     use CommonUtils;
 
-    public function supportedClausesIds() {
+    public function supportedClausesIds()
+    {
         return parent::supportedClausesIds() | UpdateQuery::C_RETURN_INTO;
     }
 }

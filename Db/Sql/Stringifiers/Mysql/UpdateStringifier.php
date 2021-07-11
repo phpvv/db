@@ -15,6 +15,7 @@ namespace VV\Db\Sql\Stringifiers\Mysql;
  *
  * @package VV\Db\Driver\Mysql\SqlStringifier
  */
-class UpdateStringifier extends \VV\Db\Sql\Stringifiers\UpdateStringifier {
+class UpdateStringifier extends \VV\Db\Sql\Stringifiers\UpdateStringifier
+{
 
 }

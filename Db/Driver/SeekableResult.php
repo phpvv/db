@@ -15,8 +15,8 @@ namespace VV\Db\Driver;
  *
  * @package VV\Db\Result
  */
-interface SeekableResult {
-
+interface SeekableResult
+{
     /**
      * Seeks to an arbitrary row
      *

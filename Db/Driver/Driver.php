@@ -10,17 +10,19 @@
  */
 namespace VV\Db\Driver;
 
+use VV\Db\Sql\Stringifiers\Factory as StringifiersFactory;
+
 /**
  * Interface Driver
  *
  * @package VV\Db
  */
-interface Driver {
-
-    public const DBMS_MYSQL = 'mysql';
-    public const DBMS_POSTGRES = 'postgres';
-    public const DBMS_ORACLE = 'oracle';
-    public const DBMS_MSSQL = 'mssql';
+interface Driver
+{
+    public const DBMS_MYSQL = 'mysql',
+        DBMS_POSTGRES = 'postgres',
+        DBMS_ORACLE = 'oracle',
+        DBMS_MSSQL = 'mssql';
 
     /**
      * Creates connection
@@ -40,12 +42,12 @@ interface Driver {
      *
      * @return string
      */
-    public function dbms(): string;
+    public function getDbmsName(): string;
 
     /**
      * Returns Sql Stringifiers Factory
      *
-     * @return \VV\Db\Sql\Stringifiers\Factory|null
+     * @return StringifiersFactory|null
      */
-    public function sqlStringifiersFactory(): ?\VV\Db\Sql\Stringifiers\Factory;
+    public function getSqlStringifiersFactory(): ?StringifiersFactory;
 }

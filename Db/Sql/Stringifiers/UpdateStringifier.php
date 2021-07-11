@@ -19,7 +19,8 @@ use VV\Db\Sql\UpdateQuery as UpdateQuery;
  *
  * @package VV\Db\Driver\Sql\Stringifier
  */
-class UpdateStringifier extends ModificatoryStringifier {
+class UpdateStringifier extends ModificatoryStringifier
+{
 
     private UpdateQuery $updateQuery;
 
@@ -29,7 +30,8 @@ class UpdateStringifier extends ModificatoryStringifier {
      * @param UpdateQuery $updateQuery
      * @param Driver      $factory
      */
-    public function __construct(UpdateQuery $updateQuery, Factory $factory) {
+    public function __construct(UpdateQuery $updateQuery, Factory $factory)
+    {
         parent::__construct($factory);
         $this->updateQuery = $updateQuery;
     }
@@ -37,36 +39,42 @@ class UpdateStringifier extends ModificatoryStringifier {
     /**
      * @return UpdateQuery
      */
-    public function updateQuery() {
+    public function updateQuery()
+    {
         return $this->updateQuery;
     }
 
-    public function supportedClausesIds() {
+    public function supportedClausesIds()
+    {
         return UpdateQuery::C_TABLE
                | UpdateQuery::C_DATASET
                | UpdateQuery::C_WHERE;
     }
 
-    public function stringifyRaw(&$params) {
+    public function stringifyRaw(&$params)
+    {
         $query = $this->updateQuery();
         $this->checkQueryToStr($query);
 
         return $this->strUpdateClause($query->tableClause(), $params)
                . $this->strSetClause($query->datasetClause(), $params)
-               . $this->strWhereClause($query->whereClause(), $params)
+               . $this->strWhereClause($query->getWhereClause(), $params)
                . $this->strReturnIntoClause($query->returnIntoClause(), $params);
     }
 
-    protected function strUpdateClause(Sql\Clauses\TableClause $table, &$params) {
+    public function queryTableClause()
+    {
+        return $this->updateQuery()->tableClause();
+    }
+
+    protected function strUpdateClause(Sql\Clauses\TableClause $table, &$params)
+    {
         return 'UPDATE ' . $this->buildTableSql($table)->embed($params);
     }
 
-    protected function strSetClause(Sql\Clauses\DatasetClause $dataset, &$params) {
+    protected function strSetClause(Sql\Clauses\DatasetClause $dataset, &$params)
+    {
         return ' SET ' . $this->strDataset($dataset, $params);
-    }
-
-    public function queryTableClause() {
-        return $this->updateQuery()->tableClause();
     }
 
     /**
@@ -74,17 +82,20 @@ class UpdateStringifier extends ModificatoryStringifier {
      *
      * @return array
      */
-    protected function checkQueryToStr(UpdateQuery $query) {
+    protected function checkQueryToStr(UpdateQuery $query)
+    {
         $checkEmptyMap = [
             [$table = $query->tableClause(), 'Table is not selected'],
             [$set = $query->datasetClause(), 'There is no data to update'],
-            [$where = $query->whereClause(), 'There is no where clause'],
+            [$where = $query->getWhereClause(), 'There is no where clause'],
         ];
         /** @var Sql\Clauses\Clause $c */
         foreach ($checkEmptyMap as [$c, $m]) {
-            if ($c->isEmpty()) throw new \InvalidArgumentException($m);
+            if ($c->isEmpty()) {
+                throw new \InvalidArgumentException($m);
+            }
         }
 
-        return array($table, $set, $where);
+        return [$table, $set, $where];
     }
 }

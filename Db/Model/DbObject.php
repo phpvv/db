@@ -10,6 +10,7 @@
  */
 namespace VV\Db\Model;
 
+use VV\Db;
 use VV\Db\Connection;
 
 /**
@@ -17,49 +18,52 @@ use VV\Db\Connection;
  *
  * @package VV\Db\Model
  */
-abstract class DbObject {
-
-    protected const NAME = '';
-
+abstract class DbObject
+{
     public const DFLT_PREFIXES = [];
+    protected const NAME = '';
+    private Db $db;
 
-    private \VV\Db $db;
-
-    public function __construct(\VV\Db $db) {
+    public function __construct(Db $db)
+    {
         $this->db = $db;
     }
 
     /**
      * @return string
      */
-    public function name(): string {
+    public function getName(): string
+    {
         return static::NAME;
     }
 
     /**
-     * @return \VV\Db
+     * @return Db
      */
-    public function db(): \VV\Db {
+    public function getDb(): Db
+    {
         return $this->db;
     }
 
     /**
      * @return Connection
      */
-    public function connection(): Connection {
-        return $this->db->connection();
+    public function getConnection(): Connection
+    {
+        return $this->db->getConnection();
     }
 
     /**
-     * Converts table name to alias: my_scheme.tbl_some_user_tabel -> sut
+     * Converts table name to alias: my_scheme.tbl_some_user_table -> sut
      *
      * @param string        $name
      * @param string[]|null $prefixes Will remove prefix from begin of name before the conversion
      *
      * @return string
      */
-    public static function name2alias(string $name, array $prefixes = null): string {
-        $name = self::wopfx($name, $prefixes);
+    public static function nameToAlias(string $name, array $prefixes = null): string
+    {
+        $name = self::trimPrefix($name, $prefixes);
 
         return strtolower(preg_replace('/(^|_)(\w)[^_]*/', '$2', $name));
     }
@@ -72,7 +76,8 @@ abstract class DbObject {
      *
      * @return string
      */
-    public static function wopfx(string $name, array $prefixes = null): string {
+    public static function trimPrefix(string $name, array $prefixes = null): string
+    {
         foreach (($prefixes ?? static::DFLT_PREFIXES) as $pfx) {
             if (stripos($name, $pfx) === 0) {
                 return substr($name, strlen($pfx));

@@ -27,7 +27,8 @@ use VV\Db\Sql\Predicates\Predicate;
  *
  * @method ConditionItem[] items():array
  */
-class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
+class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate
+{
 
     private ?string $connector = null;
     private ?Expression $target = null;
@@ -35,7 +36,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     /** Negation for all condition like in predicate */
     private bool $negation = false;
 
-    public function __get($var) {
+    public function __get($var)
+    {
         return match ($var) {
             'and' => $this->and(),
             'or' => $this->or(),
@@ -48,7 +50,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function expr(string|int|Expression $expression): static {
+    public function expr(string|int|Expression $expression): static
+    {
         return $this->setTarget($expression);
     }
 
@@ -57,7 +60,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function not(bool $flag = true): static {
+    public function not(bool $flag = true): static
+    {
         return $this->setItemNegation($flag);
     }
 
@@ -66,11 +70,16 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return static
      */
-    public function sub(string|int|Expression $expression = null): static {
-        $sub = new self;
+    public function sub(string|int|Expression $expression = null): static
+    {
+        $sub = new self();
 
-        if (!$expression) $expression = $this->target();
-        if ($expression) $sub->expr($expression);
+        if (!$expression) {
+            $expression = $this->target();
+        }
+        if ($expression) {
+            $sub->expr($expression);
+        }
 
         $this->addPredicItem($sub);
 
@@ -82,7 +91,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function subAnd(array $and): static {
+    public function subAnd(array $and): static
+    {
         $this->sub()->and($and);
 
         return $this;
@@ -93,7 +103,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function subOr(array $or): static {
+    public function subOr(array $or): static
+    {
         $this->sub()->or($or);
 
         return $this;
@@ -105,7 +116,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function compare(mixed $param, string $operator = null): static {
+    public function compare(mixed $param, string $operator = null): static
+    {
         if ($operator === null) {
             $operator = Cmp::OP_EQ;
         }
@@ -130,7 +142,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function eq(mixed $param): static {
+    public function eq(mixed $param): static
+    {
         return $this->compare($param, Cmp::OP_EQ);
     }
 
@@ -139,7 +152,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function ne(mixed $param): static {
+    public function ne(mixed $param): static
+    {
         return $this->compare($param, Cmp::OP_NE);
     }
 
@@ -148,7 +162,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function lt(mixed $param): static {
+    public function lt(mixed $param): static
+    {
         return $this->compare($param, Cmp::OP_LT);
     }
 
@@ -157,7 +172,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function lte(mixed $param): static {
+    public function lte(mixed $param): static
+    {
         return $this->compare($param, Cmp::OP_LTE);
     }
 
@@ -166,7 +182,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function gt(mixed $param): static {
+    public function gt(mixed $param): static
+    {
         return $this->compare($param, Cmp::OP_GT);
     }
 
@@ -175,7 +192,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function gte(mixed $param): static {
+    public function gte(mixed $param): static
+    {
         return $this->compare($param, Cmp::OP_GTE);
     }
 
@@ -185,7 +203,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function between($from, $till): static {
+    public function between($from, $till): static
+    {
         $predic = new Predicates\BetweenPredicate(
             $this->target(),
             self::toParam($from),
@@ -201,15 +220,20 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function in(...$params): static {
-        if (count($params) && is_array($params[0])) $params = $params[0];
+    public function in(...$params): static
+    {
+        if (count($params) && is_array($params[0])) {
+            $params = $params[0];
+        }
 
         $notNullParams = [];
         $containNull = false;
         foreach ($params as $p) {
             if (\VV\emt($p)) {
                 $containNull = true;
-            } else $notNullParams[] = $p;
+            } else {
+                $notNullParams[] = $p;
+            }
         }
 
         $target = $this->target();
@@ -223,8 +247,10 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
         // IN     (null)       ==>                  IS NULL
         // NOT IN       (1, 2) ==> NOT IN (1, 2) OR IS NULL
         if ($containNull == !$parentNot) {
-            $sub = new self;
-            if ($inPredic) $sub->_addPredicItem($inPredic);
+            $sub = new self();
+            if ($inPredic) {
+                $sub->_addPredicItem($inPredic);
+            }
             $sub->or($target)->isNull();
 
             return $this->_addPredicItem($sub);
@@ -233,9 +259,13 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
         // if $notNullParams is empty
         if (!$inPredic) {
             // NOT IN (null) ==> NOT NULL
-            if ($containNull) return $this->isNotNull();
+            if ($containNull) {
+                return $this->isNotNull();
+            }
             // NOT IN () ==> no condition (all records)
-            if ($parentNot) return $this;
+            if ($parentNot) {
+                return $this;
+            }
             // NO RECORDS
             $inPredic = new Predicates\InPredicate($target, [\VV\Db\Sql::plain('NULL')]);
         }
@@ -246,7 +276,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     /**
      * @return $this
      */
-    public function isNull(): static {
+    public function isNull(): static
+    {
         $predic = new Predicates\IsNullPredicate($this->target(), $this->isItemNegation());
 
         return $this->_addPredicItem($predic);
@@ -255,7 +286,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     /**
      * @return $this
      */
-    public function isNotNull(): static {
+    public function isNotNull(): static
+    {
         return $this->not()->isNull();
     }
 
@@ -265,7 +297,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function like(string $pattern, bool $caseInsensitive = false): static {
+    public function like(string $pattern, bool $caseInsensitive = false): static
+    {
         return $this->_addPredicItem(new Predicates\LikePredicate(
             $this->target(),
             self::toParam($pattern),
@@ -280,7 +313,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function startsWith(string $prefix, bool $caseInsensitive = false): static {
+    public function startsWith(string $prefix, bool $caseInsensitive = false): static
+    {
         return $this->like(self::escape4like($prefix) . '%', $caseInsensitive);
     }
 
@@ -290,7 +324,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function endsWith(string $suffix, bool $caseInsensitive = false): static {
+    public function endsWith(string $suffix, bool $caseInsensitive = false): static
+    {
         return $this->like('%' . self::escape4like($suffix), $caseInsensitive);
     }
 
@@ -300,7 +335,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function contains(string $string, bool $caseInsensitive = false): static {
+    public function contains(string $string, bool $caseInsensitive = false): static
+    {
         return $this->like('%' . self::escape4like($string) . '%', $caseInsensitive);
     }
 
@@ -309,8 +345,11 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function custom(...$params): static {
-        if ($params && is_array($params[0])) $params = $params[0];
+    public function custom(...$params): static
+    {
+        if ($params && is_array($params[0])) {
+            $params = $params[0];
+        }
         $predic = new Predicates\CustomPredicate($this->target(), $params, $this->isItemNegation());
 
         return $this->addPredicItem($predic);
@@ -321,7 +360,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function exists(\VV\Db\Sql\SelectQuery $query): static {
+    public function exists(\VV\Db\Sql\SelectQuery $query): static
+    {
         $predic = new Predicates\ExistsPredicate($query, $this->isItemNegation());
 
         return $this->addPredicItem($predic);
@@ -333,7 +373,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function addPredicItem(Predicate $predic, string $connector = null): static {
+    public function addPredicItem(Predicate $predic, string $connector = null): static
+    {
         return $this->clearTarget()->_addPredicItem($predic, $connector);
     }
 
@@ -342,7 +383,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function addItem(ConditionItem $item): static {
+    public function addItem(ConditionItem $item): static
+    {
         $this->clearTarget()->_addItem($item);
 
         return $this;
@@ -354,21 +396,24 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return ConditionItem
      */
-    public function createItem(Predicate $predic, string $connector = null): ConditionItem {
+    public function createItem(Predicate $predic, string $connector = null): ConditionItem
+    {
         return new ConditionItem($predic, $connector);
     }
 
     /**
      * @return Expression|null
      */
-    public function target(): ?Expression {
+    public function target(): ?Expression
+    {
         return $this->target;
     }
 
     /**
      * @return string|null
      */
-    public function connector(): ?string {
+    public function connector(): ?string
+    {
         return $this->connector;
     }
 
@@ -377,7 +422,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function setItemNegation(bool $itemNegation): static {
+    public function setItemNegation(bool $itemNegation): static
+    {
         $this->itemNegation = $itemNegation;
 
         return $this;
@@ -386,7 +432,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     /**
      * @return bool
      */
-    public function isNegative(): bool {
+    public function isNegative(): bool
+    {
         return $this->negation;
     }
 
@@ -395,7 +442,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    public function setNegation(bool $negation): static {
+    public function setNegation(bool $negation): static
+    {
         $this->negation = $negation;
 
         return $this;
@@ -403,21 +451,23 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
 
     /**
      * @param string|int|array|Expression|Predicate|null $target
-     * @param mixed                                ...$params
+     * @param mixed                                      ...$params
      *
      * @return $this
      */
-    public function and(string|int|array|Expression|Predicate $target = null, mixed ...$params): static {
+    public function and(string|int|array|Expression|Predicate $target = null, mixed ...$params): static
+    {
         return $this->append(ConditionItem::CONN_AND, ...func_get_args());
     }
 
     /**
      * @param string|int|array|Expression|Predicate|null $target
-     * @param mixed                                ...$params
+     * @param mixed                                      ...$params
      *
      * @return $this
      */
-    public function or(string|int|array|Expression|Predicate $target = null, mixed ...$params): static {
+    public function or(string|int|array|Expression|Predicate $target = null, mixed ...$params): static
+    {
         return $this->append(ConditionItem::CONN_OR, ...func_get_args());
     }
 
@@ -427,8 +477,11 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    protected function _addPredicItem(Predicate $predic, string $connector = null): static {
-        if (!$connector) $connector = $this->connector();
+    protected function _addPredicItem(Predicate $predic, string $connector = null): static
+    {
+        if (!$connector) {
+            $connector = $this->connector();
+        }
 
         return $this->_addItem($this->createItem($predic, $connector));
     }
@@ -438,7 +491,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    protected function _addItem(ConditionItem $item): static {
+    protected function _addItem(ConditionItem $item): static
+    {
         $this->setItemNegation(false);
 
         // for backward compatibility (replace same condition)
@@ -462,7 +516,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    protected function setConnector(string $connector): static {
+    protected function setConnector(string $connector): static
+    {
         $this->connector = $connector;
 
         return $this;
@@ -473,8 +528,11 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    protected function setTarget(Expression|string $target): static {
-        if (!$target) throw new \InvalidArgumentException('Expression is empty');
+    protected function setTarget(Expression|string $target): static
+    {
+        if (!$target) {
+            throw new \InvalidArgumentException('Expression is empty');
+        }
 
         $this->target = self::toExpression($target);
 
@@ -484,7 +542,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     /**
      * @return $this
      */
-    protected function clearTarget(): static {
+    protected function clearTarget(): static
+    {
         $this->target = null;
 
         return $this;
@@ -493,14 +552,15 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
     /**
      * @return bool
      */
-    protected function isItemNegation(): bool {
+    protected function isItemNegation(): bool
+    {
         return $this->itemNegation;
     }
 
     /**
-     * @param string                               $connector
+     * @param string                                     $connector
      * @param string|int|array|Expression|Predicate|null $target
-     * @param mixed                                ...$params
+     * @param mixed                                      ...$params
      *
      * @return $this
      */
@@ -512,7 +572,9 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
         $this->setConnector($connector);
 
         // if nothing passed, just set connector (traget is previous)
-        if (1 >= $argc = func_num_args()) return $this;
+        if (1 >= $argc = func_num_args()) {
+            return $this;
+        }
 
         // process as cycle call of and()/or()
         if (is_array($target)) {
@@ -584,7 +646,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this|null
      */
-    private function parseCompareTarget(string $target, array $params): ?self {
+    private function parseCompareTarget(string $target, array $params): ?self
+    {
         if (!$this->parseTargetOperator($target, '= | != | <> | < | > | <= | >=', $m)) {
             return null;
         }
@@ -600,7 +663,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this|null
      */
-    private function parseLikeTarget(string $target, array $params): ?self {
+    private function parseLikeTarget(string $target, array $params): ?self
+    {
         if (!$this->parseTargetOperator($target, '(not \s*)? like')) {
             return null;
         }
@@ -616,7 +680,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this|null
      */
-    private function parseBetweenTarget(string $target, array $params): ?self {
+    private function parseBetweenTarget(string $target, array $params): ?self
+    {
         if (!$this->parseTargetOperator($target, '(not \s*)? between')) {
             return null;
         }
@@ -632,7 +697,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this|null
      */
-    private function parseInTarget(string $target, array $params): ?self {
+    private function parseInTarget(string $target, array $params): ?self
+    {
         if (!$this->parseTargetOperator($target, '(not \s*)? in')) {
             return null;
         }
@@ -646,7 +712,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this|null
      */
-    private function parseIsNullTarget(string $target, array $params): ?self {
+    private function parseIsNullTarget(string $target, array $params): ?self
+    {
         if (!$this->parseTargetOperator($target, 'is (\s* not)?')) {
             return null;
         }
@@ -663,7 +730,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this|null
      */
-    private function parseTargetOperator(string $str, string $operatorRx, &$matches = null): ?self {
+    private function parseTargetOperator(string $str, string $operatorRx, &$matches = null): ?self
+    {
         if (!preg_match('/^(.+?) \s* (' . $operatorRx . ') \s*$/xi', $str, $matches)) {
             return null;
         }
@@ -679,7 +747,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return $this
      */
-    private function throwIfWrongParamsCount(array $params, int $count): static {
+    private function throwIfWrongParamsCount(array $params, int $count): static
+    {
         if ($count != $realCount = count($params)) {
             throw new \InvalidArgumentException("Method expects $count parameters, $realCount given");
         }
@@ -692,7 +761,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return Expression
      */
-    public static function toExpression(string|int|Expression $expression): Expression {
+    public static function toExpression(string|int|Expression $expression): Expression
+    {
         return \VV\Db\Sql::expression($expression);
     }
 
@@ -701,7 +771,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return Expression
      */
-    public static function toParam(mixed $param): Expression {
+    public static function toParam(mixed $param): Expression
+    {
         return \VV\Db\Sql::param($param);
     }
 
@@ -710,7 +781,8 @@ class Condition extends \VV\Db\Sql\Clauses\ItemList implements Predicate {
      *
      * @return string
      */
-    public static function escape4like(string $str): string {
+    public static function escape4like(string $str): string
+    {
         return preg_replace('![_%\\\\]!', '\\$0', $str);
     }
 }

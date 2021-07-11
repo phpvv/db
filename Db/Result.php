@@ -10,6 +10,8 @@
  */
 namespace VV\Db;
 
+use VV\Db;
+
 /**
  * Class Result
  *
@@ -20,23 +22,16 @@ namespace VV\Db;
  * @property-read array  $rows
  * @property-read array  $assoc
  */
-final class Result implements \IteratorAggregate {
-
+final class Result implements \IteratorAggregate
+{
     private ?Driver\Result $driver;
-
     private Statement $prepared;
-
     /** @var \Generator[] */
     private array $fetchGeneratorList = [];
-
     private ?\Closure $decorator = null;
-
-    private int $flags = \VV\Db::FETCH_ASSOC;
-
+    private int $flags = Db::FETCH_ASSOC;
     private bool $autoClose = false;
-
     private bool $used = false;
-
     private array|bool|null $resultFieldsMap = false;
 
     /**
@@ -45,12 +40,14 @@ final class Result implements \IteratorAggregate {
      * @param Driver\Result $driver
      * @param Statement     $prepared
      */
-    public function __construct(Driver\Result $driver, Statement $prepared) {
+    public function __construct(Driver\Result $driver, Statement $prepared)
+    {
         $this->driver = $driver;
         $this->prepared = $prepared;
     }
 
-    public function __get($var) {
+    public function __get($var)
+    {
         return match ($var) {
             'column' => $this->column(),
             'row' => $this->row(),
@@ -63,30 +60,17 @@ final class Result implements \IteratorAggregate {
     }
 
     /**
-     * @return int
-     */
-    public function flags(): int {
-        return $this->flags;
-    }
-
-    /**
      * Sets default flags
      *
      * @param int|null $flags
      *
      * @return $this
      */
-    public function setFlags(?int $flags): self {
-        $this->flags = $flags ?? \VV\Db::FETCH_ASSOC;
+    public function setFlags(?int $flags): self
+    {
+        $this->flags = $flags ?? Db::FETCH_ASSOC;
 
         return $this;
-    }
-
-    /**
-     * @return \Closure|null
-     */
-    public function decorator(): ?\Closure {
-        return $this->decorator;
     }
 
     /**
@@ -94,7 +78,8 @@ final class Result implements \IteratorAggregate {
      *
      * @return $this
      */
-    public function setDecorator(string|\Closure|null $decorator): self {
+    public function setDecorator(string|\Closure|null $decorator): self
+    {
         if (is_scalar($decorator)) {
             $decorator = function (&$row) use ($decorator) {
                 $row = $row[$decorator];
@@ -113,22 +98,27 @@ final class Result implements \IteratorAggregate {
      *
      * @return array|null
      */
-    public function fetch(int $flags = null): ?array {
-        $driver = $this->driverOrThrow();
+    public function fetch(int $flags = null): ?array
+    {
+        $driver = $this->getDriverOrThrow();
 
         $this->used = true;
-        if ($flags === null) $flags = $this->flags;
+        if ($flags === null) {
+            $flags = $this->flags;
+        }
 
-        // get fetch generator from driver
-        $generator = &$this->fetchGeneratorList[$flags];
-        if (!$generator) $generator = $driver->fetchIterator($flags);
+        // get fetch iterator from driver
+        $iterator = &$this->fetchGeneratorList[$flags];
+        if (!$iterator) {
+            $iterator = $driver->getIterator($flags);
+        }
 
-        $row = $generator->current();
+        $row = $iterator->current();
         if ($row) {
-            $generator->next();
+            $iterator->next();
 
             // make sub arrays
-            if (is_array($row) && $resultFieldsMap = $this->resultFieldsMap()) {
+            if (is_array($row) && $resultFieldsMap = $this->getResultFieldsMap()) {
                 self::acceptRowResultFieldMap($row, $resultFieldsMap);
             }
 
@@ -153,9 +143,12 @@ final class Result implements \IteratorAggregate {
      *
      * @return mixed
      */
-    public function column(int $index = 0, int $flags = null): mixed {
-        $row = $this->row($flags | \VV\Db::FETCH_NUM);
-        if (!$row) return null;
+    public function column(int $index = 0, int $flags = null): mixed
+    {
+        $row = $this->row($flags | Db::FETCH_NUM);
+        if (!$row) {
+            return null;
+        }
 
         return $row[$index];
     }
@@ -167,9 +160,12 @@ final class Result implements \IteratorAggregate {
      *
      * @return array|null
      */
-    public function row(int $flags = null): ?array {
+    public function row(int $flags = null): ?array
+    {
         $row = $this->fetch($flags);
-        if ($this->isAutoClose()) $this->close();
+        if ($this->isAutoClose()) {
+            $this->close();
+        }
 
         return $row;
     }
@@ -185,9 +181,11 @@ final class Result implements \IteratorAggregate {
      *
      * @return array[] Array of rows
      */
-    public function rows(int $flags = null, $keyField = null, $decorator = null): array {
+    public function rows(int $flags = null, $keyField = null, $decorator = null): array
+    {
         if (!$decorator) {
-            $decorator = function () { };
+            $decorator = function () {
+            };
         } elseif (is_scalar($decorator)) {
             $decorator = function (&$row) use ($decorator) {
                 $row = $row[$decorator];
@@ -198,13 +196,19 @@ final class Result implements \IteratorAggregate {
         while ($row = $this->fetch($flags)) {
             if ((string)$keyField !== '') {
                 $key = $row[$keyField];
-                if (count($row) > 1) unset($row[$keyField]);
-            } else $key = false;
+                if (count($row) > 1) {
+                    unset($row[$keyField]);
+                }
+            } else {
+                $key = false;
+            }
 
             if ($decorator($row, $key) !== false) {
                 if ($key !== false) {
                     $rows[$key] = $row;
-                } else $rows[] = $row;
+                } else {
+                    $rows[] = $row;
+                }
             }
         }
 
@@ -217,32 +221,47 @@ final class Result implements \IteratorAggregate {
      *
      * @return array
      */
-    public function assoc($keyField = null, $valueField = null): array {
+    public function assoc(string $keyField = null, string $valueField = null): array
+    {
         $valueField .= '';
         $keyField .= '';
 
-        return $this->rows(null, null, function (&$row, &$k) use (&$valueField, &$keyField) {
-            if ($keyField === '' || $valueField === '') {
-                $keys = array_keys($row);
-                if ($keyField === '') $keyField = $keys[0];
-                if ($valueField === '') $valueField = empty($keys[1]) ? $keys[0] : $keys[1];
-            }
+        return $this->rows(
+            null,
+            null,
+            function (&$row, &$k) use (&$valueField, &$keyField) {
+                if ($keyField === '' || $valueField === '') {
+                    $keys = array_keys($row);
+                    if ($keyField === '') {
+                        $keyField = $keys[0];
+                    }
+                    if ($valueField === '') {
+                        $valueField = empty($keys[1]) ? $keys[0] : $keys[1];
+                    }
+                }
 
-            $k = $row[$keyField];
-            $row = $row[$valueField];
-        });
+                $k = $row[$keyField];
+                $row = $row[$valueField];
+            }
+        );
     }
 
-    public function insertedId() {
-        $insertedId = $this->driverOrThrow()->insertedId();
-        if ($insertedId === null) throw new \UnexpectedValueException('insertedId is null');
+    public function insertedId(): int|string
+    {
+        $insertedId = $this->getDriverOrThrow()->getInsertedId();
+        if ($insertedId === null) {
+            throw new \UnexpectedValueException('insertedId is null');
+        }
 
         return $insertedId;
     }
 
-    public function affectedRows(): int {
-        $affectedRows = $this->driverOrThrow()->affectedRows();
-        if ($affectedRows === null) throw new \UnexpectedValueException('affectedRows is null');
+    public function affectedRows(): int
+    {
+        $affectedRows = $this->getDriverOrThrow()->getAffectedRows();
+        if ($affectedRows === null) {
+            throw new \UnexpectedValueException('affectedRows is null');
+        }
 
         return $affectedRows;
     }
@@ -252,7 +271,8 @@ final class Result implements \IteratorAggregate {
      *
      * @return $this
      */
-    public function close(): self {
+    public function close(): self
+    {
         if (!$this->isClosed()) {
             $this->driver->close();
             $this->driver = null;
@@ -265,16 +285,18 @@ final class Result implements \IteratorAggregate {
     /**
      * @return bool
      */
-    public function isClosed(): bool {
+    public function isClosed(): bool
+    {
         return empty($this->driver);
     }
 
     /**
      * @inheritDoc
      */
-    public function getIterator(): \Traversable {
+    public function getIterator(): \Traversable
+    {
         if ($this->used) {
-            $driver = $this->driverOrThrow();
+            $driver = $this->getDriverOrThrow();
             if ($driver instanceof Driver\SeekableResult) {
                 $driver->seek(0);
             } else {
@@ -282,22 +304,26 @@ final class Result implements \IteratorAggregate {
             }
         }
 
-        while ($row = $this->fetch()) yield $row;
+        while ($row = $this->fetch()) {
+            yield $row;
+        }
     }
 
     /**
      * @return bool
      */
-    public function isAutoClose(): bool {
+    public function isAutoClose(): bool
+    {
         return $this->autoClose;
     }
 
     /**
-     * @param boolean $autoClose
+     * @param bool $autoClose
      *
      * @return $this
      */
-    public function setAutoClose(bool $autoClose): self {
+    public function setAutoClose(bool $autoClose): self
+    {
         $this->autoClose = $autoClose;
 
         return $this;
@@ -306,8 +332,11 @@ final class Result implements \IteratorAggregate {
     /**
      * @return Driver\Result
      */
-    protected function driverOrThrow(): Driver\Result {
-        if (!$this->driver) throw new \LogicException('Result is closed');
+    protected function getDriverOrThrow(): Driver\Result
+    {
+        if (!$this->driver) {
+            throw new \LogicException('Result is closed');
+        }
 
         return $this->driver;
     }
@@ -315,9 +344,10 @@ final class Result implements \IteratorAggregate {
     /**
      * @return array|null
      */
-    protected function resultFieldsMap(): ?array {
+    protected function getResultFieldsMap(): ?array
+    {
         if ($this->resultFieldsMap === false) {
-            $this->resultFieldsMap = $this->prepared->queryInfo()->resultFieldsMap() ?: null;
+            $this->resultFieldsMap = $this->prepared->getQueryInfo()->getResultFieldsMap() ?: null;
         }
 
         return $this->resultFieldsMap;
@@ -327,7 +357,8 @@ final class Result implements \IteratorAggregate {
      * @param $row
      * @param $resultFieldsMap
      */
-    public static function acceptRowResultFieldMap(&$row, $resultFieldsMap): void {
+    public static function acceptRowResultFieldMap(&$row, $resultFieldsMap): void
+    {
         foreach ($resultFieldsMap as $key => $path) {
             $val = $row[$key];
             unset($row[$key]);

@@ -22,7 +22,8 @@ use VV\Db\Sql\Expressions\DbObject;
  *
  * @package VV\Db\Sql
  */
-class DeleteQuery extends ModificatoryQuery {
+class DeleteQuery extends ModificatoryQuery
+{
 
     use QueryWhereTrait;
 
@@ -39,7 +40,8 @@ class DeleteQuery extends ModificatoryQuery {
      *
      * @return DeleteTablesClause
      */
-    public function delTablesClause(): DeleteTablesClause {
+    public function delTablesClause(): DeleteTablesClause
+    {
         if (!$this->delTablesClause) {
             $this->setDelTablesClause($this->createDelTablesClause());
         }
@@ -54,7 +56,8 @@ class DeleteQuery extends ModificatoryQuery {
      *
      * @return $this
      */
-    public function setDelTablesClause(?DeleteTablesClause $delTablesClause): static {
+    public function setDelTablesClause(?DeleteTablesClause $delTablesClause): static
+    {
         $this->delTablesClause = $delTablesClause;
 
         return $this;
@@ -65,7 +68,8 @@ class DeleteQuery extends ModificatoryQuery {
      *
      * @return DeleteTablesClause
      */
-    public function clearDelTablesClause(): DeleteTablesClause {
+    public function clearDelTablesClause(): DeleteTablesClause
+    {
         try {
             return $this->delTablesClause();
         } finally {
@@ -79,8 +83,9 @@ class DeleteQuery extends ModificatoryQuery {
      * @return DeleteTablesClause
      */
     #[Pure]
-    public function createDelTablesClause(): DeleteTablesClause {
-        return new DeleteTablesClause;
+    public function createDelTablesClause(): DeleteTablesClause
+    {
+        return new DeleteTablesClause();
     }
 
     /**
@@ -90,7 +95,8 @@ class DeleteQuery extends ModificatoryQuery {
      *
      * @return $this
      */
-    public function tables(...$tables): static {
+    public function tables(...$tables): static
+    {
         $clause = $this->createDelTablesClause()->add(...$tables);
 
         return $this->setDelTablesClause($clause);
@@ -104,16 +110,18 @@ class DeleteQuery extends ModificatoryQuery {
      *
      * @return $this
      */
-    public function from(string|Table $table, string $alias = null): static {
+    public function from(string|Table $table, string $alias = null): static
+    {
         return $this->table($table, $alias);
     }
 
     /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
-    protected function nonEmptyClausesMap(): array {
+    protected function nonEmptyClausesMap(): array
+    {
         return [
             self::C_DEL_TABLES => $this->delTablesClause(),
             self::C_TABLE => $this->tableClause(),
-            self::C_WHERE => $this->whereClause(),
+            self::C_WHERE => $this->getWhereClause(),
             self::C_RETURN_INTO => $this->returnIntoClause(),
             self::C_HINT => $this->hintClause(),
         ];

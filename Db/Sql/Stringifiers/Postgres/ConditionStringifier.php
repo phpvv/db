@@ -15,9 +15,11 @@ namespace VV\Db\Sql\Stringifiers\Postgres;
  *
  * @package VV\Db\Postgres\QueryStringifiers
  */
-class ConditionStringifier extends \VV\Db\Sql\Stringifiers\ConditionStringifier {
+class ConditionStringifier extends \VV\Db\Sql\Stringifiers\ConditionStringifier
+{
 
-    protected function strPreparedLike(string $lstr, string $rstr, string $notstr, bool $caseInsensitive) {
+    protected function strPreparedLike(string $lstr, string $rstr, string $notstr, bool $caseInsensitive)
+    {
         $oper = $caseInsensitive ? 'ILIKE' : 'LIKE';
 
         return "$lstr {$notstr}$oper $rstr";

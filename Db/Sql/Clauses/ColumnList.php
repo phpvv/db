@@ -17,7 +17,8 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Clauses
  */
-abstract class ColumnList extends ItemList {
+abstract class ColumnList extends ItemList
+{
 
     /**
      * Add field(s)
@@ -26,8 +27,11 @@ abstract class ColumnList extends ItemList {
      *
      * @return $this
      */
-    public function add(string|array|Expression ...$columns): static {
-        if (!$columns) return $this;
+    public function add(string|array|Expression ...$columns): static
+    {
+        if (!$columns) {
+            return $this;
+        }
 
         if (count($columns) == 1 && is_array($columns[0])) {
             $columns = $columns[0];

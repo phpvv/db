@@ -18,7 +18,8 @@ use VV\Db\Sql\Predicates\Predicate;
  *
  * @package VV\Db\Sql
  */
-class CaseExpression implements Expression {
+class CaseExpression implements Expression
+{
 
     use AliasFieldTrait;
 
@@ -33,8 +34,11 @@ class CaseExpression implements Expression {
      *
      * @param string|int|Expression|null $case
      */
-    public function __construct(string|int|Expression $case = null) {
-        if ($case !== null) $this->case($case);
+    public function __construct(string|int|Expression $case = null)
+    {
+        if ($case !== null) {
+            $this->case($case);
+        }
     }
 
     /**
@@ -42,7 +46,8 @@ class CaseExpression implements Expression {
      *
      * @return $this
      */
-    public function case(string|int|Expression $case): static {
+    public function case(string|int|Expression $case): static
+    {
         $this->mainExpression = \VV\Db\Sql::expression($case);
 
         return $this;
@@ -53,7 +58,8 @@ class CaseExpression implements Expression {
      *
      * @return $this
      */
-    public function when(string|int|Expression|Predicate|array $when): static {
+    public function when(string|int|Expression|Predicate|array $when): static
+    {
         if ($this->mainExpression) {
             $when = \VV\Db\Sql::expression($when);
         } else {
@@ -70,7 +76,8 @@ class CaseExpression implements Expression {
      *
      * @return $this
      */
-    public function then(string|int|Expression $then): static {
+    public function then(string|int|Expression $then): static
+    {
         $then = \VV\Db\Sql::expression($then);
         if ($this->mainExpression) {
             $thenItem = $this->createComparisonThenItem($this->when, $then);
@@ -86,7 +93,8 @@ class CaseExpression implements Expression {
      *
      * @return $this
      */
-    public function else(string|int|Expression $else): static {
+    public function else(string|int|Expression $else): static
+    {
         $this->elseExpression = \VV\Db\Sql::expression($else);
 
         return $this;
@@ -97,7 +105,8 @@ class CaseExpression implements Expression {
      *
      * @return $this
      */
-    public function addThenItem(CaseExpressionThenItem $thenItem): static {
+    public function addThenItem(CaseExpressionThenItem $thenItem): static
+    {
         $this->thenItems[] = $thenItem;
         $this->when = null;
 
@@ -107,21 +116,24 @@ class CaseExpression implements Expression {
     /**
      * @return Expression|null
      */
-    public function mainExpression(): ?Expression {
+    public function mainExpression(): ?Expression
+    {
         return $this->mainExpression;
     }
 
     /**
      * @return CaseExpressionThenItem[]
      */
-    public function thenItems(): array {
+    public function thenItems(): array
+    {
         return $this->thenItems;
     }
 
     /**
      * @return Expression|null
      */
-    public function elseExpression(): ?Expression {
+    public function elseExpression(): ?Expression
+    {
         return $this->elseExpression;
     }
 
@@ -130,7 +142,8 @@ class CaseExpression implements Expression {
      *
      * @return $this
      */
-    public function buildOrderBy(array $conditions): static {
+    public function buildOrderBy(array $conditions): static
+    {
         $order = 1;
         foreach ($conditions as $condition) {
             $this->when($condition)->then($order++);
@@ -145,7 +158,8 @@ class CaseExpression implements Expression {
      *
      * @return CaseExpressionThenItem
      */
-    public function createSearchThenItem(Condition $when, Expression $then): CaseExpressionThenItem {
+    public function createSearchThenItem(Condition $when, Expression $then): CaseExpressionThenItem
+    {
         return new CaseExpressionThenItem($when, null, $then);
     }
 
@@ -155,14 +169,16 @@ class CaseExpression implements Expression {
      *
      * @return CaseExpressionThenItem
      */
-    public function createComparisonThenItem(Expression $when, Expression $then): CaseExpressionThenItem {
+    public function createComparisonThenItem(Expression $when, Expression $then): CaseExpressionThenItem
+    {
         return new CaseExpressionThenItem(null, $when, $then);
     }
 
     /**
      * @return string
      */
-    public function expressionId(): string {
+    public function expressionId(): string
+    {
         return spl_object_hash($this);
     }
 }

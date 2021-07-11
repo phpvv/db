@@ -15,6 +15,7 @@ namespace VV\Db\Exceptions;
  *
  * @package VV\Db\Error
  */
-class SqlSyntaxError extends \RuntimeException {
+class SqlSyntaxError extends \RuntimeException
+{
     use \VV\Exception\Core;
 }

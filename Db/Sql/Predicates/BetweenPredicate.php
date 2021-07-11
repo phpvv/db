@@ -17,7 +17,8 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Predicates
  */
-class BetweenPredicate extends PredicateBase {
+class BetweenPredicate extends PredicateBase
+{
 
     private Expression $expression;
     private Expression $from;
@@ -31,7 +32,8 @@ class BetweenPredicate extends PredicateBase {
      * @param Expression $till
      * @param bool       $not
      */
-    public function __construct(Expression $expression, Expression $from, Expression $till, bool $not = false) {
+    public function __construct(Expression $expression, Expression $from, Expression $till, bool $not = false)
+    {
         $this->expression = $expression;
         $this->from = $from;
         $this->till = $till;
@@ -41,21 +43,24 @@ class BetweenPredicate extends PredicateBase {
     /**
      * @return Expression
      */
-    public function expression(): Expression {
+    public function expression(): Expression
+    {
         return $this->expression;
     }
 
     /**
      * @return Expression
      */
-    public function from(): Expression {
+    public function from(): Expression
+    {
         return $this->from;
     }
 
     /**
      * @return Expression
      */
-    public function till(): Expression {
+    public function till(): Expression
+    {
         return $this->till;
     }
 }

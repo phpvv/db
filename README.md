@@ -154,7 +154,7 @@ Array
     [title] => Computer 12
     [brand] => Brand 1
     [price] => 1200.00
-    [color] => 
+    [color] =>
 )
 ```
 
@@ -249,7 +249,7 @@ try {
     // you can execute important statement in transaction free connection
     $db->tbl->log->insert()
         ->set(['title' => "new order #$orderId"])
-        ->setConnection($db->transactionFreeConnection()) // set new conenction for query
+        ->setConnection($db->getTransactionFreeConnection()) // set new conenction for query
         ->exec();
 
     // throw new \RuntimeException('Test transactionFreeConnection()');
@@ -267,7 +267,7 @@ try {
 
 ### Using only `Connection` without schema model representation
 
-Example ([connection.php](https://github.com/phpvv/db-examples/blob/master/examples/connection.php)): 
+Example ([connection.php](https://github.com/phpvv/db-examples/blob/master/examples/connection.php)):
 
 ```php
 use APP\DB\MAIN as CONF;
@@ -294,9 +294,9 @@ print_r($result->rows);
 
 ### Using DB Model(s)
 
-#### Configuration 
+#### Configuration
 
-At start, it is needed to create somewhere `class <MyNameOf>Db extends \VV\Db` and implement one abstract method `createConnection()`.  
+At start, it is needed to create somewhere `class <MyNameOf>Db extends \VV\Db` and implement one abstract method `createConnection()`.
 Example ([App/Db/Main.php](https://github.com/phpvv/db-examples/blob/master/App/Db/Main.php)):
 
 ```php

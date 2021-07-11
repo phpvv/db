@@ -15,7 +15,8 @@ namespace VV\Db\Sql\Expressions;
  *
  * @package VV\Db\Sql
  */
-class SqlParam implements Expression {
+class SqlParam implements Expression
+{
 
     use AliasFieldTrait;
 
@@ -26,18 +27,21 @@ class SqlParam implements Expression {
      *
      * @param \VV\Db\Param|mixed $param
      */
-    public function __construct(mixed $param) {
+    public function __construct(mixed $param)
+    {
         $this->setParam($param);
     }
 
     /**
      * @return mixed
      */
-    public function param(): mixed {
+    public function param(): mixed
+    {
         return $this->param;
     }
 
-    public function expressionId(): string {
+    public function expressionId(): string
+    {
         return spl_object_hash($this);
     }
 
@@ -46,7 +50,8 @@ class SqlParam implements Expression {
      *
      * @return $this
      */
-    public function setParam(mixed $param): static {
+    public function setParam(mixed $param): static
+    {
         static::throwIfWrongType($param);
         $this->param = $param;
 
@@ -58,7 +63,8 @@ class SqlParam implements Expression {
      *
      * @return bool
      */
-    public static function checkType(mixed $param): bool {
+    public static function checkType(mixed $param): bool
+    {
         return is_string($param)
                || is_int($param)
                || is_double($param)
@@ -75,7 +81,8 @@ class SqlParam implements Expression {
     /**
      * @param mixed $param
      */
-    public static function throwIfWrongType(mixed $param) {
+    public static function throwIfWrongType(mixed $param)
+    {
         if (!static::checkType($param)) {
             $type = is_object($param) ? get_class($param) : gettype($param);
             throw new \InvalidArgumentException("Parameter can be string, integer, double or instance of VV\\Db\\P; $type given");

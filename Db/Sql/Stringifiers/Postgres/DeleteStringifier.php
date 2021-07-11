@@ -15,11 +15,13 @@ namespace VV\Db\Sql\Stringifiers\Postgres;
  *
  * @package VV\Db\Postgres\QueryStringifiers
  */
-class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier {
+class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier
+{
 
     use CommonUtils;
 
-    public function supportedClausesIds() {
+    public function supportedClausesIds()
+    {
         return parent::supportedClausesIds() | \VV\Db\Sql\DeleteQuery::C_RETURN_INTO;
     }
 }

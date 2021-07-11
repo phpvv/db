@@ -15,18 +15,21 @@ namespace VV\Db\Sql\Stringifiers\Oracle;
  *
  * @package VV\Db\Driver\Oracle\SqlStringifier
  */
-class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
+class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
+{
 
     use ModifyUtils;
     use CommonUtils;
 
-    public function supportedClausesIds() {
+    public function supportedClausesIds()
+    {
         return parent::supportedClausesIds()
                | \VV\Db\Sql\InsertQuery::C_RETURN_INTO
                | \VV\Db\Sql\InsertQuery::C_RETURN_INS_ID;
     }
 
-    protected function strMultiValuesInsert(&$params) {
+    protected function strMultiValuesInsert(&$params)
+    {
         $table = $this->buildTableSql($this->insertQuery()->tableClause());
         $fields = $this->fieldsPart();
 
@@ -39,8 +42,11 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
         return $sql;
     }
 
-    protected function applyInsertedIdClause(\VV\Db\Sql\Clauses\InsertedIdClause $retinsId) {
-        if ($retinsId->isEmpty()) return;
+    protected function applyInsertedIdClause(\VV\Db\Sql\Clauses\InsertedIdClause $retinsId)
+    {
+        if ($retinsId->isEmpty()) {
+            return;
+        }
 
         $query = $this->insertQuery();
         $pk = $retinsId->pk() ?: $query->mainTablePk();
@@ -48,11 +54,11 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
 
         $pkField = null;
         if ($mtm = $query->tableClause()->mainTableModel()) {
-            $pkField = $mtm->fields()->get($pk);
+            $pkField = $mtm->getFields()->get($pk);
         }
         if (!$param = $retinsId->param()) {
             if ($pkField) {
-                $isnum = $pkField->type() == \VV\Db\Model\Field::T_NUM;
+                $isnum = $pkField->getType() == \VV\Db\Model\Field::T_NUM;
             } else {
                 $isnum = true;
             }
@@ -61,10 +67,12 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier {
             $param = new \VV\Db\Param($type);
         }
 
-        if (!$param->size() && $param->isSizable()) {
-            if (!$pkField) throw new \LogicException('pkField is empty');
+        if (!$param->getSize() && $param->isSizable()) {
+            if (!$pkField) {
+                throw new \LogicException('pkField is empty');
+            }
 
-            $param->setSize($pkField->length());
+            $param->setSize($pkField->getLength());
         }
 
         $this->addAdvReturnInto($field, $param->setForInsertedId());

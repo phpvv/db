@@ -17,7 +17,8 @@ use VV\Db\Sql;
  *
  * @package VV\Db\Driver\QueryStringifiers
  */
-interface Factory {
+interface Factory
+{
 
     /**
      * @param Sql\SelectQuery $query

@@ -18,7 +18,8 @@ use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
  *
  * @package VV\Db\Driver\Sql\Stringifier
  */
-class ConditionStringifier {
+class ConditionStringifier
+{
 
     /**
      * @var QueryStringifier
@@ -30,27 +31,32 @@ class ConditionStringifier {
      *
      * @param QueryStringifier $queryStringifier
      */
-    public function __construct(QueryStringifier $queryStringifier) {
+    public function __construct(QueryStringifier $queryStringifier)
+    {
         $this->queryStringifier = $queryStringifier;
     }
 
     /**
      * @return QueryStringifier
      */
-    public function queryStringifier() {
+    public function queryStringifier()
+    {
         return $this->queryStringifier;
     }
 
     /**
      * @param \VV\Db\Sql\Expressions\Expression $expr
-     * @param  array                            $params
+     * @param array                             $params
      * @param bool                              $prnss4plain
      *
      * @return mixed
      */
-    public function strColumn(Sql\Expressions\Expression $expr, &$params, $prnss4plain = false) {
+    public function strColumn(Sql\Expressions\Expression $expr, &$params, $prnss4plain = false)
+    {
         $str = $this->queryStringifier()->strColumn($expr, $params);
-        if ($prnss4plain) $str = $this->str2prnss4plainSql($str, $expr);
+        if ($prnss4plain) {
+            $str = $this->str2prnss4plainSql($str, $expr);
+        }
 
         return $str;
     }
@@ -60,22 +66,30 @@ class ConditionStringifier {
      *
      * @return PlainSql
      */
-    public function buildConditionSql(Sql\Condition $condition) {
+    public function buildConditionSql(Sql\Condition $condition)
+    {
         $sql = '';
         $params = [];
         foreach ($condition->items() as $item) {
             $predicStr = $this->strPredic($item->predicate(), $params);
-            if (!$predicStr) continue;
+            if (!$predicStr) {
+                continue;
+            }
 
-            if ($sql) $sql .= ' ' . $item->connector() . ' ';
+            if ($sql) {
+                $sql .= ' ' . $item->connector() . ' ';
+            }
             $sql .= $predicStr;
         }
-        if ($condition->isNegative()) $sql = "NOT ($sql)";
+        if ($condition->isNegative()) {
+            $sql = "NOT ($sql)";
+        }
 
         return $this->createPlainSql($sql, $params);
     }
 
-    public function strComparePredicate(Sql\Predicates\ComparePredicate $compare, &$params) {
+    public function strComparePredicate(Sql\Predicates\ComparePredicate $compare, &$params)
+    {
         $leftExpr = $compare->leftExpression();
         $rightExpr = $compare->rightExpression();
         $this->decorateParamsByModel($leftExpr, $rightExpr);
@@ -84,12 +98,15 @@ class ConditionStringifier {
         $rstr = $this->strColumn($rightExpr, $params, true);
 
         $str = "$lstr {$compare->operator()} $rstr";
-        if ($compare->isNegative()) return "NOT ($str)";
+        if ($compare->isNegative()) {
+            return "NOT ($str)";
+        }
 
         return $this->str2prnss4plainSql($str, $leftExpr);
     }
 
-    public function strLikePredicate(Sql\Predicates\LikePredicate $like, &$params) {
+    public function strLikePredicate(Sql\Predicates\LikePredicate $like, &$params)
+    {
         $lstr = $this->strColumn($leftExpr = $like->leftExpression(), $params);
         $rstr = $this->strColumn($like->rightExpression(), $params, true);
         $notstr = $like->isNegative() ? 'NOT ' : '';
@@ -99,7 +116,8 @@ class ConditionStringifier {
         return $this->str2prnss4plainSql($str, $leftExpr);
     }
 
-    public function strBetweenPredicate(Sql\Predicates\BetweenPredicate $between, &$params) {
+    public function strBetweenPredicate(Sql\Predicates\BetweenPredicate $between, &$params)
+    {
         $expr = $between->expression();
         $from = $between->from();
         $till = $between->till();
@@ -117,7 +135,8 @@ class ConditionStringifier {
         return $this->str2prnss4plainSql($str, $expr);
     }
 
-    public function strInPredicate(Sql\Predicates\InPredicate $in, &$params) {
+    public function strInPredicate(Sql\Predicates\InPredicate $in, &$params)
+    {
         $exprstr = $this->strColumn($expr = $in->expression(), $params);
 
         $inParams = $in->params();
@@ -140,7 +159,8 @@ class ConditionStringifier {
         return $this->str2prnss4plainSql($str, $expr);
     }
 
-    public function strIsNullPredicate(Sql\Predicates\IsNullPredicate $isNull, &$params) {
+    public function strIsNullPredicate(Sql\Predicates\IsNullPredicate $isNull, &$params)
+    {
         $exprstr = $this->strColumn($expr = $isNull->expression(), $params);
         $not = $isNull->isNegative() ? ' NOT' : '';
         $str = "$exprstr IS{$not} NULL";
@@ -148,32 +168,40 @@ class ConditionStringifier {
         return $this->str2prnss4plainSql($str, $expr);
     }
 
-    public function strCustomPredicate(Sql\Predicates\CustomPredicate $custom, &$params) {
+    public function strCustomPredicate(Sql\Predicates\CustomPredicate $custom, &$params)
+    {
         $str = $this->strColumn($custom->expression(), $params, true);
         ($p = $custom->params()) && array_push($params, ...$p);
 
-        if ($custom->isNegative()) return "NOT $str";
+        if ($custom->isNegative()) {
+            return "NOT $str";
+        }
 
         return $str;
     }
 
-    public function strExistsPredicate(Sql\Predicates\ExistsPredicate $exists, &$params) {
+    public function strExistsPredicate(Sql\Predicates\ExistsPredicate $exists, &$params)
+    {
         $selectStr = $this->queryStringifier()->factory()
             ->createSelectStringifier($exists->query())
             ->stringifyRaw($params);
 
         $str = "EXISTS ($selectStr)";
 
-        if ($exists->isNegative()) return "NOT $str";
+        if ($exists->isNegative()) {
+            return "NOT $str";
+        }
 
         return $str;
     }
 
-    protected function createPlainSql($sql, array $params = []) {
+    protected function createPlainSql($sql, array $params = [])
+    {
         return new PlainSql($sql, $params);
     }
 
-    protected function strPreparedLike(string $lstr, string $rstr, string $notstr, bool $caseInsensitive) {
+    protected function strPreparedLike(string $lstr, string $rstr, string $notstr, bool $caseInsensitive)
+    {
         if ($caseInsensitive) {
             return "LOWER($lstr) {$notstr}LIKE LOWER($rstr)";
         }
@@ -183,14 +211,17 @@ class ConditionStringifier {
 
     /**
      * @param \VV\Db\Sql\Predicates\Predicate $predic
-     * @param               $params
+     * @param                                 $params
      *
      * @return string|null
      */
-    private function strPredic(Sql\Predicates\Predicate $predic, &$params): ?string {
+    private function strPredic(Sql\Predicates\Predicate $predic, &$params): ?string
+    {
         switch (true) {
             case $predic instanceof Sql\Condition:
-                if ($predic->isEmpty()) return null;
+                if ($predic->isEmpty()) {
+                    return null;
+                }
 
                 return "({$this->buildConditionSql($predic)->embed($params)})";
 
@@ -220,18 +251,23 @@ class ConditionStringifier {
         }
     }
 
-    private function decorateParamsByModel($field, &...$params) {
+    private function decorateParamsByModel($field, &...$params)
+    {
         if ($field instanceof Sql\Expressions\DbObject) {
             foreach ($params as &$p) {
                 if ($p instanceof Sql\Expressions\SqlParam) {
                     $val = $p->param();
-                } else $val = $p;
+                } else {
+                    $val = $p;
+                }
 
                 $val = $this->queryStringifier()->decorateParamForCond($val, $field);
 
                 if ($p instanceof Sql\Expressions\SqlParam) {
                     $p->setParam($val);
-                } else $p = $val;
+                } else {
+                    $p = $val;
+                }
             }
             unset($p);
         }
@@ -245,8 +281,11 @@ class ConditionStringifier {
      *
      * @return string
      */
-    private function str2prnss4plainSql(string $str, Sql\Expressions\Expression $expr): string {
-        if ($expr instanceof Sql\Expressions\PlainSql) return "($str)";
+    private function str2prnss4plainSql(string $str, Sql\Expressions\Expression $expr): string
+    {
+        if ($expr instanceof Sql\Expressions\PlainSql) {
+            return "($str)";
+        }
 
         return $str;
     }

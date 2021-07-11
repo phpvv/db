@@ -20,7 +20,8 @@ use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
  *
  * @package VV\Db\Driver\Sql\Stringifier
  */
-abstract class QueryStringifier {
+abstract class QueryStringifier
+{
 
     private Factory $factory;
     private array $params = [];
@@ -40,7 +41,8 @@ abstract class QueryStringifier {
      *
      * @param Driver $factory
      */
-    public function __construct(Factory $factory) {
+    public function __construct(Factory $factory)
+    {
         $this->factory = $factory;
     }
 
@@ -52,7 +54,8 @@ abstract class QueryStringifier {
      *
      * @return string
      */
-    final public function stringify(&$params) {
+    final public function stringify(&$params)
+    {
         return $this->stringifyFinalDecorate($this->stringifyRaw($params));
     }
 
@@ -61,22 +64,26 @@ abstract class QueryStringifier {
      *
      * @return mixed
      */
-    final public function toString() {
+    final public function toString()
+    {
         return $this->stringifyRaw($params);
     }
 
-    final public function __toString() {
+    final public function __toString()
+    {
         return $this->toString();
     }
 
     /**
      * @return array
      */
-    final public function params() {
+    final public function params()
+    {
         return $this->params;
     }
 
-    final public function appendParams(...$params) {
+    final public function appendParams(...$params)
+    {
         $params && array_push($this->params, ...$params);
 
         return $this;
@@ -85,14 +92,16 @@ abstract class QueryStringifier {
     /**
      * @return Factory
      */
-    public function factory(): Factory {
+    public function factory(): Factory
+    {
         return $this->factory;
     }
 
     /**
      * @return ExpressoinStringifier
      */
-    public function exprStringifier(): ExpressoinStringifier {
+    public function exprStringifier(): ExpressoinStringifier
+    {
         if (!$this->exprStringifier) {
             $this->exprStringifier = $this->createExprStringifier();
         }
@@ -103,7 +112,8 @@ abstract class QueryStringifier {
     /**
      * @return ConditionStringifier
      */
-    public function conditionStringifier() {
+    public function conditionStringifier()
+    {
         if (!$this->conditionStringifier) {
             $this->conditionStringifier = $this->createConditionStringifier();
         }
@@ -111,9 +121,10 @@ abstract class QueryStringifier {
         return $this->conditionStringifier;
     }
 
-    public function decorateParamForCond($param, $field) {
+    public function decorateParamForCond($param, $field)
+    {
         if ($param instanceof \VV\Db\Param) {
-            return $param->setValue($this->decorateParamForCond($param->value(), $field));
+            return $param->setValue($this->decorateParamForCond($param->getValue(), $field));
         }
 
         return ($o = $this->fieldModel($field, $this->queryTableClause()))
@@ -128,7 +139,8 @@ abstract class QueryStringifier {
      *
      * @return mixed
      */
-    public function strExpr(Sql\Expressions\Expression $expr, &$params, $withAlias = false) {
+    public function strExpr(Sql\Expressions\Expression $expr, &$params, $withAlias = false)
+    {
         return $this->exprStringifier()->strExpr($expr, $params, $withAlias);
     }
 
@@ -138,14 +150,16 @@ abstract class QueryStringifier {
      *
      * @return string
      */
-    public function strParam($param, &$params) {
+    public function strParam($param, &$params)
+    {
         return $this->exprStringifier()->strParam($param, $params);
     }
 
     /**
      * @inheritdoc
      */
-    public function strColumn(Sql\Expressions\Expression $expr, &$params, $withAlias = false) {
+    public function strColumn(Sql\Expressions\Expression $expr, &$params, $withAlias = false)
+    {
         if ($expr instanceof Sql\Expressions\DbObject) {
             if (!$expr->owner()) { // obj without owner (without table alias)
                 $tableClause = $this->queryTableClause();
@@ -173,13 +187,16 @@ abstract class QueryStringifier {
     abstract public function queryTableClause();
 
     /**
-     * @param                  $field
+     * @param                         $field
      * @param Sql\Clauses\TableClause $tableClause
      *
      * @return \VV\Db\Model\Field|null
      */
-    protected function fieldModel($field, Sql\Clauses\TableClause $tableClause) {
-        if (!$field) return null;
+    protected function fieldModel($field, Sql\Clauses\TableClause $tableClause)
+    {
+        if (!$field) {
+            return null;
+        }
 
         if ($field instanceof \VV\Db\Model\Field) {
             return $field;
@@ -187,12 +204,16 @@ abstract class QueryStringifier {
 
         if (!$field instanceof Sql\Expressions\DbObject) {
             $field = Sql\Expressions\DbObject::create($field);
-            if (!$field) return null;
+            if (!$field) {
+                return null;
+            }
         }
 
         $owner = $field->owner();
         $table = $tableClause->tableModelOrMain($owner ? $owner->name() : null);
-        if ($table) return $table->fields()->get($field->name());
+        if ($table) {
+            return $table->getFields()->get($field->name());
+        }
 
         return null;
     }
@@ -204,7 +225,8 @@ abstract class QueryStringifier {
      *
      * @return string
      */
-    protected function strColumnList(array $exprList, &$params, $withAlias = false) {
+    protected function strColumnList(array $exprList, &$params, $withAlias = false)
+    {
         $strarr = [];
 
         foreach ($exprList as $expr) {
@@ -214,12 +236,16 @@ abstract class QueryStringifier {
         return implode(', ', $strarr);
     }
 
-    protected function buildConditionSql(Sql\Condition $condition) {
+    protected function buildConditionSql(Sql\Condition $condition)
+    {
         return $this->conditionStringifier()->buildConditionSql($condition);
     }
 
-    protected function strWhereClause(Sql\Condition $where, &$params) {
-        if ($where->isEmpty()) return '';
+    protected function strWhereClause(Sql\Condition $where, &$params)
+    {
+        if ($where->isEmpty()) {
+            return '';
+        }
 
         return ' WHERE ' . $this->buildConditionSql($where)->embed($params);
     }
@@ -229,7 +255,8 @@ abstract class QueryStringifier {
      *
      * @return PlainSql
      */
-    protected function buildTableSql(Sql\Clauses\TableClause $table) {
+    protected function buildTableSql(Sql\Clauses\TableClause $table)
+    {
         $condstr = $this->conditionStringifier();
 
         $sql = '';
@@ -255,26 +282,31 @@ abstract class QueryStringifier {
         return $this->createPlainSql($sql, $params);
     }
 
-    protected function createPlainSql($sql, array $params = []) {
+    protected function createPlainSql($sql, array $params = [])
+    {
         return new PlainSql($sql, $params);
     }
 
     /**
      * @return ExpressoinStringifier
      */
-    protected function createExprStringifier() {
+    protected function createExprStringifier()
+    {
         return new ExpressoinStringifier($this);
     }
 
-    protected function createConditionStringifier() {
+    protected function createConditionStringifier()
+    {
         return new ConditionStringifier($this);
     }
 
-    protected function stringifyFinalDecorate($sql) {
+    protected function stringifyFinalDecorate($sql)
+    {
         return $sql;
     }
 
-    protected function useAliasForTable(Sql\Clauses\TableClause $table) {
+    protected function useAliasForTable(Sql\Clauses\TableClause $table)
+    {
         return true;
     }
 }

@@ -15,15 +15,15 @@ namespace VV\Db\Model;
  *
  * @package VV\Db\Model
  */
-class FieldList implements \IteratorAggregate {
-
+class FieldList implements \IteratorAggregate
+{
     /** @var Field[] */
     private array $fields = [];
-
     /** @var string[] */
     private array $names = [];
 
-    public function __construct(array $fieldsData) {
+    public function __construct(array $fieldsData)
+    {
         foreach ($fieldsData as $name => $data) {
             $this->names[] = $name;
             $this->fields[$name] = new Field($name, $data);
@@ -37,14 +37,16 @@ class FieldList implements \IteratorAggregate {
      *
      * @return Field| null
      */
-    public function get(string $name): ?Field {
+    public function get(string $name): ?Field
+    {
         return $this->fields[$name] ?? null;
     }
 
     /**
-     * @return string[]
+     * @return string[]|null
      */
-    public function names(): ?array {
+    public function getNames(): ?array
+    {
         return $this->names;
     }
 
@@ -52,7 +54,8 @@ class FieldList implements \IteratorAggregate {
      * @inheritDoc
      * @return Field[]
      */
-    public function getIterator() {
+    public function getIterator(): iterable
+    {
         foreach ($this->fields as $k => $v) {
             yield $k => $v;
         }

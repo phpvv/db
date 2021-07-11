@@ -17,7 +17,8 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Predicate
  */
-class LikePredicate extends PredicateBase {
+class LikePredicate extends PredicateBase
+{
 
     private Expression $leftExpression;
     private Expression $rightExpression;
@@ -31,7 +32,8 @@ class LikePredicate extends PredicateBase {
      * @param bool       $not
      * @param bool       $caseInsensitive
      */
-    public function __construct(Expression $left, Expression $right, bool $not = false, bool $caseInsensitive = false) {
+    public function __construct(Expression $left, Expression $right, bool $not = false, bool $caseInsensitive = false)
+    {
         $this->leftExpression = $left;
         $this->rightExpression = $right;
         $this->not = $not;
@@ -41,21 +43,24 @@ class LikePredicate extends PredicateBase {
     /**
      * @return Expression
      */
-    public function leftExpression(): Expression {
+    public function leftExpression(): Expression
+    {
         return $this->leftExpression;
     }
 
     /**
      * @return Expression
      */
-    public function rightExpression(): Expression {
+    public function rightExpression(): Expression
+    {
         return $this->rightExpression;
     }
 
     /**
      * @return bool
      */
-    public function isCaseInsensitive(): bool {
+    public function isCaseInsensitive(): bool
+    {
         return $this->caseInsensitive;
     }
 }

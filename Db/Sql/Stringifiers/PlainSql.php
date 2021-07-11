@@ -15,7 +15,8 @@ namespace VV\Db\Sql\Stringifiers;
  *
  * @package VV\Db\Driver\Sql
  */
-class PlainSql {
+class PlainSql
+{
 
     private string $sql;
 
@@ -27,7 +28,8 @@ class PlainSql {
      * @param string $sql
      * @param array  $params
      */
-    public function __construct(string $sql, array $params = []) {
+    public function __construct(string $sql, array $params = [])
+    {
         $this->sql = $sql;
         $this->params = $params;
     }
@@ -35,14 +37,16 @@ class PlainSql {
     /**
      * @return string
      */
-    public function sql() {
+    public function sql()
+    {
         return $this->sql;
     }
 
     /**
      * @return array
      */
-    public function params() {
+    public function params()
+    {
         return $this->params;
     }
 
@@ -51,9 +55,12 @@ class PlainSql {
      *
      * @return string
      */
-    public function embed(&$params): string {
+    public function embed(&$params): string
+    {
         if ($this->params) {
-            if (!$params) $params = [];
+            if (!$params) {
+                $params = [];
+            }
             $params = array_merge($params, $this->params);
             // array_push($params, ...$this->params);
         }

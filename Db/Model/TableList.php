@@ -16,8 +16,8 @@ namespace VV\Db\Model;
  * @package VV\Db\Model
  * @method Table|null get(string $name, array $prefixes = null): ?Table
  */
-abstract class TableList extends \VV\Db\Model\ObjectList {
-
+abstract class TableList extends ObjectList
+{
     protected const SUBNS = 'Tables';
     protected const SUFFIX = 'Table';
     protected const DFLT_PREFIXES = Table::DFLT_PREFIXES;

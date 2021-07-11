@@ -15,14 +15,14 @@ namespace VV\Db\Driver;
  *
  * @package VV\Db\Driver
  */
-interface Connection {
-
+interface Connection
+{
     /**
-     * @param \VV\Db\Driver\QueryInfo $query
+     * @param QueryInfo $query
      *
      * @return Statement
      */
-    public function prepare(\VV\Db\Driver\QueryInfo $query): Statement;
+    public function prepare(QueryInfo $query): Statement;
 
     /**
      * @return void

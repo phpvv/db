@@ -15,8 +15,8 @@ namespace VV\Db\Driver;
  *
  * @package VV\Db\Driver
  */
-interface Statement {
-
+interface Statement
+{
     /**
      * @param int $size
      *

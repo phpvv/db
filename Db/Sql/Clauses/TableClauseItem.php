@@ -11,6 +11,7 @@ namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Model\DataObject;
 use VV\Db\Model\Table;
+use VV\Db\Sql;
 use VV\Db\Sql\Condition;
 use VV\Db\Sql\Expressions\DbObject;
 use VV\Db\Sql\Expressions\Expression;
@@ -20,8 +21,8 @@ use VV\Db\Sql\Expressions\Expression;
  *
  * @package VV\Db\Sql\Clause\Table
  */
-class TableClauseItem {
-
+class TableClauseItem
+{
     public const J_INNER = 'JOIN',
         J_LEFT = 'LEFT JOIN',
         J_RIGHT = 'RIGHT JOIN',
@@ -49,42 +50,49 @@ class TableClauseItem {
         string $joinType = null
     ) {
         $this->setTable($table, $alias);
-        if ($joinOn) $this->setJoin($joinOn, $joinType);
+        if ($joinOn) {
+            $this->setJoin($joinOn, $joinType);
+        }
     }
 
 
     /**
      * @return Expression
      */
-    public function table(): Expression {
+    public function table(): Expression
+    {
         return $this->table;
     }
 
     /**
      * @return Table|null
      */
-    public function tableModel(): ?Table {
+    public function tableModel(): ?Table
+    {
         return $this->tableModel;
     }
 
     /**
      * @return Condition|null
      */
-    public function joinOn(): ?Condition {
+    public function joinOn(): ?Condition
+    {
         return $this->joinOn;
     }
 
     /**
      * @return string|null
      */
-    public function joinType(): ?string {
+    public function joinType(): ?string
+    {
         return $this->joinType;
     }
 
     /**
      * @return array|null
      */
-    public function useIndex(): ?array {
+    public function useIndex(): ?array
+    {
         return $this->useIndex;
     }
 
@@ -93,7 +101,8 @@ class TableClauseItem {
      *
      * @return $this
      */
-    public function setUseIndex(array|string|null $useIndex): static {
+    public function setUseIndex(array|string|null $useIndex): static
+    {
         $this->useIndex = (array)$useIndex;
 
         return $this;
@@ -105,7 +114,8 @@ class TableClauseItem {
      *
      * @return $this
      */
-    public function setJoin(Condition $on, string $type = null): static {
+    public function setJoin(Condition $on, string $type = null): static
+    {
         return $this->setJoinOn($on)->setJoinType($type ?: self::J_INNER);
     }
 
@@ -115,14 +125,15 @@ class TableClauseItem {
      *
      * @return $this
      */
-    protected function setTable(string|Expression|Table $table, string $alias = null): static {
+    protected function setTable(string|Expression|Table $table, string $alias = null): static
+    {
         if ($table instanceof Table) {
             return $this
                 ->setTableModel($table)
-                ->setTable($table->name(), $alias ?: $table->dfltAlias());
+                ->setTable($table->getName(), $alias ?: $table->getDefaultAlias());
         }
 
-        $tbl = \VV\Db\Sql::expression($table);
+        $tbl = Sql::expression($table);
         if ($alias) {
             $tbl->as($alias);
         } elseif (!$tbl->alias()) {
@@ -130,7 +141,7 @@ class TableClauseItem {
                 throw new \LogicException('Can\'t determine alias for table');
             }
 
-            $alias = DataObject::name2alias($tbl->name());
+            $alias = DataObject::nameToAlias($tbl->name());
             $tbl->as($alias);
         }
 
@@ -144,7 +155,8 @@ class TableClauseItem {
      *
      * @return $this
      */
-    protected function setTableModel(Table $table): static {
+    protected function setTableModel(Table $table): static
+    {
         $this->tableModel = $table;
 
         return $this;
@@ -155,7 +167,8 @@ class TableClauseItem {
      *
      * @return $this
      */
-    protected function setJoinOn(Condition $on): static {
+    protected function setJoinOn(Condition $on): static
+    {
         $this->joinOn = $on;
 
         return $this;
@@ -166,7 +179,8 @@ class TableClauseItem {
      *
      * @return $this
      */
-    protected function setJoinType(string $type): static {
+    protected function setJoinType(string $type): static
+    {
         if (!self::checkJoinType($type)) {
             throw new \InvalidArgumentException('Wrong join type');
         }
@@ -181,7 +195,8 @@ class TableClauseItem {
      *
      * @return bool
      */
-    public static function checkJoinType(string $joinType): bool {
+    public static function checkJoinType(string $joinType): bool
+    {
         return match ($joinType) {
             self::J_INNER, self::J_LEFT, self::J_RIGHT, self::J_FULL, self::J_OUTER => true,
             default => false,

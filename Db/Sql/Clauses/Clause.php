@@ -15,7 +15,8 @@ namespace VV\Db\Sql\Clauses;
  *
  * @package VV\Db\Sql\Clauses
  */
-interface Clause {
+interface Clause
+{
 
     /**
      * @return bool

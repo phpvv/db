@@ -17,7 +17,8 @@ use VV\Db\Param;
  *
  * @package VV\Db\Sql\Clauses
  */
-class InsertedIdClause implements Clause {
+class InsertedIdClause implements Clause
+{
 
     private ?Param $param = null;
     private bool $empty = true;
@@ -30,7 +31,8 @@ class InsertedIdClause implements Clause {
      *
      * @return $this
      */
-    public function set(Param|int $type = null, int $size = null, string $pk = null): self {
+    public function set(Param|int $type = null, int $size = null, string $pk = null): self
+    {
         $this->empty = false;
 
         if ($type) {
@@ -39,7 +41,9 @@ class InsertedIdClause implements Clause {
             } else {
                 $param = new Param($type, null, null, $size);
             }
-            if ($size !== null) $param->setSize($size);
+            if ($size !== null) {
+                $param->setSize($size);
+            }
 
             $this->param = $param;
         }
@@ -51,30 +55,36 @@ class InsertedIdClause implements Clause {
     /**
      * @return mixed
      */
-    public function value() {
-        if (!$this->param) throw new \InvalidArgumentException('Param is empty');
+    public function value()
+    {
+        if (!$this->param) {
+            throw new \InvalidArgumentException('Param is empty');
+        }
 
-        return $this->param->value();
+        return $this->param->getValue();
     }
 
     /**
      * @return Param
      */
-    public function param() {
+    public function param()
+    {
         return $this->param;
     }
 
     /**
      * @return string
      */
-    public function pk(): ?string {
+    public function pk(): ?string
+    {
         return $this->pk;
     }
 
     /**
      * @inheritdoc
      */
-    public function isEmpty(): bool {
+    public function isEmpty(): bool
+    {
         return $this->empty;
     }
 }

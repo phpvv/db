@@ -15,7 +15,8 @@ namespace VV\Db\Sql\Expressions;
  *
  * @package VV\Db\Sql
  */
-interface AliasableExpression {
+interface AliasableExpression
+{
 
     /**
      * @return string|null
