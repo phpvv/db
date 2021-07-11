@@ -11,6 +11,7 @@
 namespace VV\Db;
 
 use JetBrains\PhpStorm\Pure;
+use VV\Db\Driver\QueryInfo;
 use VV\Db\Exceptions\ConnectionError;
 use VV\Db\Exceptions\ConnectionIsBusy;
 use VV\Db\Sql\Expressions\Expression;
@@ -83,10 +84,8 @@ final class Connection
         $this->connect();
     }
 
-    #[Pure]
-    public function isSame(
-        self $connection
-    ): bool {
+    public function isSame(self $connection): bool
+    {
         return $this === $connection || $this->getHash() == $connection->getHash();
     }
 
@@ -163,6 +162,7 @@ final class Connection
     public function prepare(Query|string $query, array $params = null, int $fetchSize = null): Statement
     {
         $this->tryAutoConnect();
+        $this->throwIfConnectionError();
 
         $resultFieldsMap = null;
         if ($query instanceof Query) {
@@ -174,7 +174,7 @@ final class Connection
             $query = $this->stringifyQuery($query, $params);
         }
 
-        $queryInfo = new \VV\Db\Driver\QueryInfo($query, $resultFieldsMap);
+        $queryInfo = new QueryInfo($query, $resultFieldsMap);
 
         $driverPrepared = $this->driverConnection->prepare($queryInfo);
         $prepared = new Statement($driverPrepared, $this, $this->driverConnection, $queryInfo);
@@ -206,19 +206,35 @@ final class Connection
         $decorator = null,
         int $fetchSize = null
     ): Result {
-        $prepared = $this->prepare($query);
+        $this->throwIfConnectionError();
 
-        if ($params) {
-            if (is_string($params) || is_numeric($params)) {
-                $params = [$params];
+        $reconnected = false;
+        while (true) {
+            try {
+                $prepared = $this->prepare($query);
+
+                if ($params) {
+                    if (is_string($params) || is_numeric($params)) {
+                        $params = [$params];
+                    }
+                    $prepared->bind($params);
+                }
+                if ($fetchSize !== null) {
+                    $prepared->setFetchSize($fetchSize);
+                }
+
+                $result = $prepared->exec();
+                break;
+            } catch (ConnectionError $e) {
+                if ($reconnected) {
+                    throw $e;
+                }
+                $reconnected = true;
+                $this->reconnect();
             }
-            $prepared->bind($params);
-        }
-        if ($fetchSize !== null) {
-            $prepared->setFetchSize($fetchSize);
         }
 
-        return $prepared->exec()
+        return $result
             ->setFlags($flags)
             ->setDecorator($decorator)
             ->setAutoClose(true);
@@ -559,7 +575,7 @@ final class Connection
     /**
      * @return ConnectionError|null
      */
-    public function connectionError(): ?ConnectionError
+    public function getConnectionError(): ?ConnectionError
     {
         return $this->connectionError;
     }
@@ -594,6 +610,18 @@ final class Connection
         }
 
         return $stringifier->stringify($params);
+    }
+
+    /**
+     * @return $this
+     */
+    public function throwIfConnectionError(): self
+    {
+        if ($e = $this->getConnectionError()) {
+            throw $e;
+        }
+
+        return $this;
     }
 
     /**

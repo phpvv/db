@@ -191,7 +191,7 @@ abstract class Db
      */
     public function getConnectionError(): ?ConnectionError
     {
-        return $this->getConnection()->connectionError();
+        return $this->getConnection()->getConnectionError();
     }
 
     abstract public function createConnection(): Connection;

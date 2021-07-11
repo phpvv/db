@@ -17,17 +17,12 @@ namespace VV\Db;
  */
 final class Statement
 {
-
-    const DATETIME_FORMAT = 'Y-m-d H:i:s';
+    public const DATETIME_FORMAT = 'Y-m-d H:i:s';
 
     private ?Driver\Statement $driver;
-
     private Connection $connection;
-
     private Driver\Connection $driverConnection;
-
     private Driver\QueryInfo $queryInfo;
-
     private ?int $fetchSize = null;
 
     /**
@@ -97,7 +92,9 @@ final class Statement
     public function exec(): Result
     {
         $connection = $this->connection;
-        // enable fatal error stub (paralel execution)
+        $connection->throwIfConnectionError();
+
+        // enable fatal error stub (parallel execution)
         $connection->acqureExecution();
         try {
             $driverResult = $this->getDriverOrThrow()->exec();
