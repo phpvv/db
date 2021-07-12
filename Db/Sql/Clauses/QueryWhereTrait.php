@@ -34,7 +34,7 @@ trait QueryWhereTrait
      *
      * @return $this
      */
-    public function where(string|int|array|Expression|Predicate|null $field, mixed $value = null): static
+    public function where(string|int|Expression|array|Predicate|null $field, mixed $value = null): static
     {
         return $this->condintionAnd($this->getWhereClause(), ...func_get_args());
     }
@@ -148,13 +148,13 @@ trait QueryWhereTrait
 
     protected function condintionAnd(
         Condition $condition,
-        string|int|array|Expression|Predicate|null $field,
+        string|int|Expression|array|Predicate|null $field,
         mixed $value = null
     ): static {
         if ($field) {
             if (is_array($field)) {
                 $condition->and($field);
-            } elseif ($field instanceof Condition) {
+            } elseif ($field instanceof Predicate) {
                 $condition->and($field);
             } else {
                 if (func_num_args() < 3) {

@@ -48,46 +48,46 @@ abstract class DataObject extends DbObject
     /**
      * Create select query
      *
-     * @param string[]|Expression[] $fields
+     * @param string[]|Expression[] $columns
      *
      * @return Sql\SelectQuery
      */
-    public function select(...$fields): Sql\SelectQuery
+    public function select(...$columns): Sql\SelectQuery
     {
-        return $this->getConnection()->select(...$fields)->from($this);
+        return $this->getConnection()->select(...$columns)->from($this);
     }
 
     /**
-     * @param string     $field
-     * @param string|int $value
-     * @param array|null $fields
-     * @param int|null   $fetchMode
+     * @param string            $field
+     * @param string|int        $value
+     * @param array|string|null $columns
+     * @param int|null          $fetchMode
      *
      * @return mixed
      */
     public function fetchByField(
         string $field,
         string|int $value,
-        array $fields = null,
+        array|string $columns = null,
         int $fetchMode = null
     ): mixed {
-        return $this->fetchByFields([$field => $value], $fields, $fetchMode);
+        return $this->fetchByFields([$field => $value], $columns, $fetchMode);
     }
 
     /**
-     * @param Condition|array|string $condition
-     * @param string|string[]|null   $fields
+     * @param Predicate|array|string $condition
+     * @param string|string[]|null   $columns
      * @param int|null               $fetchMode
      *
      * @return mixed
      */
     public function fetchByFields(
-        Condition|array|string $condition,
-        array|string $fields = null,
+        Predicate|array|string $condition,
+        array|string $columns = null,
         int $fetchMode = null
     ): mixed {
-        $sql = $this->select(...(array)$fields)->where($condition);
-        if ($fields && !is_array($fields)) {
+        $sql = $this->select(...(array)$columns)->where($condition);
+        if ($columns && !is_array($columns)) {
             return $sql->column(flags: $fetchMode);
         }
 
