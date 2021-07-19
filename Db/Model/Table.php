@@ -28,7 +28,7 @@ abstract class Table extends DataObject
 
     protected const PK = '';
     protected const PK_FIELDS = [];
-    protected const FOREING_KEYS = [];
+    protected const FOREIGN_KEYS = [];
 
     private ?ForeignKeyList $foreignKeys = null;
 
@@ -48,7 +48,7 @@ abstract class Table extends DataObject
     public function getForeignKeys(): ForeignKeyList
     {
         if ($this->foreignKeys === null) {
-            $this->foreignKeys = new ForeignKeyList(static::FOREING_KEYS);
+            $this->foreignKeys = new ForeignKeyList(static::FOREIGN_KEYS);
         }
 
         return $this->foreignKeys;

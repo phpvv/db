@@ -23,9 +23,12 @@ class ModelGenerator
     private array $todel;
 
     private string $dfltTop = <<<CODE
-        <?php declare(strict_types=1);
+        <?php
 
         /** Created by VV Db Model Generator */
+
+        declare(strict_types=1);
+
         CODE;
 
     public function __construct(\VV\Db $db)
@@ -69,11 +72,12 @@ class ModelGenerator
 
 
         foreach ($this->dataObjectsGetterPhpdoc as $dataObjectType => $v) {
-            // generate Tabel/View List class
+            // generate Table/View List class
             $className = $dataObjectType . 'List';
 
             $file = "$this->dir$className.php";
-            file_put_contents($file,
+            file_put_contents(
+                $file,
                 <<<CODE
                 $this->dfltTop
                 namespace $this->ns;
@@ -83,9 +87,10 @@ class ModelGenerator
                  *
                  * @package $this->ns
                 $v */
-                class $className extends \\VV\\Db\\Model\\$className {
-
+                class $className extends \\VV\\Db\\Model\\$className
+                {
                 }
+
                 CODE
             );
 
@@ -93,7 +98,8 @@ class ModelGenerator
             $className = $dataObjectType;
             $file = $this->dir . $className . ".php";
             if (!file_exists($file)) {
-                file_put_contents($file,
+                file_put_contents(
+                    $file,
                     <<<CODE
                     $this->dfltTop
                     namespace $this->ns;
@@ -103,9 +109,10 @@ class ModelGenerator
                      *
                      * @package $this->ns
                      */
-                    class $className extends \\VV\\Db\\Model\\$className {
-
+                    class $className extends \\VV\\Db\\Model\\$className
+                    {
                     }
+
                     CODE
                 );
             }
@@ -192,23 +199,26 @@ class ModelGenerator
 
         [$phpDoc, $advTopContent, $advBottomContent] = $this->parseClassAdvContent($fqcn);
 
+
         $content = <<<CODE
             $this->dfltTop
             namespace $ns;
 
             use VV\Db\Model\Field;
+            use $this->ns\\$type;
 
-            {$phpDoc}class $className extends \\$this->ns\\$type {
-
+            {$phpDoc}class $className extends $type
+            {
             $advTopContent    //region Auto-generated area
                 protected const NAME = '{$object->name()}';
                 protected const PK = '$pkConst';
                 protected const PK_FIELDS = ['$pkFieldsConst'];
                 protected const DFLT_ALIAS = '$alias';
                 protected const FIELDS = [$fieldsConstContent    ];
-                protected const FOREING_KEYS = [$fkConstContent    ];
+                protected const FOREIGN_KEYS = [$fkConstContent    ];
                 //endregion$advBottomContent
             }
+
             CODE;
 
         @mkdir($this->dir . $relNs);
@@ -224,11 +234,10 @@ class ModelGenerator
             return null;
         }
 
-        /** @noinspection PhpUnhandledExceptionInspection */
         $reflector = new \ReflectionClass($fqcn);
         $classLines = new \LimitIterator(
             new \SplFileObject($reflector->getFileName()),
-            $start = $reflector->getStartLine(),
+            $start = $reflector->getStartLine() + 1,
             $reflector->getEndLine() - $start - 1
         );
         $phpDoc = $reflector->getDocComment();
@@ -254,7 +263,7 @@ class ModelGenerator
                     $topLines[] = $line;
                     break;
                 case 1:
-                    if ($starts('protected const FOREING_KEYS =')) {
+                    if ($starts('protected const FOREIGN_KEYS =')) {
                         $stage = 2;
                     }
                     break;
@@ -269,6 +278,7 @@ class ModelGenerator
                     if ($starts('//')) {
                         break;
                     }
+                    // no break
                 case 4:
                     $bottomLines[] = $line;
             }
