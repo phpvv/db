@@ -10,6 +10,7 @@
  */
 namespace VV\Db\Sql\Clauses;
 
+use VV\Db\Sql;
 use VV\Db\Sql\Expressions\DbObject;
 use VV\Db\Sql\Expressions\Expression;
 
@@ -17,11 +18,10 @@ use VV\Db\Sql\Expressions\Expression;
  * Class DatasetClause
  *
  * @package VV\Db\Sql\Clauses
- * @method \VV\Db\Sql\Clauses\DatasetClauseItem[] items():array
+ * @method DatasetClauseItem[] getItems(): array
  */
 class DatasetClause extends ItemList
 {
-
     /**
      * @param iterable|string|Expression $field
      * @param mixed|null                 $value
@@ -61,7 +61,7 @@ class DatasetClause extends ItemList
     public function split(): array
     {
         $fields = $values = [];
-        foreach ($this->items() as $item) {
+        foreach ($this->getItems() as $item) {
             $fields[] = $item->field();
             $values[] = $item->value();
         }
@@ -72,10 +72,10 @@ class DatasetClause extends ItemList
     /**
      * @return array
      */
-    public function fieldsNamesValuesMap(): array
+    public function map(): array
     {
         $map = [];
-        foreach ($this->items() as $item) {
+        foreach ($this->getItems() as $item) {
             $map[$item->field()->name()] = $item->value();
         }
 
@@ -92,7 +92,7 @@ class DatasetClause extends ItemList
     {
         if (is_array($value)) {
             [$field, $expr] = explode('=', $field);
-            $value = \VV\Db\Sql::plain($expr, $value);
+            $value = Sql::plain($expr, $value);
         }
 
         $item = $this->creteItem($field, $value);

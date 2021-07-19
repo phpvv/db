@@ -10,33 +10,32 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use VV\Db\Sql;
+use VV\Db\Sql\Expressions\DbObject;
 
 /**
  * Class InsertFieldsClause
  *
  * @package VV\Db\Sql\Clauses
- * @method Sql\Expressions\DbObject[] items():array
+ * @method DbObject[] getItems(): array
  */
 class InsertFieldsClause extends ColumnList
 {
 
-    protected function _add(array $columns)
+    protected function addColumnArray(array $columns): void
     {
         foreach ($columns as &$col) {
-            if ($o = Sql\Expressions\DbObject::create($col)) {
-                $col = $o;
-            } else {
+            if (!$o = DbObject::create($col)) {
                 throw new \InvalidArgumentException();
             }
+            $col = $o;
         }
         unset($col);
 
         $this->appendItems(...$columns);
     }
 
-    protected function allowedObjectTypes(): array
+    protected function getAllowedObjectTypes(): array
     {
-        return [Sql\Expressions\DbObject::class];
+        return [DbObject::class];
     }
 }

@@ -243,7 +243,6 @@ final class Connection
     /**
      * @return bool
      */
-    #[Pure]
     public function isInTransaction(): bool
     {
         return $this->transaction && !$this->transaction->isFinished();
@@ -403,7 +402,6 @@ final class Connection
     /**
      * @return string|null
      */
-    #[Pure]
     public function getScheme(): ?string
     {
         if ($this->scheme === null) {
@@ -510,7 +508,6 @@ final class Connection
     /**
      * @return bool
      */
-    #[Pure]
     public function isBusy(): bool
     {
         return $this->isInTransaction() || $this->isUnderExecution();
@@ -601,7 +598,7 @@ final class Connection
             throw new \InvalidArgumentException('Unknown query type');
         }
 
-        $noemtClauses = $query->nonEmptyClausesIds();
+        $noemtClauses = $query->getNonEmptyClausesIds();
         $suprtClauses = $stringifier->supportedClausesIds();
 
         $intersec = $noemtClauses | $suprtClauses;

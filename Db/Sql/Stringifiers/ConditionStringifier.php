@@ -11,6 +11,7 @@
 namespace VV\Db\Sql\Stringifiers;
 
 use VV\Db\Sql;
+use VV\Db\Sql\Predicates\Predicate;
 use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
 
 /**
@@ -70,14 +71,14 @@ class ConditionStringifier
     {
         $sql = '';
         $params = [];
-        foreach ($condition->items() as $item) {
-            $predicStr = $this->strPredic($item->predicate(), $params);
+        foreach ($condition->getItems() as $item) {
+            $predicStr = $this->strPredicate($item->getPredicate(), $params);
             if (!$predicStr) {
                 continue;
             }
 
             if ($sql) {
-                $sql .= ' ' . $item->connector() . ' ';
+                $sql .= ' ' . $item->getConnector() . ' ';
             }
             $sql .= $predicStr;
         }
@@ -210,41 +211,41 @@ class ConditionStringifier
     }
 
     /**
-     * @param \VV\Db\Sql\Predicates\Predicate $predic
-     * @param                                 $params
+     * @param Predicate $predicate
+     * @param           $params
      *
      * @return string|null
      */
-    private function strPredic(Sql\Predicates\Predicate $predic, &$params): ?string
+    private function strPredicate(Predicate $predicate, &$params): ?string
     {
         switch (true) {
-            case $predic instanceof Sql\Condition:
-                if ($predic->isEmpty()) {
+            case $predicate instanceof Sql\Condition:
+                if ($predicate->isEmpty()) {
                     return null;
                 }
 
-                return "({$this->buildConditionSql($predic)->embed($params)})";
+                return "({$this->buildConditionSql($predicate)->embed($params)})";
 
-            case $predic instanceof Sql\Predicates\ComparePredicate:
-                return $this->strComparePredicate($predic, $params);
+            case $predicate instanceof Sql\Predicates\ComparePredicate:
+                return $this->strComparePredicate($predicate, $params);
 
-            case $predic instanceof Sql\Predicates\LikePredicate:
-                return $this->strLikePredicate($predic, $params);
+            case $predicate instanceof Sql\Predicates\LikePredicate:
+                return $this->strLikePredicate($predicate, $params);
 
-            case $predic instanceof Sql\Predicates\BetweenPredicate:
-                return $this->strBetweenPredicate($predic, $params);
+            case $predicate instanceof Sql\Predicates\BetweenPredicate:
+                return $this->strBetweenPredicate($predicate, $params);
 
-            case $predic instanceof Sql\Predicates\InPredicate:
-                return $this->strInPredicate($predic, $params);
+            case $predicate instanceof Sql\Predicates\InPredicate:
+                return $this->strInPredicate($predicate, $params);
 
-            case $predic instanceof Sql\Predicates\IsNullPredicate:
-                return $this->strIsNullPredicate($predic, $params);
+            case $predicate instanceof Sql\Predicates\IsNullPredicate:
+                return $this->strIsNullPredicate($predicate, $params);
 
-            case $predic instanceof Sql\Predicates\CustomPredicate:
-                return $this->strCustomPredicate($predic, $params);
+            case $predicate instanceof Sql\Predicates\CustomPredicate:
+                return $this->strCustomPredicate($predicate, $params);
 
-            case $predic instanceof Sql\Predicates\ExistsPredicate:
-                return $this->strExistsPredicate($predic, $params);
+            case $predicate instanceof Sql\Predicates\ExistsPredicate:
+                return $this->strExistsPredicate($predicate, $params);
 
             default:
                 throw new \InvalidArgumentException('Unknown predicate');

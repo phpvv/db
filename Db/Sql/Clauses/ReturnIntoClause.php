@@ -17,7 +17,7 @@ use VV\Db\Sql\Expressions\Expression;
  * Class ReturnInto
  *
  * @package VV\Db\Sql\Clause
- * @method ReturnIntoClauseItem[] items():array
+ * @method ReturnIntoClauseItem[] getItems():array
  */
 class ReturnIntoClause extends ItemList
 {
@@ -64,7 +64,7 @@ class ReturnIntoClause extends ItemList
     public function split(): array
     {
         $exprs = $params = [];
-        foreach ($this->items() as $item) {
+        foreach ($this->getItems() as $item) {
             $exprs[] = $item->expression();
             $params[] = $item->param();
         }

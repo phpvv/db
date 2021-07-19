@@ -47,7 +47,7 @@ abstract class ModificatoryStringifier extends QueryStringifier
      */
     protected function strReturnIntoClause(Sql\Clauses\ReturnIntoClause $returnInto, &$params)
     {
-        $items = $returnInto->items();
+        $items = $returnInto->getItems();
         if ($advReturnInto = $this->advReturnInto()) {
             array_push($items, ...$advReturnInto);
         }
@@ -119,7 +119,7 @@ abstract class ModificatoryStringifier extends QueryStringifier
     {
         $set = [];
         $exprStringifier = $this->exprStringifier();
-        foreach ($dataset->items() as $item) {
+        foreach ($dataset->getItems() as $item) {
             $fldstr = $exprStringifier->strSqlObj($field = $item->field(), $params);
             $valstr = $this->strValueToSave($item->value(), $field, $params);
             $set[] = "$fldstr=$valstr";

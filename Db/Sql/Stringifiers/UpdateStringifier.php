@@ -56,7 +56,7 @@ class UpdateStringifier extends ModificatoryStringifier
         $query = $this->updateQuery();
         $this->checkQueryToStr($query);
 
-        return $this->strUpdateClause($query->tableClause(), $params)
+        return $this->strUpdateClause($query->getTableClause(), $params)
                . $this->strSetClause($query->datasetClause(), $params)
                . $this->strWhereClause($query->getWhereClause(), $params)
                . $this->strReturnIntoClause($query->returnIntoClause(), $params);
@@ -64,7 +64,7 @@ class UpdateStringifier extends ModificatoryStringifier
 
     public function queryTableClause()
     {
-        return $this->updateQuery()->tableClause();
+        return $this->updateQuery()->getTableClause();
     }
 
     protected function strUpdateClause(Sql\Clauses\TableClause $table, &$params)
@@ -85,7 +85,7 @@ class UpdateStringifier extends ModificatoryStringifier
     protected function checkQueryToStr(UpdateQuery $query)
     {
         $checkEmptyMap = [
-            [$table = $query->tableClause(), 'Table is not selected'],
+            [$table = $query->getTableClause(), 'Table is not selected'],
             [$set = $query->datasetClause(), 'There is no data to update'],
             [$where = $query->getWhereClause(), 'There is no where clause'],
         ];

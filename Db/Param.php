@@ -183,7 +183,6 @@ final class Param
     /**
      * @return bool
      */
-    #[Pure]
     public function isSizable(): bool
     {
         $type = $this->getType();

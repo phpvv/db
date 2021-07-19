@@ -32,7 +32,7 @@ class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier
         if (!$tables->isEmpty()) {
             $tblstr = [];
             $exprStringifier = $this->exprStringifier();
-            foreach ($tables->items() as $item) {
+            foreach ($tables->getItems() as $item) {
                 $tblstr[] = $exprStringifier->strSqlObj($item, $params);
             }
             $str .= ' ' . implode(', ', $tblstr);

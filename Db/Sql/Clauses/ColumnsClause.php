@@ -11,6 +11,10 @@
 namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Sql;
+use VV\Db\Sql\Expressions\AliasableExpression;
+use VV\Db\Sql\Expressions\DbObject;
+use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Sql\Expressions\PlainSql;
 
 /**
  * Class ColumnsClause
@@ -19,17 +23,16 @@ use VV\Db\Sql;
  */
 class ColumnsClause extends ColumnList
 {
-
     private ?TableClause $tableClause = null;
     private ?array $resultFields = null;
     private ?array $resultFieldsMap = null;
 
     /**
-     * @return \VV\Db\Sql\Expressions\Expression[]
+     * @return Expression[]
      */
-    public function items(): array
+    public function getItems(): array
     {
-        return parent::items() ?: [Sql\Expressions\DbObject::create('*')];
+        return parent::getItems() ?: [DbObject::create('*')];
     }
 
     /**
@@ -45,33 +48,33 @@ class ColumnsClause extends ColumnList
      *
      * @return bool
      */
-    public function isAllColumns(): bool
+    public function isAsterisk(): bool
     {
-        return !parent::items();
+        return !parent::getItems();
     }
 
     /**
      * @return string[]
      */
-    public function resultFields(): array
+    public function getResultFields(): array
     {
         $rf = &$this->resultFields;
         if ($rf === null) {
             $rf = [];
-            foreach ($this->items() as $col) {
+            foreach ($this->getItems() as $col) {
                 $a = null;
 
-                if ($col instanceof Sql\Expressions\DbObject) {
+                if ($col instanceof DbObject) {
                     if (!$a = $col->alias()) {
                         $a = $col->name();
                         if ($a == '*') {
-                            $tableClause = $this->tableClause();
+                            $tableClause = $this->getTableClause();
                             if (!$tableClause) {
                                 throw new \LogicException('Table clause is not set');
                             }
 
                             $owner = ($o = $col->owner()) ? $o->name() : null;
-                            $tbl = $tableClause->tableModelOrMain($owner);
+                            $tbl = $tableClause->getTableModelOrMain($owner);
                             if (!$tbl) {
                                 throw new \LogicException("Can't get result fields: no table model for *");
                             }
@@ -80,7 +83,7 @@ class ColumnsClause extends ColumnList
                             continue;
                         }
                     }
-                } elseif ($col instanceof Sql\Expressions\AliasableExpression) {
+                } elseif ($col instanceof AliasableExpression) {
                     $a = $col->alias();
                 }
 
@@ -98,7 +101,7 @@ class ColumnsClause extends ColumnList
     /**
      * @return TableClause|null
      */
-    public function tableClause(): ?TableClause
+    public function getTableClause(): ?TableClause
     {
         return $this->tableClause;
     }
@@ -118,7 +121,7 @@ class ColumnsClause extends ColumnList
     /**
      * @return array|null
      */
-    public function resultFieldsMap(): ?array
+    public function getResultFieldsMap(): ?array
     {
         return $this->resultFieldsMap;
     }
@@ -135,12 +138,15 @@ class ColumnsClause extends ColumnList
         return $this;
     }
 
-    protected function _add(array $columns)
+    /**
+     * @inheritDoc
+     */
+    protected function addColumnArray(array $columns): void
     {
         foreach ($columns as $col) {
             $expr = Sql::expression($col);
-            if ($expr instanceof Sql\Expressions\PlainSql) {
-                if ($alias = Sql\Expressions\DbObject::parseAlias($expr->sql(), $sql)) {
+            if ($expr instanceof PlainSql) {
+                if ($alias = DbObject::parseAlias($expr->sql(), $sql)) {
                     $expr = Sql::plain($sql, $expr->params())
                         ->as($alias);
                 }
@@ -151,10 +157,10 @@ class ColumnsClause extends ColumnList
     }
 
     /**
-     * @return array
+     * @inheritDoc
      */
-    protected function allowedObjectTypes(): array
+    protected function getAllowedObjectTypes(): array
     {
-        return [Sql\Expressions\Expression::class];
+        return [Expression::class];
     }
 }

@@ -70,7 +70,6 @@ final class Sql
      *
      * @return PlainSql
      */
-    #[Pure]
     public static function plain(
         string|int $sql,
         array $params = []
@@ -94,7 +93,7 @@ final class Sql
         }
 
         if ($condition instanceof Predicate) {
-            return (new Condition())->addPredicItem($condition);
+            return (new Condition())->addPredicate($condition);
         }
 
         if (is_array($condition)) {

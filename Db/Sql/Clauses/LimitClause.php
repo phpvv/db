@@ -52,7 +52,6 @@ class LimitClause implements Clause
     /**
      * @return bool
      */
-    #[Pure]
     public function isEmpty(): bool
     {
         return !$this->count();

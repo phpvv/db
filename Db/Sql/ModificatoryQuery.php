@@ -106,7 +106,6 @@ abstract class ModificatoryQuery extends Query
      *
      * @return ReturnIntoClause
      */
-    #[Pure]
     public function createReturnIntoClause(): ReturnIntoClause
     {
         return new ReturnIntoClause();
@@ -123,11 +122,11 @@ abstract class ModificatoryQuery extends Query
     {
         if ($transaction) {
             $this->setConnection($transaction->getConnection());
-        } elseif ($this->connection()->isInTransaction()) {
+        } elseif ($this->getConnection()->isInTransaction()) {
             throw new \LogicException('Statement execution outside current transaction');
         }
 
-        return $this->_result();
+        return $this->query();
     }
 
     /**

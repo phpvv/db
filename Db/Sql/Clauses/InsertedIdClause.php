@@ -19,7 +19,6 @@ use VV\Db\Param;
  */
 class InsertedIdClause implements Clause
 {
-
     private ?Param $param = null;
     private bool $empty = true;
     private ?string $pk = null;
@@ -55,7 +54,7 @@ class InsertedIdClause implements Clause
     /**
      * @return mixed
      */
-    public function value()
+    public function getValue(): mixed
     {
         if (!$this->param) {
             throw new \InvalidArgumentException('Param is empty');
@@ -65,17 +64,17 @@ class InsertedIdClause implements Clause
     }
 
     /**
-     * @return Param
+     * @return Param|null
      */
-    public function param()
+    public function getParam(): ?Param
     {
         return $this->param;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function pk(): ?string
+    public function getPk(): ?string
     {
         return $this->pk;
     }

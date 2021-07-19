@@ -19,7 +19,6 @@ use VV\Db\Sql\Predicates\Predicate;
  */
 class ConditionItem
 {
-
     public const CONN_AND = 'AND',
         CONN_OR = 'OR';
 
@@ -49,7 +48,7 @@ class ConditionItem
     /**
      * @return Predicate
      */
-    public function predicate(): Predicate
+    public function getPredicate(): Predicate
     {
         return $this->predicate;
     }
@@ -57,7 +56,7 @@ class ConditionItem
     /**
      * @return string
      */
-    public function connector(): string
+    public function getConnector(): string
     {
         return $this->connector;
     }

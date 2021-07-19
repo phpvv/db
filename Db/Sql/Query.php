@@ -16,6 +16,7 @@ use VV\Db\Model\Table;
 use VV\Db\Result;
 use VV\Db\Sql\Clauses\TableClause;
 use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Statement;
 
 /**
  * Class Query
@@ -24,10 +25,8 @@ use VV\Db\Sql\Expressions\Expression;
  */
 abstract class Query
 {
-
     private ?Connection $connection = null;
-    private ?Clauses\TableClause $tableClause = null;
-    private ?string $hintClause = null;
+    private ?TableClause $tableClause = null;
 
     public function __construct(Connection $connection = null)
     {
@@ -37,7 +36,7 @@ abstract class Query
     /**
      * @return Connection|null
      */
-    public function connection(): ?Connection
+    public function getConnection(): ?Connection
     {
         return $this->connection;
     }
@@ -62,9 +61,9 @@ abstract class Query
      *
      * @return $this
      */
-    public function table(string|Table|Expression $table, string $alias = null): static
+    public function setMainTable(string|Table|Expression $table, string $alias = null): static
     {
-        $this->tableClause()->setMainTable($table, $alias);
+        $this->getTableClause()->setMainTable($table, $alias);
 
         return $this;
     }
@@ -78,7 +77,7 @@ abstract class Query
      */
     public function mainTableAs(string $alias): static
     {
-        $this->tableClause()->mainTableAs($alias);
+        $this->getTableClause()->setMainTableAlias($alias);
 
         return $this;
     }
@@ -86,22 +85,22 @@ abstract class Query
     /**
      * @return string
      */
-    public function mainTablePk(): string
+    public function getMainTablePk(): string
     {
-        $table = $this->tableClause();
+        $table = $this->getTableClause();
         if ($table->isEmpty()) {
             throw new \LogicException('Table not selected');
         }
-        if (!$pk = $table->mainTablePk()) {
+        if (!$pk = $table->getMainTablePk()) {
             throw new \LogicException('Can\'t determine PK field');
         }
 
         return $pk;
     }
 
-    public function mainTableAlias(): string
+    public function getMainTableAlias(): string
     {
-        $alias = $this->tableClause()->mainTableAlias();
+        $alias = $this->getTableClause()->getMainTableAlias();
         if (!$alias) {
             throw new \LogicException('Can\'t determine main table alias');
         }
@@ -109,9 +108,9 @@ abstract class Query
         return $alias;
     }
 
-    public function lastTableAlias(): string
+    public function getLastTableAlias(): string
     {
-        $alias = $this->tableClause()->lastTableAlias();
+        $alias = $this->getTableClause()->getLastTableAlias();
         if (!$alias) {
             throw new \LogicException('Can\'t determine last table alias');
         }
@@ -134,9 +133,9 @@ abstract class Query
     /**
      * @return int
      */
-    public function nonEmptyClausesIds(): int
+    public function getNonEmptyClausesIds(): int
     {
-        $map = $this->nonEmptyClausesMap();
+        $map = $this->getNonEmptyClausesMap();
 
         return $this->makeNonEmptyClausesBitMask($map);
     }
@@ -144,7 +143,7 @@ abstract class Query
     /**
      * @return TableClause
      */
-    public function tableClause(): TableClause
+    public function getTableClause(): TableClause
     {
         if (!$this->tableClause) {
             $this->setTableClause($this->createTableClause());
@@ -173,7 +172,7 @@ abstract class Query
     public function clearTableClause(): TableClause
     {
         try {
-            return $this->tableClause();
+            return $this->getTableClause();
         } finally {
             $this->setTableClause(null);
         }
@@ -182,43 +181,9 @@ abstract class Query
     /**
      * @return TableClause
      */
-    #[Pure]
     public function createTableClause(): TableClause
     {
         return new TableClause();
-    }
-
-    /**
-     * @return string|null
-     * todo: reconsider hints uasge
-     */
-    public function hintClause(): ?string
-    {
-        return $this->hintClause;
-    }
-
-    /**
-     * @param string|null $hintClause
-     *
-     * @return $this
-     * todo: reconsider hints uasge
-     */
-    public function setHintClause(?string $hintClause): static
-    {
-        $this->hintClause = $hintClause;
-
-        return $this;
-    }
-
-    /**
-     * @param string|null $hint
-     *
-     * @return $this
-     * todo: reconsider hints uasge
-     */
-    public function hint(?string $hint): static
-    {
-        return $this->setHintClause($hint);
     }
 
     public function toString(&$params = null): string
@@ -227,9 +192,9 @@ abstract class Query
     }
 
     /**
-     * @return \VV\Db\Statement
+     * @return Statement
      */
-    public function prepare(): \VV\Db\Statement
+    public function prepare(): Statement
     {
         return $this->connectionOrThrow()->prepare($this);
     }
@@ -239,7 +204,7 @@ abstract class Query
      */
     protected function connectionOrThrow(): ?Connection
     {
-        if (!$connection = $this->connection()) {
+        if (!$connection = $this->getConnection()) {
             throw new \LogicException('Db connection instance is not set in sql builder');
         }
 
@@ -276,10 +241,10 @@ abstract class Query
      *
      * @return Result
      */
-    protected function _result(int $flags = null, string|\Closure $decorator = null, int $fetchSize = null): Result
+    protected function query(int $flags = null, string|\Closure $decorator = null, int $fetchSize = null): Result
     {
         return $this->connectionOrThrow()->query($this, null, $flags, $decorator, $fetchSize);
     }
 
-    abstract protected function nonEmptyClausesMap(): array;
+    abstract protected function getNonEmptyClausesMap(): array;
 }

@@ -11,25 +11,26 @@
 namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Sql;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class GroupByClause
  *
  * @package VV\Db\Sql\Clauses
- * @method Sql\Expressions\Expression[] items():array
+ * @method Expression[] getItems(): array
  */
 class GroupByClause extends ColumnList
 {
 
-    protected function _add(array $columns)
+    protected function addColumnArray(array $columns): void
     {
         foreach ($columns as $col) {
             $this->appendItems(Sql::expression($col));
         }
     }
 
-    protected function allowedObjectTypes(): array
+    protected function getAllowedObjectTypes(): array
     {
-        return [Sql\Expressions\Expression::class];
+        return [Expression::class];
     }
 }

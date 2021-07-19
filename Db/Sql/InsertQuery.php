@@ -11,22 +11,22 @@
  */
 namespace VV\Db\Sql;
 
+use VV\Db\Model\Table;
+use VV\Db\Param;
+use VV\Db\Result;
 use VV\Db\Sql\Clauses\QueryDatasetTrait;
 use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Transaction;
 
 /**
  * Class InsertQuery
  *
  * @package VV\Db\Sql
  *
- * @property-read Clauses\DatasetClause      $dataset
- * @property-read Clauses\InsertFieldsClause $fields
- * @property-read Clauses\InsertValuesClause $values
- * @property-read mixed                      $insertedId     Execute query and return last insert id
+ * @property-read mixed $insertedId     Execute query and return last insert id
  */
 class InsertQuery extends ModificatoryQuery
 {
-
     use QueryDatasetTrait;
 
     public const C_DATASET = 0x01,
@@ -34,15 +34,11 @@ class InsertQuery extends ModificatoryQuery
         C_VALUES = 0x04,
         C_ONDUPKEY = 0x08,
         C_RETURN_INTO = 0x10,
-        C_RETURN_INS_ID = 0x20,
-        C_HINT = 0x40;
+        C_RETURN_INS_ID = 0x20;
 
     private ?Clauses\InsertFieldsClause $fieldsClause = null;
-
     private ?Clauses\InsertValuesClause $valuesClause = null;
-
-    private ?Clauses\DatasetClause $onDupKeyClause = null;
-
+    private ?Clauses\DatasetClause $onDuplicateKeyClause = null;
     private ?Clauses\InsertedIdClause $insertedIdClause = null;
 
     private int $execPerCount = 0;
@@ -58,43 +54,43 @@ class InsertQuery extends ModificatoryQuery
     /**
      * Add `INTO` clause in sql
      *
-     * @param string|\VV\Db\Model\Table $table
-     * @param string|null               $alias
+     * @param string|Table $table
+     * @param string|null  $alias
      *
      * @return $this
      */
-    public function into($table, string $alias = null): static
+    public function into(string|Table $table, string $alias = null): static
     {
-        return $this->table($table, $alias);
+        return $this->setMainTable($table, $alias);
     }
 
     /**
-     * @param string|\VV\Db\Sql\Expressions\Expression|Clauses\InsertFieldsClause ...$fields
+     * @param string|Expression|Clauses\InsertFieldsClause ...$columns
      *
      * @return $this
      */
-    public function fields(...$fields): static
+    public function columns(...$columns): static
     {
-        $clause = $fields[0] instanceof Clauses\InsertFieldsClause
-            ? $fields[0]
-            : $this->createFieldsClause()->add(...$fields);
+        $clause = $columns[0] instanceof Clauses\InsertFieldsClause
+            ? $columns[0]
+            : $this->createFieldsClause()->add(...$columns);
 
         return $this->setFieldsClause($clause);
     }
 
     /**
-     * Add valuses
+     * Set VALUES
      *
-     * @param string|Expression|\VV\Db\Param ...$values
+     * @param string|Expression|Param ...$values
      *
      * @return $this
      */
     public function values(...$values): static
     {
-        if ($values[0] instanceof \VV\Db\Sql\SelectQuery) {
-            $this->valuesClause()->clear()->add($values[0]);
+        if ($values[0] instanceof SelectQuery) {
+            $this->getValuesClause()->clear()->add($values[0]);
         } else {
-            $this->valuesClause()->add(...$values);
+            $this->getValuesClause()->add(...$values);
         }
 
         $this->perExec();
@@ -103,38 +99,16 @@ class InsertQuery extends ModificatoryQuery
     }
 
     /**
-     * @param $count
-     *
-     * @return $this
-     */
-    public function execPer($count): static
-    {
-        $this->execPerCount = $count;
-
-        return $this;
-    }
-
-    /**
-     * @return \VV\Db\Result|false
-     */
-    public function execPerFinish(): static
-    {
-        return $this->perExec(true);
-    }
-
-    /**
      * Add on duplicate key update clause
      *
-     * @param string|\VV\Db\Sql\Expressions\Expression $field
-     * @param mixed                                    $value
+     * @param string|Expression $field
+     * @param mixed             $value
      *
      * @return $this
-     * @todo Make it crossdb
-     *
      */
-    public function onDupKey($field, $value = false): static
+    public function onDuplicateKey(Expression|string $field, mixed $value = null): static
     {
-        $this->onDupKeyClause()->add(...func_get_args());
+        $this->getOnDuplicateKeyClause()->add(...func_get_args());
 
         return $this;
     }
@@ -144,7 +118,7 @@ class InsertQuery extends ModificatoryQuery
      *
      * @return Clauses\InsertFieldsClause
      */
-    public function fieldsClause(): ?Clauses\InsertFieldsClause
+    public function getFieldsClause(): Clauses\InsertFieldsClause
     {
         if (!$this->fieldsClause) {
             $this->setFieldsClause($this->createFieldsClause());
@@ -160,7 +134,7 @@ class InsertQuery extends ModificatoryQuery
      *
      * @return $this
      */
-    public function setFieldsClause(Clauses\InsertFieldsClause $fieldsClause = null): static
+    public function setFieldsClause(?Clauses\InsertFieldsClause $fieldsClause): static
     {
         $this->fieldsClause = $fieldsClause;
 
@@ -170,12 +144,12 @@ class InsertQuery extends ModificatoryQuery
     /**
      * Clears fieldsClause property and returns previous value
      *
-     * @return Clauses\InsertFieldsClause
+     * @return Clauses\InsertFieldsClause|null
      */
     public function clearFieldsClause(): ?Clauses\InsertFieldsClause
     {
         try {
-            return $this->fieldsClause();
+            return $this->getFieldsClause();
         } finally {
             $this->setFieldsClause(null);
         }
@@ -196,7 +170,7 @@ class InsertQuery extends ModificatoryQuery
      *
      * @return Clauses\InsertValuesClause
      */
-    public function valuesClause(): ?Clauses\InsertValuesClause
+    public function getValuesClause(): Clauses\InsertValuesClause
     {
         if (!$this->valuesClause) {
             $this->setValuesClause($this->createValuesClause());
@@ -212,7 +186,7 @@ class InsertQuery extends ModificatoryQuery
      *
      * @return $this
      */
-    public function setValuesClause(Clauses\InsertValuesClause $valuesClause = null): static
+    public function setValuesClause(?Clauses\InsertValuesClause $valuesClause): static
     {
         $this->valuesClause = $valuesClause;
 
@@ -224,10 +198,10 @@ class InsertQuery extends ModificatoryQuery
      *
      * @return Clauses\InsertValuesClause
      */
-    public function clearValuesClause(): ?Clauses\InsertValuesClause
+    public function clearValuesClause(): Clauses\InsertValuesClause
     {
         try {
-            return $this->valuesClause();
+            return $this->getValuesClause();
         } finally {
             $this->setValuesClause(null);
         }
@@ -248,25 +222,25 @@ class InsertQuery extends ModificatoryQuery
      *
      * @return Clauses\DatasetClause
      */
-    public function onDupKeyClause(): ?Clauses\DatasetClause
+    public function getOnDuplicateKeyClause(): Clauses\DatasetClause
     {
-        if (!$this->onDupKeyClause) {
-            $this->setOnDupKeyClause($this->createOnDupKeyClause());
+        if (!$this->onDuplicateKeyClause) {
+            $this->setOnDuplicateKeyClause($this->createOnDuplicateKeyClause());
         }
 
-        return $this->onDupKeyClause;
+        return $this->onDuplicateKeyClause;
     }
 
     /**
      * Sets onDupKeyClause
      *
-     * @param Clauses\DatasetClause|null $onDupKeyClause
+     * @param Clauses\DatasetClause|null $onDuplicateKeyClause
      *
      * @return $this
      */
-    public function setOnDupKeyClause(Clauses\DatasetClause $onDupKeyClause = null): static
+    public function setOnDuplicateKeyClause(?Clauses\DatasetClause $onDuplicateKeyClause): static
     {
-        $this->onDupKeyClause = $onDupKeyClause;
+        $this->onDuplicateKeyClause = $onDuplicateKeyClause;
 
         return $this;
     }
@@ -276,12 +250,12 @@ class InsertQuery extends ModificatoryQuery
      *
      * @return Clauses\DatasetClause
      */
-    public function clearOnDupKeyClause(): ?Clauses\DatasetClause
+    public function clearOnDuplicateKeyClause(): Clauses\DatasetClause
     {
         try {
-            return $this->onDupKeyClause();
+            return $this->getOnDuplicateKeyClause();
         } finally {
-            $this->setOnDupKeyClause(null);
+            $this->setOnDuplicateKeyClause(null);
         }
     }
 
@@ -290,7 +264,7 @@ class InsertQuery extends ModificatoryQuery
      *
      * @return Clauses\DatasetClause
      */
-    public function createOnDupKeyClause(): Clauses\DatasetClause
+    public function createOnDuplicateKeyClause(): Clauses\DatasetClause
     {
         return new Clauses\DatasetClause();
     }
@@ -300,10 +274,10 @@ class InsertQuery extends ModificatoryQuery
      *
      * @return Clauses\InsertedIdClause
      */
-    public function insertedIdClause(): ?Clauses\InsertedIdClause
+    public function getInsertedIdClause(): Clauses\InsertedIdClause
     {
         if (!$this->insertedIdClause) {
-            $this->setInsertedIdClause($this->createReturnInsertedIdClause());
+            $this->setInsertedIdClause($this->createInsertedIdClause());
         }
 
         return $this->insertedIdClause;
@@ -314,41 +288,49 @@ class InsertQuery extends ModificatoryQuery
      *
      * @return Clauses\InsertedIdClause
      */
-    public function createReturnInsertedIdClause(): Clauses\InsertedIdClause
+    public function createInsertedIdClause(): Clauses\InsertedIdClause
     {
         return new Clauses\InsertedIdClause();
     }
 
     /**
-     * @return int
-     */
-    public function execPerCount(): int
-    {
-        return $this->execPerCount;
-    }
-
-    /**
-     * @param int $execPerCount
+     * @param $count
      *
      * @return $this
      */
-    public function setExecPerCount(int $execPerCount): static
+    public function execPer($count): static
     {
-        $this->execPerCount = $execPerCount;
+        $this->execPerCount = $count;
 
         return $this;
     }
 
     /**
+     * @return int
+     */
+    public function getExecPerCount(): int
+    {
+        return $this->execPerCount;
+    }
+
+    /**
+     * @return Result|null
+     */
+    public function execPerFinish(): ?Result
+    {
+        return $this->perExec(true);
+    }
+
+    /**
      * Executes(!) query and returns insertedId
      *
-     * @param \VV\Db\Transaction|null $transaction
+     * @param Transaction|null $transaction
      *
      * @return mixed
      */
-    public function insertedId(\VV\Db\Transaction $transaction = null): mixed
+    public function insertedId(Transaction $transaction = null): mixed
     {
-        $retinsidClaues = $this->insertedIdClause();
+        $retinsidClaues = $this->getInsertedIdClause();
         if ($retinsidClaues->isEmpty()) {
             $retinsidClaues->set();
         }
@@ -359,15 +341,15 @@ class InsertQuery extends ModificatoryQuery
     /**
      *  Inits InsertedIdClause
      *
-     * @param int|\VV\Db\Param|null $type
-     * @param int|null              $size
-     * @param string|null           $pk
+     * @param int|Param|null $type
+     * @param int|null       $size
+     * @param string|null    $pk
      *
      * @return $this
      */
-    public function initInsertedId($type = null, int $size = null, string $pk = null): static
+    public function initInsertedId(Param|int $type = null, int $size = null, string $pk = null): static
     {
-        $this->insertedIdClause()->set($type, $size, $pk);
+        $this->getInsertedIdClause()->set($type, $size, $pk);
 
         return $this;
     }
@@ -386,32 +368,31 @@ class InsertQuery extends ModificatoryQuery
         return $this;
     }
 
-    protected function nonEmptyClausesMap(): array
+    protected function getNonEmptyClausesMap(): array
     {
         return [
             self::C_DATASET => $this->datasetClause(),
-            self::C_FIELDS => $this->fieldsClause(),
-            self::C_VALUES => $this->valuesClause(),
-            self::C_ONDUPKEY => $this->onDupKeyClause(),
+            self::C_FIELDS => $this->getFieldsClause(),
+            self::C_VALUES => $this->getValuesClause(),
+            self::C_ONDUPKEY => $this->getOnDuplicateKeyClause(),
             self::C_RETURN_INTO => $this->returnIntoClause(),
-            self::C_RETURN_INS_ID => $this->insertedIdClause(),
-            self::C_HINT => $this->hintClause(),
+            self::C_RETURN_INS_ID => $this->getInsertedIdClause(),
         ];
     }
 
     /**
      * @param bool $finish
      *
-     * @return \VV\Db\Result|null
+     * @return Result|null
      */
-    private function perExec(bool $finish = false): ?\VV\Db\Result
+    private function perExec(bool $finish = false): ?Result
     {
-        if (!$epc = $this->execPerCount()) {
+        if (!$epc = $this->getExecPerCount()) {
             return null;
         }
 
-        $valuesClause = $this->valuesClause();
-        $cnt = count($valuesClause->items());
+        $valuesClause = $this->getValuesClause();
+        $cnt = count($valuesClause->getItems());
 
         if (!$cnt) {
             return null;

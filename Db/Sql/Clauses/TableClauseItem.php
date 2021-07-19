@@ -31,7 +31,7 @@ class TableClauseItem
 
     private Expression $table;
     private ?Table $tableModel = null;
-    private ?Condition $joinOn = null;
+    private ?Condition $joinCondition = null;
     private ?string $joinType = null;
     private ?array $useIndex = null;
 
@@ -59,7 +59,7 @@ class TableClauseItem
     /**
      * @return Expression
      */
-    public function table(): Expression
+    public function getTable(): Expression
     {
         return $this->table;
     }
@@ -67,7 +67,7 @@ class TableClauseItem
     /**
      * @return Table|null
      */
-    public function tableModel(): ?Table
+    public function getTableModel(): ?Table
     {
         return $this->tableModel;
     }
@@ -75,15 +75,15 @@ class TableClauseItem
     /**
      * @return Condition|null
      */
-    public function joinOn(): ?Condition
+    public function getJoinCondition(): ?Condition
     {
-        return $this->joinOn;
+        return $this->joinCondition;
     }
 
     /**
      * @return string|null
      */
-    public function joinType(): ?string
+    public function getJoinType(): ?string
     {
         return $this->joinType;
     }
@@ -91,7 +91,7 @@ class TableClauseItem
     /**
      * @return array|null
      */
-    public function useIndex(): ?array
+    public function getUseIndex(): ?array
     {
         return $this->useIndex;
     }
@@ -116,7 +116,7 @@ class TableClauseItem
      */
     public function setJoin(Condition $on, string $type = null): static
     {
-        return $this->setJoinOn($on)->setJoinType($type ?: self::J_INNER);
+        return $this->setJoinCondition($on)->setJoinType($type ?: self::J_INNER);
     }
 
     /**
@@ -167,9 +167,9 @@ class TableClauseItem
      *
      * @return $this
      */
-    protected function setJoinOn(Condition $on): static
+    protected function setJoinCondition(Condition $on): static
     {
-        $this->joinOn = $on;
+        $this->joinCondition = $on;
 
         return $this;
     }

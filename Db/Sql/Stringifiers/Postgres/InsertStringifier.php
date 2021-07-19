@@ -38,8 +38,8 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
             return;
         }
 
-        $this->insertedIdParam = ($retinsId->param() ?: \VV\Db\Param::chr())->setForInsertedId();
-        $this->insertedIdField = $retinsId->pk() ?: $this->insertQuery()->mainTablePk();
+        $this->insertedIdParam = ($retinsId->getParam() ?: \VV\Db\Param::chr())->setForInsertedId();
+        $this->insertedIdField = $retinsId->getPk() ?: $this->insertQuery()->getMainTablePk();
     }
 
     protected function strStdInsert(&$params)

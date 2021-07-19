@@ -163,8 +163,8 @@ abstract class QueryStringifier
         if ($expr instanceof Sql\Expressions\DbObject) {
             if (!$expr->owner()) { // obj without owner (without table alias)
                 $tableClause = $this->queryTableClause();
-                if (count($tableClause->items()) > 1) {
-                    $expr->setOwner($tableClause->mainTableAlias());
+                if (count($tableClause->getItems()) > 1) {
+                    $expr->setOwner($tableClause->getMainTableAlias());
                 }
             }
         }
@@ -210,7 +210,7 @@ abstract class QueryStringifier
         }
 
         $owner = $field->owner();
-        $table = $tableClause->tableModelOrMain($owner ? $owner->name() : null);
+        $table = $tableClause->getTableModelOrMain($owner ? $owner->name() : null);
         if ($table) {
             return $table->getFields()->get($field->name());
         }
@@ -262,18 +262,18 @@ abstract class QueryStringifier
         $sql = '';
         $params = [];
         $useAlais = $this->useAliasForTable($table);
-        foreach ($table->items() as $item) {
-            $tableNameStr = $this->strExpr($item->table(), $params, $useAlais);
+        foreach ($table->getItems() as $item) {
+            $tableNameStr = $this->strExpr($item->getTable(), $params, $useAlais);
 
             // todo: reconsider (move to method or something else)
-            if ($useidx = $item->useIndex()) {
+            if ($useidx = $item->getUseIndex()) {
                 $tableNameStr .= ' USE INDEX (' . (is_array($useidx) ? implode(', ', $useidx) : $useidx) . ') ';
             }
 
             if ($sql) {
-                $on = $condstr->buildConditionSql($item->joinOn());
+                $on = $condstr->buildConditionSql($item->getJoinCondition());
 
-                $sql .= " {$item->joinType()} $tableNameStr ON ({$on->embed($params)})";
+                $sql .= " {$item->getJoinType()} $tableNameStr ON ({$on->embed($params)})";
             } else {
                 $sql = $tableNameStr;
             }

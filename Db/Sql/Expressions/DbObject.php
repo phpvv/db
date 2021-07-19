@@ -46,7 +46,6 @@ class DbObject implements Expressions\Expression
         return $this->name;
     }
 
-    #[Pure]
     public function resultName(): string
     {
         return $this->alias() ?: $this->name();

@@ -17,7 +17,7 @@ use VV\Db\Sql\Expressions\Expression;
  * Class DeleteTablesClause
  *
  * @package VV\Db\Sql\Clauses
- * @method DbObject[] items():array
+ * @method DbObject[] getItems():array
  */
 class DeleteTablesClause extends ItemList
 {

@@ -30,7 +30,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
 
     protected function strMultiValuesInsert(&$params)
     {
-        $table = $this->buildTableSql($this->insertQuery()->tableClause());
+        $table = $this->buildTableSql($this->insertQuery()->getTableClause());
         $fields = $this->fieldsPart();
 
         $sql = 'INSERT ALL ';
@@ -49,14 +49,14 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
         }
 
         $query = $this->insertQuery();
-        $pk = $retinsId->pk() ?: $query->mainTablePk();
+        $pk = $retinsId->getPk() ?: $query->getMainTablePk();
         $field = \VV\Db\Sql\Expressions\DbObject::create((string)$pk);
 
         $pkField = null;
-        if ($mtm = $query->tableClause()->mainTableModel()) {
+        if ($mtm = $query->getTableClause()->getMainTableModel()) {
             $pkField = $mtm->getFields()->get($pk);
         }
-        if (!$param = $retinsId->param()) {
+        if (!$param = $retinsId->getParam()) {
             if ($pkField) {
                 $isnum = $pkField->getType() == \VV\Db\Model\Field::T_NUM;
             } else {

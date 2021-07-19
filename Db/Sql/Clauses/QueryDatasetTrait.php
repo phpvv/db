@@ -79,7 +79,6 @@ trait QueryDatasetTrait
     /**
      * @return DatasetClause
      */
-    #[Pure]
     public function createDatasetClause(): DatasetClause
     {
         return new DatasetClause();

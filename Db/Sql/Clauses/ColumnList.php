@@ -12,6 +12,8 @@ namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Sql\Expressions\Expression;
 
+use function VV\instOf;
+
 /**
  * Class ColumnList
  *
@@ -37,27 +39,35 @@ abstract class ColumnList extends ItemList
             $columns = $columns[0];
         }
 
-        $allowedObjTypes = $this->allowedObjectTypes();
+        $allowedObjTypes = $this->getAllowedObjectTypes();
         foreach ($columns as $i => $col) {
             if (\VV\emt($col)) {
                 throw new \InvalidArgumentException("Column #$i is empty");
             }
 
             if (is_object($col) && $allowedObjTypes) {
-                if (!\VV\instOf($col, ...$allowedObjTypes)) {
+                if (!instOf($col, ...$allowedObjTypes)) {
                     throw new \InvalidArgumentException("Wrong type of column #$i");
                 }
-            } elseif (!is_scalar($col)) {
+            } elseif (!\is_scalar($col)) {
                 throw new \InvalidArgumentException("Column #$i is not scalar type");
             }
         }
 
-        $this->_add($columns);
+        $this->addColumnArray($columns);
 
         return $this;
     }
 
-    abstract protected function _add(array $columns);
+    /**
+     * @param array $columns
+     *
+     * @return void
+     */
+    abstract protected function addColumnArray(array $columns): void;
 
-    abstract protected function allowedObjectTypes(): array;
+    /**
+     * @return array
+     */
+    abstract protected function getAllowedObjectTypes(): array;
 }

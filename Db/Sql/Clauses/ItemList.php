@@ -17,7 +17,6 @@ namespace VV\Db\Sql\Clauses;
  */
 abstract class ItemList implements Clause
 {
-
     protected array $items = [];
 
     /**
@@ -31,7 +30,7 @@ abstract class ItemList implements Clause
     /**
      * @return array
      */
-    public function items(): array
+    public function getItems(): array
     {
         return $this->items;
     }

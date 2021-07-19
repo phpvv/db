@@ -100,7 +100,7 @@ abstract class Table extends DataObject
      */
     public function delete(Condition|array|int|string $condition = null): DeleteQuery|int
     {
-        $query = $this->getConnection()->delete()->table($this);
+        $query = $this->getConnection()->delete()->from($this);
         if (!$condition) {
             return $query;
         }

@@ -25,7 +25,6 @@ class Factory implements \VV\Db\Sql\Stringifiers\Factory
     /**
      * @inheritDoc
      */
-    #[Pure]
     public function createSelectStringifier(
         Sql\SelectQuery $query
     ): SelectStringifier {
@@ -35,7 +34,6 @@ class Factory implements \VV\Db\Sql\Stringifiers\Factory
     /**
      * @inheritDoc
      */
-    #[Pure]
     public function createInsertStringifier(
         Sql\InsertQuery $query
     ): InsertStringifier {
@@ -45,7 +43,6 @@ class Factory implements \VV\Db\Sql\Stringifiers\Factory
     /**
      * @inheritDoc
      */
-    #[Pure]
     public function createUpdateStringifier(
         Sql\UpdateQuery $query
     ): UpdateStringifier {
@@ -55,7 +52,6 @@ class Factory implements \VV\Db\Sql\Stringifiers\Factory
     /**
      * @inheritDoc
      */
-    #[Pure]
     public function createDeleteStringifier(
         Sql\DeleteQuery $query
     ): DeleteStringifier {

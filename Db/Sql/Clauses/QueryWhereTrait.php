@@ -49,7 +49,7 @@ trait QueryWhereTrait
      */
     public function whereId(string|int|Expression $id): static
     {
-        $this->where($this->mainTablePk(), $id);
+        $this->where($this->getMainTablePk(), $id);
 
         return $this;
     }
@@ -87,7 +87,7 @@ trait QueryWhereTrait
      */
     public function whereIdIn(mixed ...$values): static
     {
-        return $this->whereIn($this->mainTablePk(), ...$values);
+        return $this->whereIn($this->getMainTablePk(), ...$values);
     }
 
     /**
@@ -97,7 +97,7 @@ trait QueryWhereTrait
      */
     public function whereIdNotIn(mixed ...$values): static
     {
-        return $this->whereNotIn($this->mainTablePk(), ...$values);
+        return $this->whereNotIn($this->getMainTablePk(), ...$values);
     }
 
     /**

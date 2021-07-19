@@ -24,14 +24,12 @@ use VV\Db\Sql\Expressions\DbObject;
  */
 class DeleteQuery extends ModificatoryQuery
 {
-
     use QueryWhereTrait;
 
     public const C_DEL_TABLES = 0x01,
         C_TABLE = 0x02,
         C_WHERE = 0x04,
-        C_RETURN_INTO = 0x08,
-        C_HINT = 0x10;
+        C_RETURN_INTO = 0x08;
 
     protected ?DeleteTablesClause $delTablesClause = null;
 
@@ -82,7 +80,6 @@ class DeleteQuery extends ModificatoryQuery
      *
      * @return DeleteTablesClause
      */
-    #[Pure]
     public function createDelTablesClause(): DeleteTablesClause
     {
         return new DeleteTablesClause();
@@ -112,18 +109,17 @@ class DeleteQuery extends ModificatoryQuery
      */
     public function from(string|Table $table, string $alias = null): static
     {
-        return $this->table($table, $alias);
+        return $this->setMainTable($table, $alias);
     }
 
     /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
-    protected function nonEmptyClausesMap(): array
+    protected function getNonEmptyClausesMap(): array
     {
         return [
             self::C_DEL_TABLES => $this->delTablesClause(),
-            self::C_TABLE => $this->tableClause(),
+            self::C_TABLE => $this->getTableClause(),
             self::C_WHERE => $this->getWhereClause(),
             self::C_RETURN_INTO => $this->returnIntoClause(),
-            self::C_HINT => $this->hintClause(),
         ];
     }
 }

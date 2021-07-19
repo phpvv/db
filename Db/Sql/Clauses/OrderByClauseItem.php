@@ -84,7 +84,6 @@ class OrderByClauseItem
     /**
      * @return bool
      */
-    #[Pure]
     public function isNullsLast(): bool
     {
         if ($this->nullsLast === null) {

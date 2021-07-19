@@ -46,9 +46,7 @@ class SelectStringifier extends QueryStringifier
                | SelectQuery::C_HAVING
                | SelectQuery::C_LIMIT
                | SelectQuery::C_DISTINCT
-               | SelectQuery::C_NOCACHE
-               | SelectQuery::C_FOR_UPDATE
-               | SelectQuery::C_HINT;
+               | SelectQuery::C_FOR_UPDATE;
     }
 
     /**
@@ -64,14 +62,14 @@ class SelectStringifier extends QueryStringifier
      */
     public function queryTableClause()
     {
-        return $this->selectQuery()->tableClause();
+        return $this->selectQuery()->getTableClause();
     }
 
     public function stringifyRaw(&$params)
     {
         $query = $this->selectQuery();
         $sql = $this->strSelectClause($query, $params)
-               . $this->strFromClause($query->tableClause(), $params)
+               . $this->strFromClause($query->getTableClause(), $params)
                . $this->strWhereClause($query->getWhereClause(), $params)
                . $this->strGroupByClause($query->groupByClause(), $params)
                . $this->strHavingClause($query->havingClause(), $params)
@@ -92,9 +90,8 @@ class SelectStringifier extends QueryStringifier
     protected function strSelectClause(Sql\SelectQuery $query, &$params): string
     {
         return 'SELECT '
-               . (($hint = $query->hintClause()) ? $hint . ' ' : '')
                . ($query->isDistinct() ? 'DISTINCT ' : '')
-               . $this->strColumnList($query->columnsClause()->items(), $params, true);
+               . $this->strColumnList($query->columnsClause()->getItems(), $params, true);
     }
 
     protected function strFromClause(Sql\Clauses\TableClause $table, &$params): string
@@ -108,7 +105,7 @@ class SelectStringifier extends QueryStringifier
             return '';
         }
 
-        return ' GROUP BY ' . $this->strColumnList($groupBy->items(), $params);
+        return ' GROUP BY ' . $this->strColumnList($groupBy->getItems(), $params);
     }
 
     protected function strHavingClause(Sql\Condition $having, &$params): string
@@ -133,7 +130,7 @@ class SelectStringifier extends QueryStringifier
     {
         $orderStarr = [];
 
-        foreach ($orderBy->items() as $item) {
+        foreach ($orderBy->getItems() as $item) {
             $str = $colstr = $this->strExpr($item->expression(), $params);
             if ($item->isDesc()) {
                 $str .= ' DESC';

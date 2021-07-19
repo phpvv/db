@@ -10,30 +10,30 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use VV\Db\Sql;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class OrderByClause
  *
  * @package VV\Db\Sql\Clauses
- * @method OrderByClauseItem[] items():array
+ * @method OrderByClauseItem[] getItems(): array
  */
 class OrderByClause extends ColumnList
 {
 
-    protected function _add(array $columns)
+    protected function addColumnArray(array $columns): void
     {
         foreach ($columns as $col) {
-            if ($item = OrderByClauseItem::create($col)) {
-                $this->appendItems($item);
-            } else {
+            if (!$item = OrderByClauseItem::create($col)) {
                 throw new \InvalidArgumentException();
             }
+
+            $this->appendItems($item);
         }
     }
 
-    protected function allowedObjectTypes(): array
+    protected function getAllowedObjectTypes(): array
     {
-        return [OrderByClauseItem::class, Sql\Expressions\Expression::class];
+        return [OrderByClauseItem::class, Expression::class];
     }
 }

@@ -12,6 +12,7 @@
 namespace VV\Db\Sql\Clauses;
 
 use VV\Db\Model\Table;
+use VV\Db\Sql;
 use VV\Db\Sql\Clauses\TableClauseItem as Item;
 use VV\Db\Sql\Condition;
 use VV\Db\Sql\Expressions\DbObject;
@@ -23,11 +24,10 @@ use VV\Db\Sql\Predicates\Predicate;
  * Class Table
  *
  * @package VV\Db\Sql\Clauses
- * @method Item[] items():array
+ * @method Item[] getItems(): array
  */
 class TableClause extends ItemList
 {
-
     private ?Item $mainItem = null;
     private ?Item $lastItem = null;
 
@@ -36,19 +36,19 @@ class TableClause extends ItemList
      *
      * @return Item
      */
-    public function item(string $alias): Item
+    public function getItem(string $alias): Item
     {
         if (!$this->hasItem($alias)) {
             throw new \OutOfBoundsException("Item with alias '$alias' not found");
         }
 
-        return $this->items()[$alias];
+        return $this->getItems()[$alias];
     }
 
     /**
      * @return Item
      */
-    public function mainItem(): Item
+    public function getMainItem(): Item
     {
         if (!$this->mainItem) {
             throw new \LogicException('Main Item is not defined yet');
@@ -60,7 +60,7 @@ class TableClause extends ItemList
     /**
      * @return Item
      */
-    public function lastItem(): Item
+    public function getLastItem(): Item
     {
         if (!$this->lastItem) {
             throw new \LogicException('Last Item is not defined yet');
@@ -80,23 +80,23 @@ class TableClause extends ItemList
     }
 
     /**
-     * @param string $alias
+     * @param string|null $alias
      *
      * @return Item
      */
-    public function itemOrMain(string $alias): Item
+    public function getItemOrMain(?string $alias): Item
     {
-        return $alias ? $this->item($alias) : $this->mainItem();
+        return $alias ? $this->getItem($alias) : $this->getMainItem();
     }
 
     /**
-     * @param string $alias
+     * @param string|null $alias
      *
      * @return Item
      */
-    public function itemOrLast(string $alias): Item
+    public function getItemOrLast(?string $alias): Item
     {
-        return $alias ? $this->item($alias) : $this->lastItem();
+        return $alias ? $this->getItem($alias) : $this->getLastItem();
     }
 
     /**
@@ -106,25 +106,25 @@ class TableClause extends ItemList
      *
      * @return Table|null
      */
-    public function tableModel(string $alias): ?Table
+    public function getTableModel(string $alias): ?Table
     {
-        return $this->item($alias)->tableModel();
+        return $this->getItem($alias)->getTableModel();
     }
 
     /**
      * @return Table|null
      */
-    public function mainTableModel(): ?Table
+    public function getMainTableModel(): ?Table
     {
-        return $this->mainItem()->tableModel();
+        return $this->getMainItem()->getTableModel();
     }
 
     /**
      * @return Table|null
      */
-    public function lastTableModel(): ?Table
+    public function getLastTableModel(): ?Table
     {
-        return $this->lastItem()->tableModel();
+        return $this->getLastItem()->getTableModel();
     }
 
     /**
@@ -134,11 +134,11 @@ class TableClause extends ItemList
      *
      * @return Table|null
      */
-    public function tableModelOrMain(?string $alias): ?Table
+    public function getTableModelOrMain(?string $alias): ?Table
     {
         return $alias
-            ? $this->tableModel($alias)
-            : $this->mainTableModel();
+            ? $this->getTableModel($alias)
+            : $this->getMainTableModel();
     }
 
     /**
@@ -148,27 +148,27 @@ class TableClause extends ItemList
      *
      * @return Table|null
      */
-    public function tableModelOrLast(string $alias): ?Table
+    public function getTableModelOrLast(string $alias): ?Table
     {
         return $alias
-            ? $this->tableModel($alias)
-            : $this->lastTableModel();
+            ? $this->getTableModel($alias)
+            : $this->getLastTableModel();
     }
 
     /**
      * @return string|null
      */
-    public function mainTableAlias(): ?string
+    public function getMainTableAlias(): ?string
     {
-        return $this->mainItem()->table()->alias();
+        return $this->getMainItem()->getTable()->alias();
     }
 
     /**
      * @return string|null
      */
-    public function lastTableAlias(): ?string
+    public function getLastTableAlias(): ?string
     {
-        return $this->lastItem()->table()->alias();
+        return $this->getLastItem()->getTable()->alias();
     }
 
     /**
@@ -178,9 +178,9 @@ class TableClause extends ItemList
      *
      * @return string|null
      */
-    public function tablePk(string $alias): ?string
+    public function getTablePk(string $alias): ?string
     {
-        return ($table = $this->tableModel($alias)) ? $table->getPk() : null;
+        return $this->getTableModel($alias)?->getPk();
     }
 
     /**
@@ -188,9 +188,9 @@ class TableClause extends ItemList
      *
      * @return string|null
      */
-    public function mainTablePk(): ?string
+    public function getMainTablePk(): ?string
     {
-        return ($table = $this->mainTableModel()) ? $table->getPk() : null;
+        return $this->getMainTableModel()?->getPk();
     }
 
     /**
@@ -198,9 +198,9 @@ class TableClause extends ItemList
      *
      * @return string|null
      */
-    public function lastTablePk(): ?string
+    public function getLastTablePk(): ?string
     {
-        return ($lable = $this->lastTableModel()) ? $lable->getPk() : null;
+        return $this->getLastTableModel()?->getPk();
     }
 
     /**
@@ -210,16 +210,16 @@ class TableClause extends ItemList
      *
      * @return string|null
      */
-    public function pkByAlias(string $alias): ?string
+    public function getPkByAlias(string $alias): ?string
     {
-        return ($table = $this->tableModel($alias)) ? $table->getPk() : null;
+        return $this->getTableModel($alias)?->getPk();
     }
 
     public function setMainTable(string|Table|Expression $table, string $alias = null): static
     {
         $this->items = [];
         $this->mainItem = null;
-        $this->add($table, null, $alias);
+        $this->createAndAddItem($table, null, $alias);
 
         return $this;
     }
@@ -238,7 +238,7 @@ class TableClause extends ItemList
         string|array|Condition $on = null,
         string $alias = null
     ): static {
-        return $this->_join($table, $on, $alias);
+        return $this->addJoin($table, $on, $alias);
     }
 
     /**
@@ -255,7 +255,7 @@ class TableClause extends ItemList
         string|array|Condition $on = null,
         string $alias = null
     ): static {
-        return $this->_join($table, $on, $alias, Item::J_LEFT);
+        return $this->addJoin($table, $on, $alias, Item::J_LEFT);
     }
 
     /**
@@ -272,7 +272,7 @@ class TableClause extends ItemList
         string|array|Condition $on = null,
         string $alias = null
     ): static {
-        return $this->_join($table, $on, $alias, Item::J_RIGHT);
+        return $this->addJoin($table, $on, $alias, Item::J_RIGHT);
     }
 
     /**
@@ -289,7 +289,7 @@ class TableClause extends ItemList
         string|array|Condition $on = null,
         string $alias = null
     ): static {
-        return $this->_join($table, $on, $alias, Item::J_FULL);
+        return $this->addJoin($table, $on, $alias, Item::J_FULL);
     }
 
     //endregion
@@ -306,7 +306,7 @@ class TableClause extends ItemList
      */
     public function joinBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static
     {
-        return $this->_joinBack($table, $onTable, $alias);
+        return $this->addJoinBack($table, $onTable, $alias);
     }
 
     /**
@@ -320,7 +320,7 @@ class TableClause extends ItemList
      */
     public function leftBack(string|Table|Expression $table, string $onTable = null, string $alias = null): static
     {
-        return $this->_joinBack($table, $onTable, $alias, Item::J_LEFT);
+        return $this->addJoinBack($table, $onTable, $alias, Item::J_LEFT);
     }
 
     //endregion
@@ -337,7 +337,7 @@ class TableClause extends ItemList
      */
     public function joinParent(string $alias, string $onTable = null, string $parentField = null): static
     {
-        return $this->_joinParent($alias, $onTable, $parentField);
+        return $this->addJoinParent($alias, $onTable, $parentField);
     }
 
     /**
@@ -351,7 +351,7 @@ class TableClause extends ItemList
      */
     public function leftParent(string $alias, string $onTable = null, string $parentField = null): static
     {
-        return $this->_joinParent($alias, $onTable, $parentField, Item::J_LEFT);
+        return $this->addJoinParent($alias, $onTable, $parentField, Item::J_LEFT);
     }
 
     /**
@@ -359,10 +359,10 @@ class TableClause extends ItemList
      *
      * @return $this
      */
-    public function mainTableAs(string $alias): static
+    public function setMainTableAlias(string $alias): static
     {
-        $mainItem = $this->mainItem();
-        $mainItem->table()->as($alias);
+        $mainItem = $this->getMainItem();
+        $mainItem->getTable()->as($alias);
         array_shift($this->items);
         $this->items = [$alias => $mainItem] + $this->items;
 
@@ -372,21 +372,21 @@ class TableClause extends ItemList
     /**
      * @return string[]
      */
-    public function aliases(): array
+    public function getAliases(): array
     {
         return array_keys($this->items);
     }
 
     public function useIndex($index): static
     {
-        $this->lastItem()->setUseIndex($index);
+        $this->getLastItem()->setUseIndex($index);
 
         return $this;
     }
 
     public function addItem(Item $item): static
     {
-        $alias = $item->table()->alias();
+        $alias = $item->getTable()->alias();
         if (!$alias) {
             throw new \InvalidArgumentException('Alias is not defined for table');
         }
@@ -403,30 +403,11 @@ class TableClause extends ItemList
     }
 
     /**
-     * @param string|Table|Expression $table
-     * @param string|null             $alias
-     *
-     * @return Item
-     */
-    public function createItem(string|Table|Expression $table, string $alias = null): Item
-    {
-        return new Item($table, $alias);
-    }
-
-    /**
-     * @return Condition
-     */
-    protected function createCondition(): Condition
-    {
-        return \VV\Db\Sql::condition();
-    }
-
-    /**
      * @param Item $firstItem
      *
      * @return $this
      */
-    private function setMainItem(Item $firstItem): static
+    protected function setMainItem(Item $firstItem): static
     {
         $this->mainItem = $firstItem;
 
@@ -438,47 +419,47 @@ class TableClause extends ItemList
      *
      * @return $this
      */
-    private function setLastItem(Item $lastItem): static
+    protected function setLastItem(Item $lastItem): static
     {
         $this->lastItem = $lastItem;
 
         return $this;
     }
 
-    private function _join($tbl, $on, $alias, $joinType = null): static
+    protected function addJoin($tbl, $on, $alias, $joinType = null): static
     {
         if (!$this->items) {
             throw new \LogicException('Main table does not set yet');
         }
 
-        return $this->add($tbl, $on, $alias, $joinType);
+        return $this->createAndAddItem($tbl, $on, $alias, $joinType);
     }
 
-    private function _joinBack($table, $backTableAlias = null, $alias = null, $joinType = null): static
+    protected function addJoinBack($table, $backTableAlias = null, $alias = null, $joinType = null): static
     {
-        $backItem = $this->itemOrLast($backTableAlias);
-        $backTableModel = $backItem->tableModel();
+        $backItem = $this->getItemOrLast($backTableAlias);
+        $backTableModel = $backItem->getTableModel();
         if (!$backTableModel) {
             throw new \LogicException('Can\'t determine pk field of relation table');
         }
 
         if (!$backTableAlias) {
-            $backTableAlias = $backItem->table()->alias();
+            $backTableAlias = $backItem->getTable()->alias();
         }
 
-        return $this->_join($table, "$backTableAlias.{$backTableModel->getPk()}", $alias, $joinType);
+        return $this->addJoin($table, "$backTableAlias.{$backTableModel->getPk()}", $alias, $joinType);
     }
 
-    private function _joinParent($alias, $parentTableAlias, $parentField, $joinType = null): static
+    protected function addJoinParent($alias, $parentTableAlias, $parentField, $joinType = null): static
     {
-        $parentItem = $this->itemOrLast($parentTableAlias);
-        $parentTblMdl = $parentItem->tableModel();
+        $parentItem = $this->getItemOrLast($parentTableAlias);
+        $parentTblMdl = $parentItem->getTableModel();
         if (!$parentTblMdl) {
             throw new \LogicException('Can\'t determine pk field of relation table');
         }
 
         if (!$parentTableAlias) {
-            $parentTableAlias = $parentItem->table()->alias();
+            $parentTableAlias = $parentItem->getTable()->alias();
         }
         if (!$parentField) {
             $parentField = 'parent_id';
@@ -489,28 +470,17 @@ class TableClause extends ItemList
             DbObject::create("$parentTableAlias.$parentField")
         );
 
-        return $this->_join($parentTblMdl, $on, $alias, $joinType);
-    }
-
-    private function add($table, $on = null, $alias = null, $joinType = null): static
-    {
-        $item = $this->createItem($table, $alias);
-        if ($this->items) {
-            $on = $this->prepareOnCondition($on, $item);
-            $item->setJoin($on, $joinType);
-        }
-
-        return $this->addItem($item);
+        return $this->addJoin($parentTblMdl, $on, $alias, $joinType);
     }
 
     /**
-     * @param string $cmpstr
+     * @param string $comparationString
      *
      * @return array|null
      */
-    private function parseCustomCompare(string $cmpstr): ?array
+    protected function parseCustomCompare(string $comparationString): ?array
     {
-        $objs = explode('=', $cmpstr);
+        $objs = explode('=', $comparationString);
         if (count($objs) != 2) {
             return null;
         }
@@ -531,7 +501,7 @@ class TableClause extends ItemList
      *
      * @return Condition
      */
-    private function prepareOnCondition(mixed $on, Item $item): Condition
+    protected function prepareOnCondition(mixed $on, Item $item): Condition
     {
         if ($on instanceof Condition) {
             return $on;
@@ -539,17 +509,17 @@ class TableClause extends ItemList
 
         $condition = $this->createCondition();
         if ($on instanceof Predicate) {
-            return $condition->addPredicItem($on);
+            return $condition->addPredicate($on);
         }
-        // constom on as array: ['f.foo = b.bar AND b.field = ?', ['fieldValue']]
+        // custom on as array: ['f.foo = b.bar AND b.field = ?', ['fieldValue']]
         if (is_array($on)) {
             return $condition->expr($on[0])->custom(...array_slice($on, 1));
         }
 
         // todo: need comment with examples
-        $lastItem = $this->lastItem();
+        $lastItem = $this->getLastItem();
         if (!$on) {
-            $on = $lastItem->table()->alias();
+            $on = $lastItem->getTable()->alias();
         }
 
         /** @var DbObject $rightField */
@@ -557,7 +527,7 @@ class TableClause extends ItemList
         if (is_string($on) && str_starts_with($on, '.')) {
             $rightField = DbObject::create(substr($on, 1));
             if ($rightField) {
-                $prevAlais = $lastItem->table()->alias();
+                $prevAlais = $lastItem->getTable()->alias();
                 $rightField->setOwner($prevAlais);
             }
         }
@@ -566,7 +536,7 @@ class TableClause extends ItemList
             $rightField = DbObject::create($on);
             if ($rightField) {
                 if (!$rightField->owner()) {
-                    $tableModel = $item->tableModel();
+                    $tableModel = $item->getTableModel();
                     if (!$tableModel) {
                         throw new \LogicException('Can\'t determine previous table PK field');
                     }
@@ -577,7 +547,7 @@ class TableClause extends ItemList
         }
 
         if ($rightField) {
-            $leftField = DbObject::create($rightField->name(), $item->table()->alias());
+            $leftField = DbObject::create($rightField->name(), $item->getTable()->alias());
         } else {
             [$leftField, $rightField] = $this->parseCustomCompare($on);
         }
@@ -591,5 +561,35 @@ class TableClause extends ItemList
         }
 
         return $condition->expr($on)->custom();
+    }
+
+    protected function createAndAddItem($table, $on = null, $alias = null, $joinType = null): static
+    {
+        $item = $this->createItem($table, $alias);
+        if ($this->items) {
+            $on = $this->prepareOnCondition($on, $item);
+            $item->setJoin($on, $joinType);
+        }
+
+        return $this->addItem($item);
+    }
+
+    /**
+     * @param string|Table|Expression $table
+     * @param string|null             $alias
+     *
+     * @return Item
+     */
+    public function createItem(string|Table|Expression $table, string $alias = null): Item
+    {
+        return new Item($table, $alias);
+    }
+
+    /**
+     * @return Condition
+     */
+    protected function createCondition(): Condition
+    {
+        return Sql::condition();
     }
 }

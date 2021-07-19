@@ -10,6 +10,7 @@
  */
 namespace VV\Db\Sql;
 
+use VV\Db\Model\Table;
 use VV\Db\Sql\Clauses\QueryDatasetTrait;
 use VV\Db\Sql\Clauses\QueryWhereTrait;
 use VV\Db\Sql\Expressions\Expression;
@@ -21,15 +22,26 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class UpdateQuery extends ModificatoryQuery
 {
-
     use QueryDatasetTrait;
     use QueryWhereTrait;
 
     public const C_TABLE = 0x01,
         C_DATASET = 0x02,
         C_WHERE = 0x04,
-        C_RETURN_INTO = 0x08,
-        C_HINT = 0x10;
+        C_RETURN_INTO = 0x08;
+
+    /**
+     * Add from clause in sql
+     *
+     * @param string|Table|Expression $table
+     * @param string|null             $alias
+     *
+     * @return $this
+     */
+    public function table(string|Table|Expression $table, string $alias = null): static
+    {
+        return $this->setMainTable($table, $alias);
+    }
 
     /**
      * Sets to null all fields in argument list
@@ -43,15 +55,13 @@ class UpdateQuery extends ModificatoryQuery
         return $this->set(array_fill_keys($fields, null));
     }
 
-    /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
-    protected function nonEmptyClausesMap(): array
+    protected function getNonEmptyClausesMap(): array
     {
         return [
-            self::C_TABLE => $this->tableClause(),
+            self::C_TABLE => $this->getTableClause(),
             self::C_DATASET => $this->datasetClause(),
             self::C_WHERE => $this->getWhereClause(),
             self::C_RETURN_INTO => $this->returnIntoClause(),
-            self::C_HINT => $this->hintClause(),
         ];
     }
 }

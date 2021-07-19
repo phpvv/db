@@ -88,7 +88,7 @@ class InsertStringifier extends ModificatoryStringifier
     public function stringifyRaw(&$params)
     {
         $query = $this->insertQuery();
-        $table = $query->tableClause();
+        $table = $query->getTableClause();
         if ($table->isEmpty()) {
             throw new \LogicException('Table is not selected');
         }
@@ -102,7 +102,7 @@ class InsertStringifier extends ModificatoryStringifier
 
     public function queryTableClause()
     {
-        return $this->insertQuery()->tableClause();
+        return $this->insertQuery()->getTableClause();
     }
 
     protected function strMultiValuesInsert(&$params)
@@ -120,17 +120,17 @@ class InsertStringifier extends ModificatoryStringifier
     protected function strStdInsert(&$params)
     {
         $query = $this->insertQuery();
-        $this->applyInsertedIdClause($query->insertedIdClause());
+        $this->applyInsertedIdClause($query->getInsertedIdClause());
 
         return $this->strStdInsertIntoClause($params)
                . $this->strStdValuesClause($params)
-               . $this->strOnDupKeyClause($query->onDupKeyClause(), $params)
+               . $this->strOnDupKeyClause($query->getOnDuplicateKeyClause(), $params)
                . $this->strReturnIntoClause($query->returnIntoClause(), $params);
     }
 
     protected function buildFieldsPart()
     {
-        $fields = $this->insertQuery()->fieldsClause()->items();
+        $fields = $this->insertQuery()->getFieldsClause()->getItems();
 
         return $this->fieldListToPart($fields);
     }
@@ -138,15 +138,15 @@ class InsertStringifier extends ModificatoryStringifier
     protected function buildValuesPart()
     {
         $query = $this->insertQuery();
-        $fieldsClause = $query->fieldsClause();
+        $fieldsClause = $query->getFieldsClause();
         if ($fieldsClause->isEmpty()) {
-            $mainTable = $query->tableClause()->mainTableModel();
+            $mainTable = $query->getTableClause()->getMainTableModel();
             $fields = $mainTable ? $mainTable->getFields()->getNames() : [];
         } else {
-            $fields = $fieldsClause->items();
+            $fields = $fieldsClause->getItems();
         }
 
-        $values = $query->valuesClause()->items();
+        $values = $query->getValuesClause()->getItems();
 
         return $this->valueListToPart($values, $fields);
     }
@@ -218,12 +218,12 @@ class InsertStringifier extends ModificatoryStringifier
      */
     protected function isSelectValues(): bool
     {
-        $valuesClause = $this->insertQuery()->valuesClause();
-        if (!$valuesClause->items()) {
+        $valuesClause = $this->insertQuery()->getValuesClause();
+        if (!$valuesClause->getItems()) {
             return false;
         }
 
-        return $valuesClause->items()[0] instanceof Sql\SelectQuery;
+        return $valuesClause->getItems()[0] instanceof Sql\SelectQuery;
     }
 
     /**
@@ -231,7 +231,7 @@ class InsertStringifier extends ModificatoryStringifier
      */
     protected function isStdFieldsValues()
     {
-        return !$this->insertQuery()->valuesClause()->isEmpty();
+        return !$this->insertQuery()->getValuesClause()->isEmpty();
     }
 
     /**
@@ -287,7 +287,7 @@ class InsertStringifier extends ModificatoryStringifier
     protected function strStdInsertIntoClause(&$params)
     {
         $fields = $this->fieldsPart();
-        $table = $this->buildTableSql($this->insertQuery()->tableClause());
+        $table = $this->buildTableSql($this->insertQuery()->getTableClause());
 
         /** @noinspection SqlNoDataSourceInspection */
         return "INSERT INTO {$table->embed($params)} {$fields->embed($params)}";

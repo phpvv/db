@@ -56,7 +56,7 @@ class DeleteStringifier extends ModificatoryStringifier
         $this->checkQueryToStr($query);
 
         $sql = $this->strDeleteClause($query->delTablesClause(), $params)
-               . $this->strTableClause($query->tableClause(), $params)
+               . $this->strTableClause($query->getTableClause(), $params)
                . $this->strWhereClause($query->getWhereClause(), $params);
 
         return $sql;
@@ -67,7 +67,7 @@ class DeleteStringifier extends ModificatoryStringifier
      */
     public function queryTableClause()
     {
-        return $this->deleteQuery()->tableClause();
+        return $this->deleteQuery()->getTableClause();
     }
 
     protected function strDeleteClause(Sql\Clauses\DeleteTablesClause $tables, &$params)
@@ -86,7 +86,7 @@ class DeleteStringifier extends ModificatoryStringifier
     protected function checkQueryToStr(DeleteQuery $query)
     {
         $checkEmptyMap = [
-            [$table = $query->tableClause(), '&Table is not selected'],
+            [$table = $query->getTableClause(), '&Table is not selected'],
             [$where = $query->getWhereClause(), '&There is no where clause'],
         ];
         /** @var Sql\Clauses\Clause $c */
@@ -99,6 +99,6 @@ class DeleteStringifier extends ModificatoryStringifier
 
     protected function useAliasForTable(Sql\Clauses\TableClause $table)
     {
-        return count($table->items()) > 1;
+        return count($table->getItems()) > 1;
     }
 }

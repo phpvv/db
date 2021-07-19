@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  * This file is part of the phpvv package.
@@ -20,45 +22,35 @@ use VV\Db\Sql;
  */
 class Factory implements \VV\Db\Sql\Stringifiers\Factory
 {
-
-
     /**
      * @inheritDoc
      */
-    #[Pure]
-    public function createSelectStringifier(
-        Sql\SelectQuery $query
-    ): SelectStringifier {
+    public function createSelectStringifier(Sql\SelectQuery $query): SelectStringifier
+    {
         return new SelectStringifier($query, $this);
     }
 
     /**
      * @inheritDoc
      */
-    #[Pure]
-    public function createInsertStringifier(
-        Sql\InsertQuery $query
-    ): InsertStringifier {
+    public function createInsertStringifier(Sql\InsertQuery $query): InsertStringifier
+    {
         return new InsertStringifier($query, $this);
     }
 
     /**
      * @inheritDoc
      */
-    #[Pure]
-    public function createUpdateStringifier(
-        Sql\UpdateQuery $query
-    ): UpdateStringifier {
+    public function createUpdateStringifier(Sql\UpdateQuery $query): UpdateStringifier
+    {
         return new UpdateStringifier($query, $this);
     }
 
     /**
      * @inheritDoc
      */
-    #[Pure]
-    public function createDeleteStringifier(
-        Sql\DeleteQuery $query
-    ): DeleteStringifier {
+    public function createDeleteStringifier(Sql\DeleteQuery $query): DeleteStringifier
+    {
         return new DeleteStringifier($query, $this);
     }
 }
