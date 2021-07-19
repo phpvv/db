@@ -49,7 +49,7 @@ class PlainSql implements Expression
         return $this->sql;
     }
 
-    public function expressionId(): string
+    public function getExpressionId(): string
     {
         return $this->sql;
     }

@@ -52,7 +52,7 @@ class ReturnIntoClause extends ItemList
             : $param;
 
         $item = $this->creteItem($expression, $P);
-        $itemName = $item->expression()->expressionId();
+        $itemName = $item->expression()->getExpressionId();
         $this->items[$itemName] = $item;
 
         return $this;

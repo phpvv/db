@@ -177,7 +177,7 @@ class CaseExpression implements Expression
     /**
      * @return string
      */
-    public function expressionId(): string
+    public function getExpressionId(): string
     {
         return spl_object_hash($this);
     }

@@ -125,7 +125,7 @@ class InsertStringifier extends ModificatoryStringifier
         return $this->strStdInsertIntoClause($params)
                . $this->strStdValuesClause($params)
                . $this->strOnDupKeyClause($query->getOnDuplicateKeyClause(), $params)
-               . $this->strReturnIntoClause($query->returnIntoClause(), $params);
+               . $this->strReturnIntoClause($query->getReturnIntoClause(), $params);
     }
 
     protected function buildFieldsPart()

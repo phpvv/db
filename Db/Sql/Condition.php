@@ -500,7 +500,7 @@ class Condition extends ItemList implements Predicate
         $predicate = $item->getPredicate();
         $itemKey = null;
         if ($predicate instanceof Cmp && $item->getConnector() == ConditionItem::CONN_AND) {
-            $itemKey = $predicate->leftExpression()->expressionId() . ' ' . $predicate->operator();
+            $itemKey = $predicate->leftExpression()->getExpressionId() . ' ' . $predicate->operator();
         }
 
         if ($itemKey) {

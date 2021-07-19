@@ -71,16 +71,16 @@ class SelectStringifier extends QueryStringifier
         $sql = $this->strSelectClause($query, $params)
                . $this->strFromClause($query->getTableClause(), $params)
                . $this->strWhereClause($query->getWhereClause(), $params)
-               . $this->strGroupByClause($query->groupByClause(), $params)
-               . $this->strHavingClause($query->havingClause(), $params)
-               . $this->strOrderByClause($query->orderByClause(), $params);
+               . $this->strGroupByClause($query->getGroupByClause(), $params)
+               . $this->strHavingClause($query->getHavingClause(), $params)
+               . $this->strOrderByClause($query->getOrderByClause(), $params);
 
-        $limit = $query->limitClause();
+        $limit = $query->getLimitClause();
         if (!$limit->isEmpty()) {
             $this->applyLimitClause($sql, $limit->count(), $limit->offset());
         }
 
-        if ($fuc = $query->forUpdateClause()) {
+        if ($fuc = $query->getForUpdateClause()) {
             $this->applyForUpdateClause($sql, $fuc);
         }
 
@@ -91,7 +91,7 @@ class SelectStringifier extends QueryStringifier
     {
         return 'SELECT '
                . ($query->isDistinct() ? 'DISTINCT ' : '')
-               . $this->strColumnList($query->columnsClause()->getItems(), $params, true);
+               . $this->strColumnList($query->getColumnsClause()->getItems(), $params, true);
     }
 
     protected function strFromClause(Sql\Clauses\TableClause $table, &$params): string

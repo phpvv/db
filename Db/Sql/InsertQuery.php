@@ -32,7 +32,7 @@ class InsertQuery extends ModificatoryQuery
     public const C_DATASET = 0x01,
         C_FIELDS = 0x02,
         C_VALUES = 0x04,
-        C_ONDUPKEY = 0x08,
+        C_ON_DUP_KEY = 0x08,
         C_RETURN_INTO = 0x10,
         C_RETURN_INS_ID = 0x20;
 
@@ -330,9 +330,9 @@ class InsertQuery extends ModificatoryQuery
      */
     public function insertedId(Transaction $transaction = null): mixed
     {
-        $retinsidClaues = $this->getInsertedIdClause();
-        if ($retinsidClaues->isEmpty()) {
-            $retinsidClaues->set();
+        $insertedIdClause = $this->getInsertedIdClause();
+        if ($insertedIdClause->isEmpty()) {
+            $insertedIdClause->set();
         }
 
         return $this->exec($transaction)->insertedId();
@@ -374,8 +374,8 @@ class InsertQuery extends ModificatoryQuery
             self::C_DATASET => $this->datasetClause(),
             self::C_FIELDS => $this->getFieldsClause(),
             self::C_VALUES => $this->getValuesClause(),
-            self::C_ONDUPKEY => $this->getOnDuplicateKeyClause(),
-            self::C_RETURN_INTO => $this->returnIntoClause(),
+            self::C_ON_DUP_KEY => $this->getOnDuplicateKeyClause(),
+            self::C_RETURN_INTO => $this->getReturnIntoClause(),
             self::C_RETURN_INS_ID => $this->getInsertedIdClause(),
         ];
     }

@@ -111,7 +111,7 @@ class SelectQuery extends Query implements Expressions\Expression
     /**
      * @return bool|string
      */
-    public function forUpdateClause(): bool|string
+    public function getForUpdateClause(): bool|string
     {
         return $this->forUpdateClause;
     }
@@ -137,7 +137,7 @@ class SelectQuery extends Query implements Expressions\Expression
      *
      * @return $this
      */
-    public function columns(...$columns): static
+    public function columns(string|array|Expression ...$columns): static
     {
         $clause = $this->createColumnsClause()->add(...$columns);
 
@@ -151,9 +151,9 @@ class SelectQuery extends Query implements Expressions\Expression
      *
      * @return $this
      */
-    public function addColumns(...$columns): static
+    public function addColumns(string|array|Expression ...$columns): static
     {
-        $this->columnsClause()->add(...$columns);
+        $this->getColumnsClause()->add(...$columns);
 
         return $this;
     }
@@ -195,7 +195,7 @@ class SelectQuery extends Query implements Expressions\Expression
         }
 
         // todo: need review/refactoring
-        $columnsClause = $this->columnsClause();
+        $columnsClause = $this->getColumnsClause();
         $map = $columnsClause->getResultFieldsMap();
         foreach ($columns as &$col) {
             if (is_string($col)) {
@@ -392,7 +392,7 @@ class SelectQuery extends Query implements Expressions\Expression
         array|string $group = null,
         string $alias = null,
     ): static {
-        return $this->_joinAsColumnsGroup([$this, 'join'], $table, $on, $group, $alias);
+        return $this->addJoinAsColumnsGroup([$this, 'join'], $table, $on, $group, $alias);
     }
 
     /**
@@ -409,7 +409,7 @@ class SelectQuery extends Query implements Expressions\Expression
         array|string $group = null,
         string $alias = null,
     ): static {
-        return $this->_joinAsColumnsGroup([$this, 'left'], $table, $on, $group, $alias);
+        return $this->addJoinAsColumnsGroup([$this, 'left'], $table, $on, $group, $alias);
     }
 
     /**
@@ -435,7 +435,7 @@ class SelectQuery extends Query implements Expressions\Expression
      */
     public function addOrderBy(...$columns): static
     {
-        $this->orderByClause()->add(...$columns);
+        $this->getOrderByClause()->add(...$columns);
 
         return $this;
     }
@@ -463,7 +463,7 @@ class SelectQuery extends Query implements Expressions\Expression
      */
     public function addGroupBy(...$columns): static
     {
-        $this->groupByClause()->add(...$columns);
+        $this->getGroupByClause()->add(...$columns);
 
         return $this;
     }
@@ -492,7 +492,7 @@ class SelectQuery extends Query implements Expressions\Expression
      */
     public function having(string|int|array|Expression|Predicate|null $field, mixed $value = null): SelectQuery
     {
-        return $this->condintionAnd($this->havingClause(), ...func_get_args());
+        return $this->condintionAnd($this->getHavingClause(), ...func_get_args());
     }
 
     /**
@@ -505,7 +505,7 @@ class SelectQuery extends Query implements Expressions\Expression
      */
     public function limit(int $count, int $offset = 0): static
     {
-        $this->limitClause()->set($count, $offset);
+        $this->getLimitClause()->set($count, $offset);
 
         return $this;
     }
@@ -571,7 +571,7 @@ class SelectQuery extends Query implements Expressions\Expression
      *
      * @return ColumnsClause
      */
-    public function columnsClause(): ColumnsClause
+    public function getColumnsClause(): ColumnsClause
     {
         if (!$this->columnsClause) {
             $this->setColumnsClause($this->createColumnsClause());
@@ -602,7 +602,7 @@ class SelectQuery extends Query implements Expressions\Expression
     public function clearColumnsClause(): ColumnsClause
     {
         try {
-            return $this->columnsClause();
+            return $this->getColumnsClause();
         } finally {
             $this->setColumnsClause(null);
         }
@@ -623,7 +623,7 @@ class SelectQuery extends Query implements Expressions\Expression
      *
      * @return GroupByClause
      */
-    public function groupByClause(): GroupByClause
+    public function getGroupByClause(): GroupByClause
     {
         if (!$this->groupByClause) {
             $this->setGroupByClause($this->createGroupByClause());
@@ -654,7 +654,7 @@ class SelectQuery extends Query implements Expressions\Expression
     public function clearGroupByClause(): GroupByClause
     {
         try {
-            return $this->groupByClause();
+            return $this->getGroupByClause();
         } finally {
             $this->setGroupByClause(null);
         }
@@ -675,7 +675,7 @@ class SelectQuery extends Query implements Expressions\Expression
      *
      * @return Condition
      */
-    public function havingClause(): Condition
+    public function getHavingClause(): Condition
     {
         if (!$this->havingClause) {
             $this->setHavingClause($this->createHavingClause());
@@ -706,7 +706,7 @@ class SelectQuery extends Query implements Expressions\Expression
     public function clearHavingClause(): Condition
     {
         try {
-            return $this->havingClause();
+            return $this->getHavingClause();
         } finally {
             $this->setHavingClause(null);
         }
@@ -727,7 +727,7 @@ class SelectQuery extends Query implements Expressions\Expression
      *
      * @return OrderByClause
      */
-    public function orderByClause(): OrderByClause
+    public function getOrderByClause(): OrderByClause
     {
         if (!$this->orderByClause) {
             $this->setOrderByClause($this->createOrderByClause());
@@ -758,7 +758,7 @@ class SelectQuery extends Query implements Expressions\Expression
     public function clearOrderByClause(): OrderByClause
     {
         try {
-            return $this->orderByClause();
+            return $this->getOrderByClause();
         } finally {
             $this->setOrderByClause(null);
         }
@@ -779,7 +779,7 @@ class SelectQuery extends Query implements Expressions\Expression
      *
      * @return LimitClause
      */
-    public function limitClause(): LimitClause
+    public function getLimitClause(): LimitClause
     {
         if (!$this->limitClause) {
             $this->setLimitClause($this->createLimitClause());
@@ -810,7 +810,7 @@ class SelectQuery extends Query implements Expressions\Expression
     public function clearLimitClause(): LimitClause
     {
         try {
-            return $this->limitClause();
+            return $this->getLimitClause();
         } finally {
             $this->setLimitClause(null);
         }
@@ -829,20 +829,20 @@ class SelectQuery extends Query implements Expressions\Expression
     /**
      * @return array|null
      */
-    public function resultFieldsMap(): ?array
+    public function getResultFieldsMap(): ?array
     {
-        return $this->columnsClause()->getResultFieldsMap();
+        return $this->getColumnsClause()->getResultFieldsMap();
     }
 
     /**
      * @inheritDoc
      */
-    public function expressionId(): string
+    public function getExpressionId(): string
     {
         return spl_object_hash($this);
     }
 
-    protected function _joinAsColumnsGroup(
+    protected function addJoinAsColumnsGroup(
         callable $joinCallback,
         Table|SelectQuery $from,
         string|array|Condition $on = null,
@@ -854,8 +854,8 @@ class SelectQuery extends Query implements Expressions\Expression
                 throw new \LogicException('$group not set and $on is not string');
             }
 
-            $namerx = Expressions\DbObject::NAME_RX;
-            if (preg_match("/^$namerx\.($namerx)$", $on, $m)) {
+            $nameRx = Expressions\DbObject::NAME_RX;
+            if (preg_match("/^$nameRx\.($nameRx)$", $on, $m)) {
                 $group = $m[1];
             }
         }
@@ -875,11 +875,11 @@ class SelectQuery extends Query implements Expressions\Expression
         }
 
         if ($from instanceof SelectQuery) {
-            $resultFields = $from->columnsClause()->getResultFields();
+            $resultFields = $from->getColumnsClause()->getResultFields();
             // todo: need review/refactoring
-            if ($joinMap = $from->resultFieldsMap()) {
+            if ($joinMap = $from->getResultFieldsMap()) {
                 $resultFields = array_diff($resultFields, array_keys($joinMap));
-                $columnsClause = $this->columnsClause();
+                $columnsClause = $this->getColumnsClause();
 
                 $map = $columnsClause->getResultFieldsMap();
                 foreach ($joinMap as $subField => $path) {
@@ -901,15 +901,15 @@ class SelectQuery extends Query implements Expressions\Expression
     protected function getNonEmptyClausesMap(): array
     {
         return [
-            self::C_COLUMNS => $this->columnsClause(),
+            self::C_COLUMNS => $this->getColumnsClause(),
             self::C_TABLE => $this->getTableClause(),
             self::C_WHERE => $this->getWhereClause(),
-            self::C_GROUP_BY => $this->groupByClause(),
-            self::C_HAVING => $this->havingClause(),
-            self::C_ORDER_BY => $this->orderByClause(),
-            self::C_LIMIT => $this->limitClause(),
+            self::C_GROUP_BY => $this->getGroupByClause(),
+            self::C_HAVING => $this->getHavingClause(),
+            self::C_ORDER_BY => $this->getOrderByClause(),
+            self::C_LIMIT => $this->getLimitClause(),
             self::C_DISTINCT => $this->isDistinct(),
-            self::C_FOR_UPDATE => $this->forUpdateClause(),
+            self::C_FOR_UPDATE => $this->getForUpdateClause(),
         ];
     }
 

@@ -24,7 +24,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
     public function supportedClausesIds()
     {
         return parent::supportedClausesIds()
-               | InsertQuery::C_ONDUPKEY
+               | InsertQuery::C_ON_DUP_KEY
                | InsertQuery::C_RETURN_INS_ID;
     }
 

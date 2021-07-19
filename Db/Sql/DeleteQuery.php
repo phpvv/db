@@ -11,11 +11,10 @@
  */
 namespace VV\Db\Sql;
 
-use JetBrains\PhpStorm\Pure;
 use VV\Db\Model\Table;
 use VV\Db\Sql\Clauses\DeleteTablesClause;
 use VV\Db\Sql\Clauses\QueryWhereTrait;
-use VV\Db\Sql\Expressions\DbObject;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class DeleteQuery
@@ -31,32 +30,32 @@ class DeleteQuery extends ModificatoryQuery
         C_WHERE = 0x04,
         C_RETURN_INTO = 0x08;
 
-    protected ?DeleteTablesClause $delTablesClause = null;
+    protected ?DeleteTablesClause $deleteTablesClause = null;
 
     /**
      * Returns delTablesClause
      *
      * @return DeleteTablesClause
      */
-    public function delTablesClause(): DeleteTablesClause
+    public function getDeleteTablesClause(): DeleteTablesClause
     {
-        if (!$this->delTablesClause) {
-            $this->setDelTablesClause($this->createDelTablesClause());
+        if (!$this->deleteTablesClause) {
+            $this->setDeleteTablesClause($this->createDeleteTablesClause());
         }
 
-        return $this->delTablesClause;
+        return $this->deleteTablesClause;
     }
 
     /**
      * Sets delTablesClause
      *
-     * @param DeleteTablesClause|null $delTablesClause
+     * @param DeleteTablesClause|null $deleteTablesClause
      *
      * @return $this
      */
-    public function setDelTablesClause(?DeleteTablesClause $delTablesClause): static
+    public function setDeleteTablesClause(?DeleteTablesClause $deleteTablesClause): static
     {
-        $this->delTablesClause = $delTablesClause;
+        $this->deleteTablesClause = $deleteTablesClause;
 
         return $this;
     }
@@ -66,12 +65,12 @@ class DeleteQuery extends ModificatoryQuery
      *
      * @return DeleteTablesClause
      */
-    public function clearDelTablesClause(): DeleteTablesClause
+    public function clearDeleteTablesClause(): DeleteTablesClause
     {
         try {
-            return $this->delTablesClause();
+            return $this->getDeleteTablesClause();
         } finally {
-            $this->setDelTablesClause(null);
+            $this->setDeleteTablesClause(null);
         }
     }
 
@@ -80,7 +79,7 @@ class DeleteQuery extends ModificatoryQuery
      *
      * @return DeleteTablesClause
      */
-    public function createDelTablesClause(): DeleteTablesClause
+    public function createDeleteTablesClause(): DeleteTablesClause
     {
         return new DeleteTablesClause();
     }
@@ -88,15 +87,15 @@ class DeleteQuery extends ModificatoryQuery
     /**
      * Add list of tables which need to be deleted
      *
-     * @param string[]|DbObject[] $tables
+     * @param string|Expression ...$tables
      *
      * @return $this
      */
-    public function tables(...$tables): static
+    public function tables(string|Expression ...$tables): static
     {
-        $clause = $this->createDelTablesClause()->add(...$tables);
+        $clause = $this->createDeleteTablesClause()->add(...$tables);
 
-        return $this->setDelTablesClause($clause);
+        return $this->setDeleteTablesClause($clause);
     }
 
     /**
@@ -116,10 +115,10 @@ class DeleteQuery extends ModificatoryQuery
     protected function getNonEmptyClausesMap(): array
     {
         return [
-            self::C_DEL_TABLES => $this->delTablesClause(),
+            self::C_DEL_TABLES => $this->getDeleteTablesClause(),
             self::C_TABLE => $this->getTableClause(),
             self::C_WHERE => $this->getWhereClause(),
-            self::C_RETURN_INTO => $this->returnIntoClause(),
+            self::C_RETURN_INTO => $this->getReturnIntoClause(),
         ];
     }
 }

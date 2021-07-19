@@ -40,7 +40,7 @@ class SqlParam implements Expression
         return $this->param;
     }
 
-    public function expressionId(): string
+    public function getExpressionId(): string
     {
         return spl_object_hash($this);
     }

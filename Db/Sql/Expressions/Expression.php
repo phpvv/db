@@ -22,5 +22,5 @@ interface Expression extends AliasableExpression
      *
      * @return string
      */
-    public function expressionId(): string;
+    public function getExpressionId(): string;
 }

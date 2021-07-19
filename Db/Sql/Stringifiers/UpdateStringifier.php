@@ -59,7 +59,7 @@ class UpdateStringifier extends ModificatoryStringifier
         return $this->strUpdateClause($query->getTableClause(), $params)
                . $this->strSetClause($query->datasetClause(), $params)
                . $this->strWhereClause($query->getWhereClause(), $params)
-               . $this->strReturnIntoClause($query->returnIntoClause(), $params);
+               . $this->strReturnIntoClause($query->getReturnIntoClause(), $params);
     }
 
     public function queryTableClause()

@@ -96,7 +96,7 @@ class DatasetClause extends ItemList
         }
 
         $item = $this->creteItem($field, $value);
-        $itemName = $item->field()->expressionId();
+        $itemName = $item->field()->getExpressionId();
         $this->items[$itemName] = $item;
 
         return $this;

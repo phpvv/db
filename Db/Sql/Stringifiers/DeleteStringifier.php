@@ -55,7 +55,7 @@ class DeleteStringifier extends ModificatoryStringifier
         $query = $this->deleteQuery();
         $this->checkQueryToStr($query);
 
-        $sql = $this->strDeleteClause($query->delTablesClause(), $params)
+        $sql = $this->strDeleteClause($query->getDeleteTablesClause(), $params)
                . $this->strTableClause($query->getTableClause(), $params)
                . $this->strWhereClause($query->getWhereClause(), $params);
 

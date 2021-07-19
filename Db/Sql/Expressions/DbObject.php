@@ -10,7 +10,6 @@
  */
 namespace VV\Db\Sql\Expressions;
 
-use JetBrains\PhpStorm\Pure;
 use VV\Db\Sql\Expressions;
 
 /**
@@ -20,7 +19,6 @@ use VV\Db\Sql\Expressions;
  */
 class DbObject implements Expressions\Expression
 {
-
     use Expressions\AliasFieldTrait;
 
     public const NAME_RX = '[_a-zA-Z\$][\w]*';
@@ -111,7 +109,7 @@ class DbObject implements Expressions\Expression
         return new static($name, $this);
     }
 
-    public function expressionId(): string
+    public function getExpressionId(): string
     {
         return implode('-', $this->path());
     }
@@ -145,13 +143,16 @@ class DbObject implements Expressions\Expression
 
     /**
      * @param string|int|DbObject  $name
-     * @param string|DbObject|null $dfltOwner
+     * @param string|DbObject|null $defaultOwner
      * @param bool                 $parseAlias
      *
      * @return static|null
      */
-    public static function create(string|int|self $name, string|self $dfltOwner = null, bool $parseAlias = true): ?self
-    {
+    public static function create(
+        string|int|self $name,
+        string|self $defaultOwner = null,
+        bool $parseAlias = true
+    ): ?self {
         if ($name instanceof static) {
             return $name;
         }
@@ -165,8 +166,8 @@ class DbObject implements Expressions\Expression
         }
 
         $obj = (new static())->setParsedData($path, $alias);
-        if ($dfltOwner && !$obj->owner()) {
-            $obj->setOwner($dfltOwner);
+        if ($defaultOwner && !$obj->owner()) {
+            $obj->setOwner($defaultOwner);
         }
 
         return $obj;
@@ -180,7 +181,7 @@ class DbObject implements Expressions\Expression
      */
     public static function parse(string $name, bool $parseAlias = true): ?array
     {
-        $namerx = static::NAME_RX;
+        $nameRx = static::NAME_RX;
 
         $alias = $parseAlias ? static::parseAlias($name, $name) : null;
 
@@ -195,7 +196,7 @@ class DbObject implements Expressions\Expression
                 continue;
             }
 
-            if (!preg_match("!^(`|)($namerx)\\1$!", $name, $m)) {
+            if (!preg_match("!^(`|)($nameRx)\\1$!", $name, $m)) {
                 return null;
             }
 
@@ -213,7 +214,7 @@ class DbObject implements Expressions\Expression
      */
     public static function parseAlias(string $name, string &$nameWoAlias = null): ?string
     {
-        $namerx = static::NAME_RX;
+        $nameRx = static::NAME_RX;
 
         /** @noinspection RegExpRepeatedSpace */
         $aliasRx = /** @lang RegExp */
@@ -222,17 +223,19 @@ class DbObject implements Expressions\Expression
 (?: \\s+ as)? # unnecessary 'as' keyword
 \\s+
 (`|)    # sql encloser
-($namerx)    # alias
+($nameRx)    # alias
 \\1          # sql encloser backreference
 $
 /xi
 RX;
         $alias = null;
-        $nameWoAlias = preg_replace_callback($aliasRx,
+        $nameWoAlias = preg_replace_callback(
+            $aliasRx,
             function ($m) use (&$alias) {
                 $alias = $m[2];
             },
-            $name);
+            $name
+        );
 
         return $alias;
     }

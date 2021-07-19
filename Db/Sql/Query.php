@@ -188,7 +188,7 @@ abstract class Query
 
     public function toString(&$params = null): string
     {
-        return $this->connectionOrThrow()->stringifyQuery($this, $params);
+        return $this->getConnectionOrThrow()->stringifyQuery($this, $params);
     }
 
     /**
@@ -196,13 +196,13 @@ abstract class Query
      */
     public function prepare(): Statement
     {
-        return $this->connectionOrThrow()->prepare($this);
+        return $this->getConnectionOrThrow()->prepare($this);
     }
 
     /**
      * @return Connection|null
      */
-    protected function connectionOrThrow(): ?Connection
+    protected function getConnectionOrThrow(): ?Connection
     {
         if (!$connection = $this->getConnection()) {
             throw new \LogicException('Db connection instance is not set in sql builder');
@@ -243,7 +243,7 @@ abstract class Query
      */
     protected function query(int $flags = null, string|\Closure $decorator = null, int $fetchSize = null): Result
     {
-        return $this->connectionOrThrow()->query($this, null, $flags, $decorator, $fetchSize);
+        return $this->getConnectionOrThrow()->query($this, null, $flags, $decorator, $fetchSize);
     }
 
     abstract protected function getNonEmptyClausesMap(): array;

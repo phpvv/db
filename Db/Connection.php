@@ -168,7 +168,7 @@ final class Connection
         if ($query instanceof Query) {
             $params = [];
             if ($query instanceof Sql\SelectQuery) {
-                $resultFieldsMap = $query->resultFieldsMap();
+                $resultFieldsMap = $query->getResultFieldsMap();
             }
 
             $query = $this->stringifyQuery($query, $params);

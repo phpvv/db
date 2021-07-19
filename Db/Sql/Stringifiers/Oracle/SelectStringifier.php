@@ -23,7 +23,7 @@ class SelectStringifier extends \VV\Db\Sql\Stringifiers\SelectStringifier
     protected function applyLimitClause(&$sql, int $count, int $offset): void
     {
         $rn = 'ora_rownum_field';
-        $fields = '`' . implode('`, `', $this->selectQuery()->columnsClause()->getResultFields()) . '`';
+        $fields = '`' . implode('`, `', $this->selectQuery()->getColumnsClause()->getResultFields()) . '`';
         $sql = "SELECT $fields FROM (SELECT t.*, rownum AS $rn FROM ($sql) t) WHERE $rn>$offset AND $rn<=$count+$offset";
     }
 

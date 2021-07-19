@@ -54,7 +54,7 @@ abstract class ModificatoryQuery extends Query
         string $name = null,
         int $size = null
     ): static {
-        $this->returnIntoClause()->add($field, $param, $type, $name, $size);
+        $this->getReturnIntoClause()->add($field, $param, $type, $name, $size);
 
         return $this;
     }
@@ -64,7 +64,7 @@ abstract class ModificatoryQuery extends Query
      *
      * @return ReturnIntoClause
      */
-    public function returnIntoClause(): ReturnIntoClause
+    public function getReturnIntoClause(): ReturnIntoClause
     {
         if (!$this->returnIntoClause) {
             $this->setReturnIntoClause($this->createReturnIntoClause());
@@ -95,7 +95,7 @@ abstract class ModificatoryQuery extends Query
     public function clearReturnIntoClause(): ReturnIntoClause
     {
         try {
-            return $this->returnIntoClause();
+            return $this->getReturnIntoClause();
         } finally {
             $this->setReturnIntoClause(null);
         }
@@ -136,6 +136,6 @@ abstract class ModificatoryQuery extends Query
      */
     public function affectedRows(Transaction $transaction = null): int
     {
-        return $this->exec($transaction)->affectedRows;
+        return $this->exec($transaction)->affectedRows();
     }
 }
