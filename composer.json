@@ -33,7 +33,7 @@
     "require": {
         "php": "^8.0",
         "phpvv/runtime": "^0.2.0",
-        "phpvv/exception": "^0.2.0"
+        "phpvv/exception": "^0.2.1"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.6"
