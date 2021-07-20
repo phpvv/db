@@ -12,7 +12,6 @@ declare(strict_types=1);
  */
 namespace VV\Db\Sql\Stringifiers\Oracle;
 
-use JetBrains\PhpStorm\Pure;
 use VV\Db\Sql;
 
 /**

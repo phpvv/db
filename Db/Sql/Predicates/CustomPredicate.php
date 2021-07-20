@@ -19,12 +19,11 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class CustomPredicate extends PredicateBase
 {
-
     private Expression $expression;
     private array $params;
 
     /**
-     * IsNull constructor.
+     * CustomPredicate constructor.
      *
      * @param Expression $expression
      * @param array      $params
@@ -32,15 +31,16 @@ class CustomPredicate extends PredicateBase
      */
     public function __construct(Expression $expression, array $params, bool $not = false)
     {
+        parent::__construct($not);
+
         $this->expression = $expression;
         $this->params = $params;
-        $this->not = $not;
     }
 
     /**
      * @return Expression
      */
-    public function expression(): Expression
+    public function getExpression(): Expression
     {
         return $this->expression;
     }
@@ -48,7 +48,7 @@ class CustomPredicate extends PredicateBase
     /**
      * @return array
      */
-    public function params(): array
+    public function getParams(): array
     {
         return $this->params;
     }

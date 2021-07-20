@@ -10,7 +10,6 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use JetBrains\PhpStorm\Pure;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
@@ -20,7 +19,6 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class OrderByClauseItem
 {
-
     private Expression $expression;
     private bool $desc;
     private ?bool $nullsLast;

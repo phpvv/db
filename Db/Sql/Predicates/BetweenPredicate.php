@@ -19,13 +19,12 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class BetweenPredicate extends PredicateBase
 {
-
     private Expression $expression;
-    private Expression $from;
-    private Expression $till;
+    private Expression $fromExpression;
+    private Expression $tillExpression;
 
     /**
-     * Between constructor.
+     * BetweenPredicate constructor.
      *
      * @param Expression $expression
      * @param Expression $from
@@ -34,16 +33,17 @@ class BetweenPredicate extends PredicateBase
      */
     public function __construct(Expression $expression, Expression $from, Expression $till, bool $not = false)
     {
+        parent::__construct($not);
+
         $this->expression = $expression;
-        $this->from = $from;
-        $this->till = $till;
-        $this->not = $not;
+        $this->fromExpression = $from;
+        $this->tillExpression = $till;
     }
 
     /**
      * @return Expression
      */
-    public function expression(): Expression
+    public function getExpression(): Expression
     {
         return $this->expression;
     }
@@ -51,16 +51,16 @@ class BetweenPredicate extends PredicateBase
     /**
      * @return Expression
      */
-    public function from(): Expression
+    public function getFromExpression(): Expression
     {
-        return $this->from;
+        return $this->fromExpression;
     }
 
     /**
      * @return Expression
      */
-    public function till(): Expression
+    public function getTillExpression(): Expression
     {
-        return $this->till;
+        return $this->tillExpression;
     }
 }

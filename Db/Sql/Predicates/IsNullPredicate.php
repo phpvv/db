@@ -23,21 +23,22 @@ class IsNullPredicate extends PredicateBase
     private Expression $expression;
 
     /**
-     * IsNull constructor.
+     * IsNullPredicate constructor.
      *
      * @param Expression $expression
      * @param bool       $not
      */
     public function __construct(Expression $expression, bool $not = false)
     {
+        parent::__construct($not);
+
         $this->expression = $expression;
-        $this->not = $not;
     }
 
     /**
      * @return Expression
      */
-    public function expression(): Expression
+    public function getExpression(): Expression
     {
         return $this->expression;
     }

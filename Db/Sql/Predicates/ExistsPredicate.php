@@ -19,7 +19,6 @@ use VV\Db\Sql\SelectQuery;
  */
 class ExistsPredicate extends PredicateBase
 {
-
     private SelectQuery $query;
 
     /**
@@ -30,11 +29,12 @@ class ExistsPredicate extends PredicateBase
      */
     public function __construct(SelectQuery $query, bool $not = false)
     {
+        parent::__construct($not);
+
         $this->query = $query;
-        $this->not = $not;
     }
 
-    public function query(): SelectQuery
+    public function getQuery(): SelectQuery
     {
         return $this->query;
     }

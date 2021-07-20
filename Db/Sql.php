@@ -10,7 +10,6 @@
  */
 namespace VV\Db;
 
-use JetBrains\PhpStorm\Pure;
 use VV\Db\Sql\Condition;
 use VV\Db\Sql\Expressions\CaseExpression;
 use VV\Db\Sql\Expressions\DbObject;
@@ -26,7 +25,6 @@ use VV\Db\Sql\Predicates\Predicate;
  */
 final class Sql
 {
-
     /**
      * @param string|int|Expression $expression
      * @param array                 $params
@@ -104,10 +102,10 @@ final class Sql
     }
 
     /**
-     * @param string|int|Expression|null $case
+     * @param string|int|Expression|null                 $case
      * @param string|int|Expression|Predicate|array|null $when
-     * @param string|int|Expression|null $then
-     * @param string|int|Expression|null $else
+     * @param string|int|Expression|null                 $then
+     * @param string|int|Expression|null                 $else
      *
      * @return CaseExpression
      */

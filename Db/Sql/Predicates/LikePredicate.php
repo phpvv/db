@@ -13,19 +13,18 @@ namespace VV\Db\Sql\Predicates;
 use VV\Db\Sql\Expressions\Expression;
 
 /**
- * Class Like
+ * Class LikePredicate
  *
- * @package VV\Db\Sql\Predicate
+ * @package VV\Db\Sql\Predicates
  */
 class LikePredicate extends PredicateBase
 {
-
     private Expression $leftExpression;
     private Expression $rightExpression;
     private bool $caseInsensitive;
 
     /**
-     * Like constructor.
+     * LikePredicate constructor.
      *
      * @param Expression $left
      * @param Expression $right
@@ -34,16 +33,17 @@ class LikePredicate extends PredicateBase
      */
     public function __construct(Expression $left, Expression $right, bool $not = false, bool $caseInsensitive = false)
     {
+        parent::__construct($not);
+
         $this->leftExpression = $left;
         $this->rightExpression = $right;
-        $this->not = $not;
         $this->caseInsensitive = $caseInsensitive;
     }
 
     /**
      * @return Expression
      */
-    public function leftExpression(): Expression
+    public function getLeftExpression(): Expression
     {
         return $this->leftExpression;
     }
@@ -51,7 +51,7 @@ class LikePredicate extends PredicateBase
     /**
      * @return Expression
      */
-    public function rightExpression(): Expression
+    public function getRightExpression(): Expression
     {
         return $this->rightExpression;
     }

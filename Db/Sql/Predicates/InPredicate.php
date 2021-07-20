@@ -19,32 +19,32 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class InPredicate extends PredicateBase
 {
-
     private Expression $expression;
     /** @var Expression[] */
     private array $params;
 
     /**
-     * IsNull constructor.
+     * InPredicate constructor.
      *
-     * @param Expression   $expression
-     * @param Expression[] $params
-     * @param bool         $not
+     * @param Expression $expression
+     * @param array      $params
+     * @param bool       $not
      */
     public function __construct(Expression $expression, array $params, bool $not = false)
     {
+        parent::__construct($not);
+
         $this->expression = $expression;
         if (!$params) {
             throw new \InvalidArgumentException('Params is empty');
         }
         $this->params = $params;
-        $this->not = $not;
     }
 
     /**
      * @return Expression
      */
-    public function expression(): Expression
+    public function getExpression(): Expression
     {
         return $this->expression;
     }
@@ -52,7 +52,7 @@ class InPredicate extends PredicateBase
     /**
      * @return Expression[]
      */
-    public function params(): array
+    public function getParams(): array
     {
         return $this->params;
     }

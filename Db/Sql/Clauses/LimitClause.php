@@ -10,8 +10,6 @@
  */
 namespace VV\Db\Sql\Clauses;
 
-use JetBrains\PhpStorm\Pure;
-
 /**
  * Class LimitClause
  *
@@ -19,7 +17,6 @@ use JetBrains\PhpStorm\Pure;
  */
 class LimitClause implements Clause
 {
-
     private int $count = 0;
     private int $offset = 0;
 

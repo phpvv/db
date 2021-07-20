@@ -11,10 +11,15 @@
 namespace VV\Db\Sql;
 
 use VV\Db\Sql\Clauses\ItemList;
-use VV\Db\Sql\Expressions;
+use VV\Db\Sql\Expressions\DbObject;
 use VV\Db\Sql\Expressions\Expression;
-use VV\Db\Sql\Predicates;
+use VV\Db\Sql\Predicates\BetweenPredicate;
 use VV\Db\Sql\Predicates\ComparePredicate as Cmp;
+use VV\Db\Sql\Predicates\CustomPredicate;
+use VV\Db\Sql\Predicates\ExistsPredicate;
+use VV\Db\Sql\Predicates\InPredicate;
+use VV\Db\Sql\Predicates\IsNullPredicate;
+use VV\Db\Sql\Predicates\LikePredicate;
 use VV\Db\Sql\Predicates\Predicate;
 
 /**
@@ -206,7 +211,7 @@ class Condition extends ItemList implements Predicate
      */
     public function between($from, $till): static
     {
-        $predicate = new Predicates\BetweenPredicate(
+        $predicate = new BetweenPredicate(
             $this->getTarget(),
             self::toParam($from),
             self::toParam($till),
@@ -241,7 +246,7 @@ class Condition extends ItemList implements Predicate
         $parentNot = $this->isItemNegation();
 
         $inPredic = $notNullParams
-            ? new Predicates\InPredicate($target, $notNullParams, $parentNot)
+            ? new InPredicate($target, $notNullParams, $parentNot)
             : null;
 
         // IN     (null, 1, 2) ==> IN (1, 2)     OR IS NULL
@@ -268,7 +273,7 @@ class Condition extends ItemList implements Predicate
                 return $this;
             }
             // NO RECORDS
-            $inPredic = new Predicates\InPredicate($target, [\VV\Db\Sql::plain('NULL')]);
+            $inPredic = new InPredicate($target, [\VV\Db\Sql::plain('NULL')]);
         }
 
         return $this->plainAddPredicate($inPredic);
@@ -279,7 +284,7 @@ class Condition extends ItemList implements Predicate
      */
     public function isNull(): static
     {
-        $predicate = new Predicates\IsNullPredicate($this->getTarget(), $this->isItemNegation());
+        $predicate = new IsNullPredicate($this->getTarget(), $this->isItemNegation());
 
         return $this->plainAddPredicate($predicate);
     }
@@ -300,7 +305,7 @@ class Condition extends ItemList implements Predicate
      */
     public function like(string $pattern, bool $caseInsensitive = false): static
     {
-        return $this->plainAddPredicate(new Predicates\LikePredicate(
+        return $this->plainAddPredicate(new LikePredicate(
             $this->getTarget(),
             self::toParam($pattern),
             $this->isItemNegation(),
@@ -351,7 +356,7 @@ class Condition extends ItemList implements Predicate
         if ($params && is_array($params[0])) {
             $params = $params[0];
         }
-        $predicate = new Predicates\CustomPredicate($this->getTarget(), $params, $this->isItemNegation());
+        $predicate = new CustomPredicate($this->getTarget(), $params, $this->isItemNegation());
 
         return $this->addPredicate($predicate);
     }
@@ -363,7 +368,7 @@ class Condition extends ItemList implements Predicate
      */
     public function exists(SelectQuery $query): static
     {
-        $predicate = new Predicates\ExistsPredicate($query, $this->isItemNegation());
+        $predicate = new ExistsPredicate($query, $this->isItemNegation());
 
         return $this->addPredicate($predicate);
     }
@@ -500,7 +505,7 @@ class Condition extends ItemList implements Predicate
         $predicate = $item->getPredicate();
         $itemKey = null;
         if ($predicate instanceof Cmp && $item->getConnector() == ConditionItem::CONN_AND) {
-            $itemKey = $predicate->leftExpression()->getExpressionId() . ' ' . $predicate->operator();
+            $itemKey = $predicate->getLeftExpression()->getExpressionId() . ' ' . $predicate->getOperator();
         }
 
         if ($itemKey) {
@@ -616,7 +621,7 @@ class Condition extends ItemList implements Predicate
         }
 
         $equals = is_object($target);
-        if (!$equals && $obj = Expressions\DbObject::create($target, null, false)) {
+        if (!$equals && $obj = DbObject::create($target, null, false)) {
             $target = $obj;
             $equals = true;
         }

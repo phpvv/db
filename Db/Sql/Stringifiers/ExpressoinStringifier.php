@@ -62,7 +62,7 @@ class ExpressoinStringifier
                 throw new \InvalidArgumentException('Wrong expression type');
         }
 
-        if ($withAlias && $a = $expr->alias()) {
+        if ($withAlias && $a = $expr->getAlias()) {
             $str .= " `$a`";
         }
 
@@ -81,14 +81,14 @@ class ExpressoinStringifier
 
     public function strPlainSql(Sql\Expressions\PlainSql $plain, &$params)
     {
-        ($p = $plain->params()) && array_push($params, ...$p);
+        ($p = $plain->getParams()) && array_push($params, ...$p);
 
-        return $plain->sql();
+        return $plain->getSql();
     }
 
     public function strSqlObj(Sql\Expressions\DbObject $obj, &$params)
     {
-        $path = $obj->path();
+        $path = $obj->getPath();
 
         $parts = [];
         foreach ($path as $p) {
@@ -107,7 +107,7 @@ class ExpressoinStringifier
     public function strParam($param, &$params)
     {
         if ($param instanceof Sql\Expressions\SqlParam) {
-            $param = $param->param();
+            $param = $param->getParam();
         } // pam fuiiiww
 
         $params[] = $param;
@@ -119,25 +119,25 @@ class ExpressoinStringifier
     {
         $str = 'CASE ';
 
-        if ($mainExpr = $caseExpr->mainExpression()) {
+        if ($mainExpr = $caseExpr->getMainExpression()) {
             $mainStr = $this->strExpr($mainExpr, $params);
             $str .= "$mainStr ";
 
-            foreach ($caseExpr->thenItems() as $item) {
-                $whenstr = $this->strExpr($item->whenExpression(), $params);
-                $thenstr = $this->strExpr($item->thenExpression(), $params);
+            foreach ($caseExpr->getThenItems() as $item) {
+                $whenstr = $this->strExpr($item->getWhenExpression(), $params);
+                $thenstr = $this->strExpr($item->getThenExpression(), $params);
                 $str .= "WHEN $whenstr THEN $thenstr ";
             }
         } else {
             $condStringifier = $this->queryStringifier()->conditionStringifier();
-            foreach ($caseExpr->thenItems() as $item) {
-                $whenstr = $condStringifier->buildConditionSql($item->whenCondition())->embed($params);
-                $thenstr = $this->strExpr($item->thenExpression(), $params);
+            foreach ($caseExpr->getThenItems() as $item) {
+                $whenstr = $condStringifier->buildConditionSql($item->getWhenCondition())->embed($params);
+                $thenstr = $this->strExpr($item->getThenExpression(), $params);
                 $str .= "WHEN $whenstr THEN $thenstr ";
             }
         }
 
-        if ($else = $caseExpr->elseExpression()) {
+        if ($else = $caseExpr->getElseExpression()) {
             $str .= "ELSE {$this->strExpr($else, $params)} ";
         }
 

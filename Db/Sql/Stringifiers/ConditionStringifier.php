@@ -91,14 +91,14 @@ class ConditionStringifier
 
     public function strComparePredicate(Sql\Predicates\ComparePredicate $compare, &$params)
     {
-        $leftExpr = $compare->leftExpression();
-        $rightExpr = $compare->rightExpression();
+        $leftExpr = $compare->getLeftExpression();
+        $rightExpr = $compare->getRightExpression();
         $this->decorateParamsByModel($leftExpr, $rightExpr);
 
         $lstr = $this->strColumn($leftExpr, $params);
         $rstr = $this->strColumn($rightExpr, $params, true);
 
-        $str = "$lstr {$compare->operator()} $rstr";
+        $str = "$lstr {$compare->getOperator()} $rstr";
         if ($compare->isNegative()) {
             return "NOT ($str)";
         }
@@ -108,8 +108,8 @@ class ConditionStringifier
 
     public function strLikePredicate(Sql\Predicates\LikePredicate $like, &$params)
     {
-        $lstr = $this->strColumn($leftExpr = $like->leftExpression(), $params);
-        $rstr = $this->strColumn($like->rightExpression(), $params, true);
+        $lstr = $this->strColumn($leftExpr = $like->getLeftExpression(), $params);
+        $rstr = $this->strColumn($like->getRightExpression(), $params, true);
         $notstr = $like->isNegative() ? 'NOT ' : '';
 
         $str = $this->strPreparedLike($lstr, $rstr, $notstr, $like->isCaseInsensitive());
@@ -119,9 +119,9 @@ class ConditionStringifier
 
     public function strBetweenPredicate(Sql\Predicates\BetweenPredicate $between, &$params)
     {
-        $expr = $between->expression();
-        $from = $between->from();
-        $till = $between->till();
+        $expr = $between->getExpression();
+        $from = $between->getFromExpression();
+        $till = $between->getTillExpression();
 
         $this->decorateParamsByModel($expr, $from, $till);
 
@@ -138,10 +138,10 @@ class ConditionStringifier
 
     public function strInPredicate(Sql\Predicates\InPredicate $in, &$params)
     {
-        $exprstr = $this->strColumn($expr = $in->expression(), $params);
+        $exprstr = $this->strColumn($expr = $in->getExpression(), $params);
 
-        $inParams = $in->params();
-        $this->decorateParamsByModel($in->expression(), ...$inParams);
+        $inParams = $in->getParams();
+        $this->decorateParamsByModel($in->getExpression(), ...$inParams);
 
         // build values clause: (?, ?, SOME_FUNC(field))
         $valsarr = [];
@@ -162,7 +162,7 @@ class ConditionStringifier
 
     public function strIsNullPredicate(Sql\Predicates\IsNullPredicate $isNull, &$params)
     {
-        $exprstr = $this->strColumn($expr = $isNull->expression(), $params);
+        $exprstr = $this->strColumn($expr = $isNull->getExpression(), $params);
         $not = $isNull->isNegative() ? ' NOT' : '';
         $str = "$exprstr IS{$not} NULL";
 
@@ -171,8 +171,8 @@ class ConditionStringifier
 
     public function strCustomPredicate(Sql\Predicates\CustomPredicate $custom, &$params)
     {
-        $str = $this->strColumn($custom->expression(), $params, true);
-        ($p = $custom->params()) && array_push($params, ...$p);
+        $str = $this->strColumn($custom->getExpression(), $params, true);
+        ($p = $custom->getParams()) && array_push($params, ...$p);
 
         if ($custom->isNegative()) {
             return "NOT $str";
@@ -184,7 +184,7 @@ class ConditionStringifier
     public function strExistsPredicate(Sql\Predicates\ExistsPredicate $exists, &$params)
     {
         $selectStr = $this->queryStringifier()->factory()
-            ->createSelectStringifier($exists->query())
+            ->createSelectStringifier($exists->getQuery())
             ->stringifyRaw($params);
 
         $str = "EXISTS ($selectStr)";
@@ -257,7 +257,7 @@ class ConditionStringifier
         if ($field instanceof Sql\Expressions\DbObject) {
             foreach ($params as &$p) {
                 if ($p instanceof Sql\Expressions\SqlParam) {
-                    $val = $p->param();
+                    $val = $p->getParam();
                 } else {
                     $val = $p;
                 }

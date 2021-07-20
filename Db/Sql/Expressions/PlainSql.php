@@ -11,19 +11,20 @@
 namespace VV\Db\Sql\Expressions;
 
 /**
- * Class Plain
+ * Class PlainSql
  *
- * @package VV\Db\Sql
+ * @package VV\Db\Sql\Expressions
  */
 class PlainSql implements Expression
 {
-
     use AliasFieldTrait;
 
     private string $sql;
     private array $params;
 
     /**
+     * PlainSql constructor.
+     *
      * @param string $sql
      * @param array  $params
      */
@@ -34,19 +35,19 @@ class PlainSql implements Expression
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function params(): array
+    public function getSql(): string
     {
-        return $this->params;
+        return $this->sql;
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function sql(): string
+    public function getParams(): array
     {
-        return $this->sql;
+        return $this->params;
     }
 
     public function getExpressionId(): string

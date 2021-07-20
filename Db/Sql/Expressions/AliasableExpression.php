@@ -11,17 +11,16 @@
 namespace VV\Db\Sql\Expressions;
 
 /**
- * Interface Aliasable
+ * Interface AliasableExpression
  *
- * @package VV\Db\Sql
+ * @package VV\Db\Sql\Expressions
  */
 interface AliasableExpression
 {
-
     /**
      * @return string|null
      */
-    public function alias(): ?string;
+    public function getAlias(): ?string;
 
     /**
      * @param string|null $alias

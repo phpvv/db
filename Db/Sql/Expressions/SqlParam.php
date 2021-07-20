@@ -10,22 +10,23 @@
  */
 namespace VV\Db\Sql\Expressions;
 
+use VV\Db\Param;
+
 /**
- * Class Param
+ * Class SqlParam
  *
- * @package VV\Db\Sql
+ * @package VV\Db\Sql\Expressions
  */
 class SqlParam implements Expression
 {
-
     use AliasFieldTrait;
 
     private mixed $param;
 
     /**
-     * Param constructor.
+     * SqlParam constructor.
      *
-     * @param \VV\Db\Param|mixed $param
+     * @param mixed $param
      */
     public function __construct(mixed $param)
     {
@@ -35,7 +36,7 @@ class SqlParam implements Expression
     /**
      * @return mixed
      */
-    public function param(): mixed
+    public function getParam(): mixed
     {
         return $this->param;
     }
@@ -46,7 +47,7 @@ class SqlParam implements Expression
     }
 
     /**
-     * @param \VV\Db\Param|mixed $param
+     * @param Param|mixed $param
      *
      * @return $this
      */
@@ -72,7 +73,7 @@ class SqlParam implements Expression
                // parameter object
                || (is_object($param)
                    && (
-                       $param instanceof \VV\Db\Param
+                       $param instanceof Param
                        || $param instanceof \DateTimeInterface
                    )
                );
@@ -85,7 +86,9 @@ class SqlParam implements Expression
     {
         if (!static::checkType($param)) {
             $type = is_object($param) ? get_class($param) : gettype($param);
-            throw new \InvalidArgumentException("Parameter can be string, integer, double or instance of VV\\Db\\P; $type given");
+            throw new \InvalidArgumentException(
+                "Parameter can be string, integer, double or instance of VV\\Db\\P; $type given"
+            );
         }
     }
 }

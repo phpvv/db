@@ -13,11 +13,10 @@ namespace VV\Db\Sql\Predicates;
 /**
  * Interface Predicate
  *
- * @package VV\Db\Sql
+ * @package VV\Db\Sql\Predicates
  */
 interface Predicate
 {
-
     /**
      * @return bool
      */

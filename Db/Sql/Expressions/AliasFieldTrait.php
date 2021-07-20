@@ -13,17 +13,16 @@ namespace VV\Db\Sql\Expressions;
 /**
  * Trait AliasFieldTrait
  *
- * @package VV\Db\Sql
+ * @package VV\Db\Sql\Expressions
  */
 trait AliasFieldTrait
 {
-
     private ?string $alias = null;
 
     /**
      * @return string|null
      */
-    public function alias(): ?string
+    public function getAlias(): ?string
     {
         return $this->alias;
     }

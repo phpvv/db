@@ -160,7 +160,7 @@ class TableClause extends ItemList
      */
     public function getMainTableAlias(): ?string
     {
-        return $this->getMainItem()->getTable()->alias();
+        return $this->getMainItem()->getTable()->getAlias();
     }
 
     /**
@@ -168,7 +168,7 @@ class TableClause extends ItemList
      */
     public function getLastTableAlias(): ?string
     {
-        return $this->getLastItem()->getTable()->alias();
+        return $this->getLastItem()->getTable()->getAlias();
     }
 
     /**
@@ -386,7 +386,7 @@ class TableClause extends ItemList
 
     public function addItem(Item $item): static
     {
-        $alias = $item->getTable()->alias();
+        $alias = $item->getTable()->getAlias();
         if (!$alias) {
             throw new \InvalidArgumentException('Alias is not defined for table');
         }
@@ -444,7 +444,7 @@ class TableClause extends ItemList
         }
 
         if (!$backTableAlias) {
-            $backTableAlias = $backItem->getTable()->alias();
+            $backTableAlias = $backItem->getTable()->getAlias();
         }
 
         return $this->addJoin($table, "$backTableAlias.{$backTableModel->getPk()}", $alias, $joinType);
@@ -459,7 +459,7 @@ class TableClause extends ItemList
         }
 
         if (!$parentTableAlias) {
-            $parentTableAlias = $parentItem->getTable()->alias();
+            $parentTableAlias = $parentItem->getTable()->getAlias();
         }
         if (!$parentField) {
             $parentField = 'parent_id';
@@ -519,7 +519,7 @@ class TableClause extends ItemList
         // todo: need comment with examples
         $lastItem = $this->getLastItem();
         if (!$on) {
-            $on = $lastItem->getTable()->alias();
+            $on = $lastItem->getTable()->getAlias();
         }
 
         /** @var DbObject $rightField */
@@ -527,15 +527,15 @@ class TableClause extends ItemList
         if (is_string($on) && str_starts_with($on, '.')) {
             $rightField = DbObject::create(substr($on, 1));
             if ($rightField) {
-                $prevAlais = $lastItem->getTable()->alias();
-                $rightField->setOwner($prevAlais);
+                $prevAliAs = $lastItem->getTable()->getAlias();
+                $rightField->setOwner($prevAliAs);
             }
         }
 
         if (!$rightField) {
             $rightField = DbObject::create($on);
             if ($rightField) {
-                if (!$rightField->owner()) {
+                if (!$rightField->getOwner()) {
                     $tableModel = $item->getTableModel();
                     if (!$tableModel) {
                         throw new \LogicException('Can\'t determine previous table PK field');
@@ -547,13 +547,13 @@ class TableClause extends ItemList
         }
 
         if ($rightField) {
-            $leftField = DbObject::create($rightField->name(), $item->getTable()->alias());
+            $leftField = DbObject::create($rightField->getName(), $item->getTable()->getAlias());
         } else {
             [$leftField, $rightField] = $this->parseCustomCompare($on);
         }
 
         if ($rightField && $leftField) {
-            if ($leftField->path() === $rightField->path()) {
+            if ($leftField->getPath() === $rightField->getPath()) {
                 throw new \LogicException('JOIN ON leftField == rightField');
             }
 

@@ -76,7 +76,7 @@ class DatasetClause extends ItemList
     {
         $map = [];
         foreach ($this->getItems() as $item) {
-            $map[$item->field()->name()] = $item->value();
+            $map[$item->field()->getName()] = $item->value();
         }
 
         return $map;

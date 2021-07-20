@@ -136,12 +136,12 @@ class TableClauseItem
         $tbl = Sql::expression($table);
         if ($alias) {
             $tbl->as($alias);
-        } elseif (!$tbl->alias()) {
+        } elseif (!$tbl->getAlias()) {
             if (!$tbl instanceof DbObject) {
                 throw new \LogicException('Can\'t determine alias for table');
             }
 
-            $alias = DataObject::nameToAlias($tbl->name());
+            $alias = DataObject::nameToAlias($tbl->getName());
             $tbl->as($alias);
         }
 

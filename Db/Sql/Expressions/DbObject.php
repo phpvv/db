@@ -10,16 +10,14 @@
  */
 namespace VV\Db\Sql\Expressions;
 
-use VV\Db\Sql\Expressions;
-
 /**
- * Class Object
+ * Class DbObject
  *
- * @package VV\Db\Sql
+ * @package VV\Db\Sql\Expressions
  */
-class DbObject implements Expressions\Expression
+class DbObject implements Expression
 {
-    use Expressions\AliasFieldTrait;
+    use AliasFieldTrait;
 
     public const NAME_RX = '[_a-zA-Z\$][\w]*';
 
@@ -39,14 +37,14 @@ class DbObject implements Expressions\Expression
     /**
      * @return string
      */
-    public function name(): string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function resultName(): string
+    public function getResultName(): string
     {
-        return $this->alias() ?: $this->name();
+        return $this->getAlias() ?: $this->getName();
     }
 
     /**
@@ -70,13 +68,13 @@ class DbObject implements Expressions\Expression
     /**
      * @return array
      */
-    public function path(): array
+    public function getPath(): array
     {
         $path = [];
         $cur = $this;
         do {
-            array_unshift($path, $cur->name());
-        } while ($cur = $cur->owner());
+            array_unshift($path, $cur->getName());
+        } while ($cur = $cur->getOwner());
 
         return $path;
     }
@@ -84,7 +82,7 @@ class DbObject implements Expressions\Expression
     /**
      * @return DbObject|null
      */
-    public function owner(): ?DbObject
+    public function getOwner(): ?DbObject
     {
         return $this->owner;
     }
@@ -111,7 +109,7 @@ class DbObject implements Expressions\Expression
 
     public function getExpressionId(): string
     {
-        return implode('-', $this->path());
+        return implode('-', $this->getPath());
     }
 
     /**
@@ -152,7 +150,7 @@ class DbObject implements Expressions\Expression
         string|int|self $name,
         string|self $defaultOwner = null,
         bool $parseAlias = true
-    ): ?self {
+    ): ?static {
         if ($name instanceof static) {
             return $name;
         }
@@ -166,7 +164,7 @@ class DbObject implements Expressions\Expression
         }
 
         $obj = (new static())->setParsedData($path, $alias);
-        if ($defaultOwner && !$obj->owner()) {
+        if ($defaultOwner && !$obj->getOwner()) {
             $obj->setOwner($defaultOwner);
         }
 
@@ -222,12 +220,14 @@ class DbObject implements Expressions\Expression
 /
 (?: \\s+ as)? # unnecessary 'as' keyword
 \\s+
-(`|)    # sql encloser
-($nameRx)    # alias
-\\1          # sql encloser backreference
+(`|)          # sql encloser
+($nameRx)     # alias
+\\1           # sql encloser backreference
 $
 /xi
 RX;
+        // $aliasRx = "/(?:\\s+as)?\\s+(`|)($nameRx)\\1\$/xi";
+
         $alias = null;
         $nameWoAlias = preg_replace_callback(
             $aliasRx,

@@ -11,9 +11,9 @@
 namespace VV\Db\Sql\Expressions;
 
 /**
- * Interface Expr
+ * Interface Expression
  *
- * @package VV\Db\Sql
+ * @package VV\Db\Sql\Expressions
  */
 interface Expression extends AliasableExpression
 {

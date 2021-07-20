@@ -10,7 +10,6 @@
  */
 namespace VV\Db;
 
-use JetBrains\PhpStorm\Pure;
 use VV\Db\Driver\QueryInfo;
 use VV\Db\Exceptions\ConnectionError;
 use VV\Db\Exceptions\ConnectionIsBusy;
@@ -26,7 +25,6 @@ use VV\Db\Sql\Stringifiers\QueryStringifier;
  */
 final class Connection
 {
-
     private Driver\Driver $driver;
     private ?string $host = null;
     private ?string $user = null;
@@ -598,11 +596,11 @@ final class Connection
             throw new \InvalidArgumentException('Unknown query type');
         }
 
-        $noemtClauses = $query->getNonEmptyClausesIds();
-        $suprtClauses = $stringifier->supportedClausesIds();
+        $nonEmptyClausesIds = $query->getNonEmptyClausesIds();
+        $supportedClausesIds = $stringifier->supportedClausesIds();
 
-        $intersec = $noemtClauses | $suprtClauses;
-        if ($intersec != $suprtClauses) {
+        $intersection = $nonEmptyClausesIds | $supportedClausesIds;
+        if ($intersection != $supportedClausesIds) {
             throw new \RuntimeException('Not all present clauses are supported by DB driver');
         }
 

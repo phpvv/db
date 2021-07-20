@@ -10,7 +10,6 @@
  */
 namespace VV\Db\Sql;
 
-use JetBrains\PhpStorm\Pure;
 use VV\Db\Connection;
 use VV\Db\Model\Table;
 use VV\Db\Result;

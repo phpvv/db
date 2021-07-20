@@ -19,7 +19,6 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class ComparePredicate extends PredicateBase
 {
-
     public const OP_EQ = '=',
         OP_NE = '<>',
         OP_NE_ALT = '!=',
@@ -33,7 +32,7 @@ class ComparePredicate extends PredicateBase
     private string $operator = self::OP_EQ;
 
     /**
-     * Compare constructor.
+     * ComparePredicate constructor.
      *
      * @param Expression  $left
      * @param Expression  $right
@@ -42,9 +41,10 @@ class ComparePredicate extends PredicateBase
      */
     public function __construct(Expression $left, Expression $right, string $operator = null, bool $not = false)
     {
+        parent::__construct($not);
+
         $this->leftExpression = $left;
         $this->rightExpression = $right;
-        $this->not = $not;
 
         if ($operator && $operator = trim($operator)) {
             switch ($operator) {
@@ -69,7 +69,7 @@ class ComparePredicate extends PredicateBase
     /**
      * @return Expression
      */
-    public function leftExpression(): Expression
+    public function getLeftExpression(): Expression
     {
         return $this->leftExpression;
     }
@@ -77,7 +77,7 @@ class ComparePredicate extends PredicateBase
     /**
      * @return Expression
      */
-    public function rightExpression(): Expression
+    public function getRightExpression(): Expression
     {
         return $this->rightExpression;
     }
@@ -85,7 +85,7 @@ class ComparePredicate extends PredicateBase
     /**
      * @return string
      */
-    public function operator(): string
+    public function getOperator(): string
     {
         return $this->operator;
     }

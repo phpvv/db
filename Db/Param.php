@@ -10,8 +10,6 @@
  */
 namespace VV\Db;
 
-use JetBrains\PhpStorm\Pure;
-
 /**
  * Class Param
  *

@@ -10,7 +10,6 @@
  */
 namespace VV\Db\Sql;
 
-use JetBrains\PhpStorm\Pure;
 use VV\Db\Param;
 use VV\Db\Result;
 use VV\Db\Sql\Clauses\ReturnIntoClause;

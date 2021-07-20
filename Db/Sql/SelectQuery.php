@@ -200,7 +200,7 @@ class SelectQuery extends Query implements Expressions\Expression
         foreach ($columns as &$col) {
             if (is_string($col)) {
                 $col = Expressions\DbObject::create($col, $defaultTableAlias);
-                $col->as($col->resultName());
+                $col->as($col->getResultName());
             }
 
             if (!$col instanceof Expressions\Expression) {
@@ -208,7 +208,7 @@ class SelectQuery extends Query implements Expressions\Expression
             }
 
             $path = $group;
-            $path[] = $col->alias();
+            $path[] = $col->getAlias();
 
             // build short alias name
             $sqlAlias = $this->buildColumnsGroupAlias($path, $map);

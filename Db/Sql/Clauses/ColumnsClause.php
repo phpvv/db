@@ -65,15 +65,15 @@ class ColumnsClause extends ColumnList
                 $a = null;
 
                 if ($col instanceof DbObject) {
-                    if (!$a = $col->alias()) {
-                        $a = $col->name();
+                    if (!$a = $col->getAlias()) {
+                        $a = $col->getName();
                         if ($a == '*') {
                             $tableClause = $this->getTableClause();
                             if (!$tableClause) {
                                 throw new \LogicException('Table clause is not set');
                             }
 
-                            $owner = ($o = $col->owner()) ? $o->name() : null;
+                            $owner = ($o = $col->getOwner()) ? $o->getName() : null;
                             $tbl = $tableClause->getTableModelOrMain($owner);
                             if (!$tbl) {
                                 throw new \LogicException("Can't get result fields: no table model for *");
@@ -84,7 +84,7 @@ class ColumnsClause extends ColumnList
                         }
                     }
                 } elseif ($col instanceof AliasableExpression) {
-                    $a = $col->alias();
+                    $a = $col->getAlias();
                 }
 
                 if (!$a) {
@@ -146,8 +146,8 @@ class ColumnsClause extends ColumnList
         foreach ($columns as $col) {
             $expr = Sql::expression($col);
             if ($expr instanceof PlainSql) {
-                if ($alias = DbObject::parseAlias($expr->sql(), $sql)) {
-                    $expr = Sql::plain($sql, $expr->params())
+                if ($alias = DbObject::parseAlias($expr->getSql(), $sql)) {
+                    $expr = Sql::plain($sql, $expr->getParams())
                         ->as($alias);
                 }
             }

@@ -161,7 +161,7 @@ abstract class QueryStringifier
     public function strColumn(Sql\Expressions\Expression $expr, &$params, $withAlias = false)
     {
         if ($expr instanceof Sql\Expressions\DbObject) {
-            if (!$expr->owner()) { // obj without owner (without table alias)
+            if (!$expr->getOwner()) { // obj without owner (without table alias)
                 $tableClause = $this->queryTableClause();
                 if (count($tableClause->getItems()) > 1) {
                     $expr->setOwner($tableClause->getMainTableAlias());
@@ -209,10 +209,10 @@ abstract class QueryStringifier
             }
         }
 
-        $owner = $field->owner();
-        $table = $tableClause->getTableModelOrMain($owner ? $owner->name() : null);
+        $owner = $field->getOwner();
+        $table = $tableClause->getTableModelOrMain($owner ? $owner->getName() : null);
         if ($table) {
-            return $table->getFields()->get($field->name());
+            return $table->getFields()->get($field->getName());
         }
 
         return null;

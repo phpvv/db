@@ -17,11 +17,20 @@ namespace VV\Db\Sql\Predicates;
  */
 abstract class PredicateBase implements Predicate
 {
-
-    protected bool $not = false;
+    private bool $not;
 
     /**
-     * @return bool
+     * PredicateBase constructor.
+     *
+     * @param bool $not
+     */
+    protected function __construct(bool $not)
+    {
+        $this->not = $not;
+    }
+
+    /**
+     * @inheritDoc
      */
     public function isNegative(): bool
     {

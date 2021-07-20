@@ -10,6 +10,7 @@
  */
 namespace VV\Db\Sql\Expressions;
 
+use VV\Db\Sql;
 use VV\Db\Sql\Condition;
 use VV\Db\Sql\Predicates\Predicate;
 
@@ -20,7 +21,6 @@ use VV\Db\Sql\Predicates\Predicate;
  */
 class CaseExpression implements Expression
 {
-
     use AliasFieldTrait;
 
     private ?Expression $mainExpression = null;
@@ -48,7 +48,7 @@ class CaseExpression implements Expression
      */
     public function case(string|int|Expression $case): static
     {
-        $this->mainExpression = \VV\Db\Sql::expression($case);
+        $this->mainExpression = Sql::expression($case);
 
         return $this;
     }
@@ -61,9 +61,9 @@ class CaseExpression implements Expression
     public function when(string|int|Expression|Predicate|array $when): static
     {
         if ($this->mainExpression) {
-            $when = \VV\Db\Sql::expression($when);
+            $when = Sql::expression($when);
         } else {
-            $when = \VV\Db\Sql::condition($when);
+            $when = Sql::condition($when);
         }
 
         $this->when = $when;
@@ -78,7 +78,7 @@ class CaseExpression implements Expression
      */
     public function then(string|int|Expression $then): static
     {
-        $then = \VV\Db\Sql::expression($then);
+        $then = Sql::expression($then);
         if ($this->mainExpression) {
             $thenItem = $this->createComparisonThenItem($this->when, $then);
         } else {
@@ -95,7 +95,7 @@ class CaseExpression implements Expression
      */
     public function else(string|int|Expression $else): static
     {
-        $this->elseExpression = \VV\Db\Sql::expression($else);
+        $this->elseExpression = Sql::expression($else);
 
         return $this;
     }
@@ -116,7 +116,7 @@ class CaseExpression implements Expression
     /**
      * @return Expression|null
      */
-    public function mainExpression(): ?Expression
+    public function getMainExpression(): ?Expression
     {
         return $this->mainExpression;
     }
@@ -124,7 +124,7 @@ class CaseExpression implements Expression
     /**
      * @return CaseExpressionThenItem[]
      */
-    public function thenItems(): array
+    public function getThenItems(): array
     {
         return $this->thenItems;
     }
@@ -132,7 +132,7 @@ class CaseExpression implements Expression
     /**
      * @return Expression|null
      */
-    public function elseExpression(): ?Expression
+    public function getElseExpression(): ?Expression
     {
         return $this->elseExpression;
     }
@@ -153,12 +153,20 @@ class CaseExpression implements Expression
     }
 
     /**
-     * @param \VV\Db\Sql\Condition $when
-     * @param Expression           $then
+     * @return string
+     */
+    public function getExpressionId(): string
+    {
+        return spl_object_hash($this);
+    }
+
+    /**
+     * @param Condition  $when
+     * @param Expression $then
      *
      * @return CaseExpressionThenItem
      */
-    public function createSearchThenItem(Condition $when, Expression $then): CaseExpressionThenItem
+    protected function createSearchThenItem(Condition $when, Expression $then): CaseExpressionThenItem
     {
         return new CaseExpressionThenItem($when, null, $then);
     }
@@ -169,16 +177,8 @@ class CaseExpression implements Expression
      *
      * @return CaseExpressionThenItem
      */
-    public function createComparisonThenItem(Expression $when, Expression $then): CaseExpressionThenItem
+    protected function createComparisonThenItem(Expression $when, Expression $then): CaseExpressionThenItem
     {
         return new CaseExpressionThenItem(null, $when, $then);
-    }
-
-    /**
-     * @return string
-     */
-    public function getExpressionId(): string
-    {
-        return spl_object_hash($this);
     }
 }
