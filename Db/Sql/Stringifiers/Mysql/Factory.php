@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * This file is part of the phpvv package.
@@ -8,6 +8,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
+
 namespace VV\Db\Sql\Stringifiers\Mysql;
 
 use VV\Db\Sql;
@@ -22,28 +25,32 @@ class Factory implements \VV\Db\Sql\Stringifiers\Factory
     /**
      * @inheritDoc
      */
-    public function createSelectStringifier(Sql\SelectQuery $query): SelectStringifier {
+    public function createSelectStringifier(Sql\SelectQuery $query): SelectStringifier
+    {
         return new SelectStringifier($query, $this);
     }
 
     /**
      * @inheritDoc
      */
-    public function createInsertStringifier(Sql\InsertQuery $query): InsertStringifier {
+    public function createInsertStringifier(Sql\InsertQuery $query): InsertStringifier
+    {
         return new InsertStringifier($query, $this);
     }
 
     /**
      * @inheritDoc
      */
-    public function createUpdateStringifier(Sql\UpdateQuery $query): UpdateStringifier {
+    public function createUpdateStringifier(Sql\UpdateQuery $query): UpdateStringifier
+    {
         return new UpdateStringifier($query, $this);
     }
 
     /**
      * @inheritDoc
      */
-    public function createDeleteStringifier(Sql\DeleteQuery $query): DeleteStringifier {
+    public function createDeleteStringifier(Sql\DeleteQuery $query): DeleteStringifier
+    {
         return new DeleteStringifier($query, $this);
     }
 }

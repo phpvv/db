@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Clauses;
 
+use VV\Db\Param;
 use VV\Db\Sql\Expressions\DbObject;
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class DatasetClauseItem
@@ -22,16 +24,15 @@ use VV\Db\Sql\Expressions\DbObject;
  */
 class DatasetClauseItem
 {
-
     private DbObject $field;
-    /** @var mixed|\VV\Db\Sql\Expressions\Expression|\VV\Db\Param */
+    /** @var mixed|Expression|Param */
     private mixed $value;
 
     /**
      * Item constructor.
      *
-     * @param string|DbObject                                      $field
-     * @param mixed|\VV\Db\Sql\Expressions\Expression|\VV\Db\Param $value
+     * @param string|DbObject        $field
+     * @param mixed|Expression|Param $value
      *
      */
     public function __construct(string|DbObject $field, mixed $value = null)
@@ -45,7 +46,7 @@ class DatasetClauseItem
     /**
      * @return DbObject
      */
-    public function field(): DbObject
+    public function getField(): DbObject
     {
         return $this->field;
     }
@@ -53,21 +54,9 @@ class DatasetClauseItem
     /**
      * @return mixed
      */
-    public function value(): mixed
+    public function getValue(): mixed
     {
         return $this->value;
-    }
-
-    /**
-     * @param mixed|\VV\Db\Sql\Expressions\Expression|\VV\Db\Param $value
-     *
-     * @return $this
-     */
-    public function setValue(mixed $value): static
-    {
-        $this->value = $value;
-
-        return $this;
     }
 
     /**
@@ -85,6 +74,18 @@ class DatasetClauseItem
             throw new \InvalidArgumentException();
         }
         $this->field = $field;
+
+        return $this;
+    }
+
+    /**
+     * @param mixed|Expression|Param $value
+     *
+     * @return $this
+     */
+    public function setValue(mixed $value): static
+    {
+        $this->value = $value;
 
         return $this;
     }

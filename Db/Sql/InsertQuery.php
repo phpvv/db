@@ -1,5 +1,4 @@
-<?php declare(strict_types=1);
-/** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
+<?php
 
 /*
  * This file is part of the VV package.
@@ -9,6 +8,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
+
 namespace VV\Db\Sql;
 
 use VV\Db\Model\Table;
@@ -371,7 +373,7 @@ class InsertQuery extends ModificatoryQuery
     protected function getNonEmptyClausesMap(): array
     {
         return [
-            self::C_DATASET => $this->datasetClause(),
+            self::C_DATASET => $this->getDatasetClause(),
             self::C_FIELDS => $this->getFieldsClause(),
             self::C_VALUES => $this->getValuesClause(),
             self::C_ON_DUP_KEY => $this->getOnDuplicateKeyClause(),

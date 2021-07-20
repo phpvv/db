@@ -61,10 +61,10 @@ abstract class ModificatoryStringifier extends QueryStringifier
 
         $vars = $exprs = [];
         foreach ($items as $item) {
-            $exprs[] = $this->strExpr($item->expression(), $params);
+            $exprs[] = $this->strExpr($item->getExpression(), $params);
             /** @var \VV\Db\Sql\Stringifiers\ExpressoinStringifier $exprStringifier */
             $exprStringifier = $this->exprStringifier();
-            $vars[] = $exprStringifier->strParam($item->param(), $params);
+            $vars[] = $exprStringifier->strParam($item->getParam(), $params);
         }
 
         return ' RETURNING ' . implode(', ', $exprs) . ' INTO ' . implode(', ', $vars);
@@ -123,8 +123,8 @@ abstract class ModificatoryStringifier extends QueryStringifier
         $set = [];
         $exprStringifier = $this->exprStringifier();
         foreach ($dataset->getItems() as $item) {
-            $fldstr = $exprStringifier->strSqlObj($field = $item->field(), $params);
-            $valstr = $this->strValueToSave($item->value(), $field, $params);
+            $fldstr = $exprStringifier->strSqlObj($field = $item->getField(), $params);
+            $valstr = $this->strValueToSave($item->getValue(), $field, $params);
             $set[] = "$fldstr=$valstr";
         }
 

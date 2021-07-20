@@ -156,7 +156,7 @@ class InsertStringifier extends ModificatoryStringifier
 
     protected function buildFieldsValuesFromDataset()
     {
-        [$fields, $values] = $this->insertQuery()->datasetClause()->split();
+        [$fields, $values] = $this->insertQuery()->getDatasetClause()->split();
 
         return [
             $this->fieldListToPart($fields),

@@ -24,7 +24,9 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class GroupByClause extends ColumnList
 {
-
+    /**
+     * @inheritDoc
+     */
     protected function addColumnArray(array $columns): void
     {
         foreach ($columns as $col) {
@@ -32,6 +34,9 @@ class GroupByClause extends ColumnList
         }
     }
 
+    /**
+     * @inheritDoc
+     */
     protected function getAllowedObjectTypes(): array
     {
         return [Expression::class];

@@ -23,7 +23,9 @@ use VV\Db\Sql\Expressions\DbObject;
  */
 class InsertFieldsClause extends ColumnList
 {
-
+    /**
+     * @inheritDoc
+     */
     protected function addColumnArray(array $columns): void
     {
         foreach ($columns as &$col) {
@@ -37,6 +39,9 @@ class InsertFieldsClause extends ColumnList
         $this->appendItems(...$columns);
     }
 
+    /**
+     * @inheritDoc
+     */
     protected function getAllowedObjectTypes(): array
     {
         return [DbObject::class];

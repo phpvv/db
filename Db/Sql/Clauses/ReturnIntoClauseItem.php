@@ -31,9 +31,8 @@ class ReturnIntoClauseItem
     /**
      * Item constructor.
      *
-     * @param \VV\Db\Sql\Expressions\Expression|string $expression
-     * @param Param                                    $param
-     *
+     * @param Expression|string $expression
+     * @param Param             $param
      */
     public function __construct(string|Expression $expression, Param $param)
     {
@@ -50,9 +49,9 @@ class ReturnIntoClauseItem
     }
 
     /**
-     * @return \VV\Db\Sql\Expressions\Expression
+     * @return Expression
      */
-    public function expression(): Expression
+    public function getExpression(): Expression
     {
         return $this->expression;
     }
@@ -60,7 +59,7 @@ class ReturnIntoClauseItem
     /**
      * @return Param
      */
-    public function param(): Param
+    public function getParam(): Param
     {
         return $this->param;
     }

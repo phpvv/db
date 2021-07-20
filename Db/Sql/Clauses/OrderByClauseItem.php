@@ -53,11 +53,10 @@ class OrderByClauseItem
             ->setNullsLast($nullsLast);
     }
 
-
     /**
      * @return Expression
      */
-    public function expression(): Expression
+    public function getExpression(): Expression
     {
         return $this->expression;
     }

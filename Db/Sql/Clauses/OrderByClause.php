@@ -23,7 +23,9 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class OrderByClause extends ColumnList
 {
-
+    /**
+     * @inheritDoc
+     */
     protected function addColumnArray(array $columns): void
     {
         foreach ($columns as $col) {
@@ -35,6 +37,9 @@ class OrderByClause extends ColumnList
         }
     }
 
+    /**
+     * @inheritDoc
+     */
     protected function getAllowedObjectTypes(): array
     {
         return [OrderByClauseItem::class, Expression::class];

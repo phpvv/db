@@ -65,8 +65,8 @@ class DatasetClause extends ItemList
     {
         $fields = $values = [];
         foreach ($this->getItems() as $item) {
-            $fields[] = $item->field();
-            $values[] = $item->value();
+            $fields[] = $item->getField();
+            $values[] = $item->getValue();
         }
 
         return [$fields, $values];
@@ -79,7 +79,7 @@ class DatasetClause extends ItemList
     {
         $map = [];
         foreach ($this->getItems() as $item) {
-            $map[$item->field()->getName()] = $item->value();
+            $map[$item->getField()->getName()] = $item->getValue();
         }
 
         return $map;
@@ -99,7 +99,7 @@ class DatasetClause extends ItemList
         }
 
         $item = $this->creteItem($field, $value);
-        $itemName = $item->field()->getExpressionId();
+        $itemName = $item->getField()->getExpressionId();
         $this->items[$itemName] = $item;
 
         return $this;

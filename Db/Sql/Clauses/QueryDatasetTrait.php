@@ -34,7 +34,7 @@ trait QueryDatasetTrait
      */
     public function set(iterable|string|Expression $field, mixed $value = null): static
     {
-        $this->datasetClause()->add(...func_get_args());
+        $this->getDatasetClause()->add(...func_get_args());
 
         return $this;
     }
@@ -42,7 +42,7 @@ trait QueryDatasetTrait
     /**
      * @return DatasetClause
      */
-    public function datasetClause(): DatasetClause
+    public function getDatasetClause(): DatasetClause
     {
         if (!$this->datasetClause) {
             $this->setDatasetClause($this->createDatasetClause());
@@ -71,7 +71,7 @@ trait QueryDatasetTrait
     public function clearDatasetClause(): DatasetClause
     {
         try {
-            return $this->datasetClause();
+            return $this->getDatasetClause();
         } finally {
             $this->setDatasetClause(null);
         }

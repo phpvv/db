@@ -80,7 +80,7 @@ class SelectStringifier extends QueryStringifier
 
         $limit = $query->getLimitClause();
         if (!$limit->isEmpty()) {
-            $this->applyLimitClause($sql, $limit->count(), $limit->offset());
+            $this->applyLimitClause($sql, $limit->getCount(), $limit->getOffset());
         }
 
         if ($fuc = $query->getForUpdateClause()) {
@@ -134,7 +134,7 @@ class SelectStringifier extends QueryStringifier
         $orderStarr = [];
 
         foreach ($orderBy->getItems() as $item) {
-            $str = $colstr = $this->strExpr($item->expression(), $params);
+            $str = $colstr = $this->strExpr($item->getExpression(), $params);
             if ($item->isDesc()) {
                 $str .= ' DESC';
             }

@@ -62,7 +62,7 @@ class UpdateQuery extends ModificatoryQuery
     {
         return [
             self::C_TABLE => $this->getTableClause(),
-            self::C_DATASET => $this->datasetClause(),
+            self::C_DATASET => $this->getDatasetClause(),
             self::C_WHERE => $this->getWhereClause(),
             self::C_RETURN_INTO => $this->getReturnIntoClause(),
         ];

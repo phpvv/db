@@ -26,7 +26,7 @@ class LimitClause implements Clause
     /**
      * @return int
      */
-    public function count(): int
+    public function getCount(): int
     {
         return $this->count;
     }
@@ -34,7 +34,7 @@ class LimitClause implements Clause
     /**
      * @return int
      */
-    public function offset(): int
+    public function getOffset(): int
     {
         return $this->offset;
     }
@@ -54,6 +54,6 @@ class LimitClause implements Clause
      */
     public function isEmpty(): bool
     {
-        return !$this->count();
+        return !$this->getCount();
     }
 }

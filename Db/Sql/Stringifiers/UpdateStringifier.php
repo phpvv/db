@@ -60,7 +60,7 @@ class UpdateStringifier extends ModificatoryStringifier
         $this->checkQueryToStr($query);
 
         return $this->strUpdateClause($query->getTableClause(), $params)
-               . $this->strSetClause($query->datasetClause(), $params)
+               . $this->strSetClause($query->getDatasetClause(), $params)
                . $this->strWhereClause($query->getWhereClause(), $params)
                . $this->strReturnIntoClause($query->getReturnIntoClause(), $params);
     }
@@ -89,7 +89,7 @@ class UpdateStringifier extends ModificatoryStringifier
     {
         $checkEmptyMap = [
             [$table = $query->getTableClause(), 'Table is not selected'],
-            [$set = $query->datasetClause(), 'There is no data to update'],
+            [$set = $query->getDatasetClause(), 'There is no data to update'],
             [$where = $query->getWhereClause(), 'There is no where clause'],
         ];
         /** @var Sql\Clauses\Clause $c */
