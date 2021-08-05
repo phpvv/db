@@ -22,11 +22,13 @@ use VV\Db\Sql\UpdateQuery as UpdateQuery;
  */
 class UpdateStringifier extends \VV\Db\Sql\Stringifiers\UpdateStringifier
 {
-
     use CommonUtils;
 
-    public function supportedClausesIds()
+    /**
+     * @inheritDoc
+     */
+    public function getSupportedClausesIds(): int
     {
-        return parent::supportedClausesIds() | UpdateQuery::C_RETURN_INTO;
+        return parent::getSupportedClausesIds() | UpdateQuery::C_RETURN_INTO;
     }
 }

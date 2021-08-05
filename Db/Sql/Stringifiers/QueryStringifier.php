@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Driver\Driver;
-use VV\Db\Sql;
-use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
-
+use VV\Db\Model\Field;
+use VV\Db\Sql\Clauses\TableClause;
+use VV\Db\Sql\Condition;
+use VV\Db\Sql\Expressions\DbObject;
+use VV\Db\Sql\Expressions\Expression;
+use VV\Db\Sql\Expressions\SqlParam;
 
 /**
  * Class QueryStringifier
@@ -25,67 +27,57 @@ use VV\Db\Sql\Stringifiers\PlainSql as PlainSql;
  */
 abstract class QueryStringifier
 {
-
     private Factory $factory;
     private array $params = [];
-
-    /**
-     * @var ExpressoinStringifier
-     */
-    private $exprStringifier;
-
-    /**
-     * @var ConditionStringifier
-     */
-    private $conditionStringifier;
+    private ?ExpressionStringifier $expressionStringifier = null;
+    private ?ConditionStringifier $conditionStringifier = null;
 
     /**
      * Stringifier constructor.
      *
-     * @param Driver $factory
+     * @param Factory $factory
      */
     public function __construct(Factory $factory)
     {
         $this->factory = $factory;
     }
 
-
     /**
      * Builds SQL-string and returns by reference it parameters in proper order
      *
-     * @param array &$params (out)
+     * @param array|null &$params (out)
      *
      * @return string
      */
-    final public function stringify(&$params)
+    final public function stringify(?array &$params): string
     {
         return $this->stringifyFinalDecorate($this->stringifyRaw($params));
     }
 
     /**
-     * Returns same as {@link stringify()} without returning parameters
+     * Returns same as {@link stringify()} without returning parameters and final decoration
      *
      * @return mixed
      */
-    final public function toString()
+    final public function toString(): string
     {
         return $this->stringifyRaw($params);
-    }
-
-    final public function __toString()
-    {
-        return $this->toString();
     }
 
     /**
      * @return array
      */
-    final public function params()
+    final public function getParams(): array
     {
         return $this->params;
     }
 
-    final public function appendParams(...$params)
+    /**
+     * @param ...$params
+     *
+     * @return $this
+     */
+    final public function appendParams(...$params): static
     {
         $params && array_push($this->params, ...$params);
 
@@ -95,27 +87,27 @@ abstract class QueryStringifier
     /**
      * @return Factory
      */
-    public function factory(): Factory
+    public function getFactory(): Factory
     {
         return $this->factory;
     }
 
     /**
-     * @return ExpressoinStringifier
+     * @return ExpressionStringifier
      */
-    public function exprStringifier(): ExpressoinStringifier
+    public function getExpressionStringifier(): ExpressionStringifier
     {
-        if (!$this->exprStringifier) {
-            $this->exprStringifier = $this->createExprStringifier();
+        if (!$this->expressionStringifier) {
+            $this->expressionStringifier = $this->createExpressionStringifier();
         }
 
-        return $this->exprStringifier;
+        return $this->expressionStringifier;
     }
 
     /**
      * @return ConditionStringifier
      */
-    public function conditionStringifier()
+    public function getConditionStringifier(): ConditionStringifier
     {
         if (!$this->conditionStringifier) {
             $this->conditionStringifier = $this->createConditionStringifier();
@@ -124,55 +116,59 @@ abstract class QueryStringifier
         return $this->conditionStringifier;
     }
 
-    public function decorateParamForCond($param, $field)
+    public function decorateParamForCondition(mixed $param, mixed $field): mixed
     {
         if ($param instanceof \VV\Db\Param) {
-            return $param->setValue($this->decorateParamForCond($param->getValue(), $field));
+            return $param->setValue($this->decorateParamForCondition($param->getValue(), $field));
         }
 
-        return ($o = $this->fieldModel($field, $this->queryTableClause()))
+        return ($o = $this->getFieldModel($field, $this->getQueryTableClause()))
             ? $o->prepeareValueForCondition($param)
             : $param;
     }
 
     /**
-     * @param \VV\Db\Sql\Expressions\Expression $expr
-     * @param array                             $params
-     * @param bool                              $withAlias
-     *
-     * @return mixed
-     */
-    public function strExpr(Sql\Expressions\Expression $expr, &$params, $withAlias = false)
-    {
-        return $this->exprStringifier()->strExpr($expr, $params, $withAlias);
-    }
-
-    /**
-     * @param mixed|\VV\Db\Sql\Expressions\SqlParam $param
-     * @param array                                 $params
+     * @param Expression $expression
+     * @param array|null $params
+     * @param bool       $withAlias
      *
      * @return string
      */
-    public function strParam($param, &$params)
+    public function stringifyExpression(Expression $expression, ?array &$params, bool $withAlias = false): string
     {
-        return $this->exprStringifier()->strParam($param, $params);
+        return $this->getExpressionStringifier()->stringifyExpression($expression, $params, $withAlias);
     }
 
     /**
-     * @inheritdoc
+     * @param mixed|SqlParam $param
+     * @param array|null     $params
+     *
+     * @return string
      */
-    public function strColumn(Sql\Expressions\Expression $expr, &$params, $withAlias = false)
+    public function stringifyParam(mixed $param, array|null &$params): string
     {
-        if ($expr instanceof Sql\Expressions\DbObject) {
-            if (!$expr->getOwner()) { // obj without owner (without table alias)
-                $tableClause = $this->queryTableClause();
+        return $this->getExpressionStringifier()->stringifyParam($param, $params);
+    }
+
+    /**
+     * @param Expression $expression
+     * @param array|null $params
+     * @param bool       $withAlias
+     *
+     * @return string
+     */
+    public function stringifyColumn(Expression $expression, ?array &$params, bool $withAlias = false): string
+    {
+        if ($expression instanceof DbObject) {
+            if (!$expression->getOwner()) { // obj without owner (without table alias)
+                $tableClause = $this->getQueryTableClause();
                 if (count($tableClause->getItems()) > 1) {
-                    $expr->setOwner($tableClause->getMainTableAlias());
+                    $expression->setOwner($tableClause->getMainTableAlias());
                 }
             }
         }
 
-        return $this->strExpr($expr, $params, $withAlias);
+        return $this->stringifyExpression($expression, $params, $withAlias);
     }
 
     /**
@@ -180,33 +176,38 @@ abstract class QueryStringifier
      *
      * @return int
      */
-    abstract public function supportedClausesIds();
-
-    abstract public function stringifyRaw(&$params);
+    abstract public function getSupportedClausesIds(): int;
 
     /**
-     * @return Sql\Clauses\TableClause
-     */
-    abstract public function queryTableClause();
-
-    /**
-     * @param                         $field
-     * @param Sql\Clauses\TableClause $tableClause
+     * @param array|null &$params
      *
-     * @return \VV\Db\Model\Field|null
+     * @return string
      */
-    protected function fieldModel($field, Sql\Clauses\TableClause $tableClause)
+    abstract public function stringifyRaw(?array &$params): string;
+
+    /**
+     * @return TableClause
+     */
+    abstract public function getQueryTableClause(): TableClause;
+
+    /**
+     * @param mixed       $field
+     * @param TableClause $tableClause
+     *
+     * @return Field|null
+     */
+    protected function getFieldModel(mixed $field, TableClause $tableClause): ?Field
     {
         if (!$field) {
             return null;
         }
 
-        if ($field instanceof \VV\Db\Model\Field) {
+        if ($field instanceof Field) {
             return $field;
         }
 
-        if (!$field instanceof Sql\Expressions\DbObject) {
-            $field = Sql\Expressions\DbObject::create($field);
+        if (!$field instanceof DbObject) {
+            $field = DbObject::create($field);
             if (!$field) {
                 return null;
             }
@@ -222,29 +223,39 @@ abstract class QueryStringifier
     }
 
     /**
-     * @param \VV\Db\Sql\Expressions\Expression[] $exprList
-     * @param array                               $params
-     * @param bool                                $withAlias
+     * @param Expression[] $exprList
+     * @param array|null   $params
+     * @param bool         $withAlias
      *
      * @return string
      */
-    protected function strColumnList(array $exprList, &$params, $withAlias = false)
+    protected function stringifyColumnList(array $exprList, ?array &$params, bool $withAlias = false): string
     {
-        $strarr = [];
-
+        $strings = [];
         foreach ($exprList as $expr) {
-            $strarr[] = $this->strColumn($expr, $params, $withAlias);
+            $strings[] = $this->stringifyColumn($expr, $params, $withAlias);
         }
 
-        return implode(', ', $strarr);
+        return implode(', ', $strings);
     }
 
-    protected function buildConditionSql(Sql\Condition $condition)
+    /**
+     * @param Condition $condition
+     *
+     * @return SqlPart
+     */
+    protected function buildConditionSql(Condition $condition): SqlPart
     {
-        return $this->conditionStringifier()->buildConditionSql($condition);
+        return $this->getConditionStringifier()->buildConditionSql($condition);
     }
 
-    protected function strWhereClause(Sql\Condition $where, &$params)
+    /**
+     * @param Condition  $where
+     * @param array|null $params
+     *
+     * @return string
+     */
+    protected function stringifyWhereClause(Condition $where, ?array &$params): string
     {
         if ($where->isEmpty()) {
             return '';
@@ -254,27 +265,27 @@ abstract class QueryStringifier
     }
 
     /**
-     * @param Sql\Clauses\TableClause $table
+     * @param TableClause $table
      *
-     * @return PlainSql
+     * @return SqlPart
      */
-    protected function buildTableSql(Sql\Clauses\TableClause $table)
+    protected function buildTableSql(TableClause $table): SqlPart
     {
-        $condstr = $this->conditionStringifier();
+        $conditionStringifier = $this->getConditionStringifier();
 
         $sql = '';
         $params = [];
-        $useAlais = $this->useAliasForTable($table);
+        $useAlias = $this->useAliasForTable($table);
         foreach ($table->getItems() as $item) {
-            $tableNameStr = $this->strExpr($item->getTable(), $params, $useAlais);
+            $tableNameStr = $this->stringifyExpression($item->getTable(), $params, $useAlias);
 
             // todo: reconsider (move to method or something else)
-            if ($useidx = $item->getUseIndex()) {
-                $tableNameStr .= ' USE INDEX (' . (is_array($useidx) ? implode(', ', $useidx) : $useidx) . ') ';
+            if ($useIdx = $item->getUseIndex()) {
+                $tableNameStr .= ' USE INDEX (' . (is_array($useIdx) ? implode(', ', $useIdx) : $useIdx) . ') ';
             }
 
             if ($sql) {
-                $on = $condstr->buildConditionSql($item->getJoinCondition());
+                $on = $conditionStringifier->buildConditionSql($item->getJoinCondition());
 
                 $sql .= " {$item->getJoinType()} $tableNameStr ON ({$on->embed($params)})";
             } else {
@@ -282,33 +293,52 @@ abstract class QueryStringifier
             }
         }
 
-        return $this->createPlainSql($sql, $params);
-    }
-
-    protected function createPlainSql($sql, array $params = [])
-    {
-        return new PlainSql($sql, $params);
+        return $this->createSqlPart($sql, $params);
     }
 
     /**
-     * @return ExpressoinStringifier
+     * @param string $sql
+     * @param array  $params
+     *
+     * @return SqlPart
      */
-    protected function createExprStringifier()
+    protected function createSqlPart(string $sql, array $params = []): SqlPart
     {
-        return new ExpressoinStringifier($this);
+        return new SqlPart($sql, $params);
     }
 
-    protected function createConditionStringifier()
+    /**
+     * @return ExpressionStringifier
+     */
+    protected function createExpressionStringifier(): ExpressionStringifier
+    {
+        return new ExpressionStringifier($this);
+    }
+
+    /**
+     * @return ConditionStringifier
+     */
+    protected function createConditionStringifier(): ConditionStringifier
     {
         return new ConditionStringifier($this);
     }
 
-    protected function stringifyFinalDecorate($sql)
+    /**
+     * @param string $sql
+     *
+     * @return string
+     */
+    protected function stringifyFinalDecorate(string $sql): string
     {
         return $sql;
     }
 
-    protected function useAliasForTable(Sql\Clauses\TableClause $table)
+    /**
+     * @param TableClause $table
+     *
+     * @return bool
+     */
+    protected function useAliasForTable(TableClause $table): bool
     {
         return true;
     }

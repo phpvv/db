@@ -13,7 +13,8 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Mysql;
 
-use VV\Db\Sql;
+use VV\Db\Sql\Clauses\DeleteTablesClause;
+use VV\Db\Sql\DeleteQuery;
 
 /**
  * Class Delete
@@ -23,22 +24,28 @@ use VV\Db\Sql;
 class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier
 {
 
-    public function supportedClausesIds()
+    /**
+     * @inheritDoc
+     */
+    public function getSupportedClausesIds(): int
     {
-        return parent::supportedClausesIds() | \VV\Db\Sql\DeleteQuery::C_DEL_TABLES;
+        return parent::getSupportedClausesIds() | DeleteQuery::C_DEL_TABLES;
     }
 
-    protected function strDeleteClause(Sql\Clauses\DeleteTablesClause $tables, &$params)
+    /**
+     * @inheritDoc
+     */
+    protected function stringifyDeleteClause(DeleteTablesClause $tables, ?array &$params): string
     {
         $str = 'DELETE';
 
         if (!$tables->isEmpty()) {
-            $tblstr = [];
-            $exprStringifier = $this->exprStringifier();
+            $tableStr = [];
+            $exprStringifier = $this->getExpressionStringifier();
             foreach ($tables->getItems() as $item) {
-                $tblstr[] = $exprStringifier->strSqlObj($item, $params);
+                $tableStr[] = $exprStringifier->stringifyDbObject($item, $params);
             }
-            $str .= ' ' . implode(', ', $tblstr);
+            $str .= ' ' . implode(', ', $tableStr);
         }
 
         return $str;

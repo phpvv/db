@@ -13,9 +13,12 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Driver\Driver;
-use VV\Db\Sql;
-use VV\Db\Sql\SelectQuery as SelectQuery;
+use VV\Db\Sql\Clauses\GroupByClause;
+use VV\Db\Sql\Clauses\OrderByClause;
+use VV\Db\Sql\Clauses\OrderByClauseItem;
+use VV\Db\Sql\Clauses\TableClause;
+use VV\Db\Sql\Condition;
+use VV\Db\Sql\SelectQuery;
 
 /**
  * Class Select
@@ -24,14 +27,13 @@ use VV\Db\Sql\SelectQuery as SelectQuery;
  */
 class SelectStringifier extends QueryStringifier
 {
-
     private SelectQuery $selectQuery;
 
     /**
-     * Select constructor.
+     * SelectStringifier constructor.
      *
      * @param SelectQuery $selectQuery
-     * @param Driver      $factory
+     * @param Factory     $factory
      */
     public function __construct(SelectQuery $selectQuery, Factory $factory)
     {
@@ -39,7 +41,7 @@ class SelectStringifier extends QueryStringifier
         $this->selectQuery = $selectQuery;
     }
 
-    public function supportedClausesIds()
+    public function getSupportedClausesIds(): int
     {
         return SelectQuery::C_COLUMNS
                | SelectQuery::C_TABLE
@@ -55,7 +57,7 @@ class SelectStringifier extends QueryStringifier
     /**
      * @return SelectQuery
      */
-    public function selectQuery()
+    public function getSelectQuery(): SelectQuery
     {
         return $this->selectQuery;
     }
@@ -63,20 +65,23 @@ class SelectStringifier extends QueryStringifier
     /**
      * @inheritDoc
      */
-    public function queryTableClause()
+    public function getQueryTableClause(): TableClause
     {
-        return $this->selectQuery()->getTableClause();
+        return $this->getSelectQuery()->getTableClause();
     }
 
-    public function stringifyRaw(&$params)
+    /**
+     * @inheritDoc
+     */
+    public function stringifyRaw(?array &$params): string
     {
-        $query = $this->selectQuery();
-        $sql = $this->strSelectClause($query, $params)
-               . $this->strFromClause($query->getTableClause(), $params)
-               . $this->strWhereClause($query->getWhereClause(), $params)
-               . $this->strGroupByClause($query->getGroupByClause(), $params)
-               . $this->strHavingClause($query->getHavingClause(), $params)
-               . $this->strOrderByClause($query->getOrderByClause(), $params);
+        $query = $this->getSelectQuery();
+        $sql = $this->stringifySelectClause($query, $params)
+               . $this->stringifyFromClause($query->getTableClause(), $params)
+               . $this->stringifyWhereClause($query->getWhereClause(), $params)
+               . $this->stringifyGroupByClause($query->getGroupByClause(), $params)
+               . $this->stringifyHavingClause($query->getHavingClause(), $params)
+               . $this->stringifyOrderByClause($query->getOrderByClause(), $params);
 
         $limit = $query->getLimitClause();
         if (!$limit->isEmpty()) {
@@ -90,28 +95,52 @@ class SelectStringifier extends QueryStringifier
         return $sql;
     }
 
-    protected function strSelectClause(Sql\SelectQuery $query, &$params): string
+    /**
+     * @param SelectQuery $query
+     * @param array|null  $params
+     *
+     * @return string
+     */
+    protected function stringifySelectClause(SelectQuery $query, ?array &$params): string
     {
         return 'SELECT '
                . ($query->isDistinct() ? 'DISTINCT ' : '')
-               . $this->strColumnList($query->getColumnsClause()->getItems(), $params, true);
+               . $this->stringifyColumnList($query->getColumnsClause()->getItems(), $params, true);
     }
 
-    protected function strFromClause(Sql\Clauses\TableClause $table, &$params): string
+    /**
+     * @param TableClause $table
+     * @param array|null  $params
+     *
+     * @return string
+     */
+    protected function stringifyFromClause(TableClause $table, ?array &$params): string
     {
         return ' FROM ' . $this->buildTableSql($table)->embed($params);
     }
 
-    protected function strGroupByClause(Sql\Clauses\GroupByClause $groupBy, &$params): string
+    /**
+     * @param GroupByClause $groupBy
+     * @param array|null    $params
+     *
+     * @return string
+     */
+    protected function stringifyGroupByClause(GroupByClause $groupBy, ?array &$params): string
     {
         if ($groupBy->isEmpty()) {
             return '';
         }
 
-        return ' GROUP BY ' . $this->strColumnList($groupBy->getItems(), $params);
+        return ' GROUP BY ' . $this->stringifyColumnList($groupBy->getItems(), $params);
     }
 
-    protected function strHavingClause(Sql\Condition $having, &$params): string
+    /**
+     * @param Condition  $having
+     * @param array|null $params
+     *
+     * @return string
+     */
+    protected function stringifyHavingClause(Condition $having, ?array &$params): string
     {
         if ($having->isEmpty()) {
             return '';
@@ -120,26 +149,38 @@ class SelectStringifier extends QueryStringifier
         return ' HAVING ' . $this->buildConditionSql($having)->embed($params);
     }
 
-    protected function strOrderByClause(Sql\Clauses\OrderByClause $orderBy, &$params): string
+    /**
+     * @param OrderByClause $orderBy
+     * @param array|null    $params
+     *
+     * @return string
+     */
+    protected function stringifyOrderByClause(OrderByClause $orderBy, ?array &$params): string
     {
         if ($orderBy->isEmpty()) {
             return '';
         }
 
-        return ' ORDER BY ' . $this->strOrderByItems($orderBy, $params);
+        return ' ORDER BY ' . $this->stringifyOrderByItems($orderBy, $params);
     }
 
-    protected function strOrderByItems(Sql\Clauses\OrderByClause $orderBy, &$params): string
+    /**
+     * @param OrderByClause $orderBy
+     * @param array|null    $params
+     *
+     * @return string
+     */
+    protected function stringifyOrderByItems(OrderByClause $orderBy, ?array &$params): string
     {
         $orderStarr = [];
 
         foreach ($orderBy->getItems() as $item) {
-            $str = $colstr = $this->strExpr($item->getExpression(), $params);
+            $str = $columnString = $this->stringifyExpression($item->getExpression(), $params);
             if ($item->isDesc()) {
                 $str .= ' DESC';
             }
 
-            $this->applyOderByItemNullsLast($str, $colstr, $item);
+            $this->applyOderByItemNullsLast($str, $columnString, $item);
 
             $orderStarr[] = $str;
         }
@@ -147,19 +188,29 @@ class SelectStringifier extends QueryStringifier
         return implode(', ', $orderStarr);
     }
 
-    protected function applyOderByItemNullsLast(&$str, $colstr, Sql\Clauses\OrderByClauseItem $item): void
+    /**
+     * @param                   $str
+     * @param                   $columnString
+     * @param OrderByClauseItem $item
+     */
+    protected function applyOderByItemNullsLast(&$str, $columnString, OrderByClauseItem $item): void
     {
-        $isdesc = $item->isDesc();
+        $isDesc = $item->isDesc();
         $isNullsLast = $item->isNullsLast();
-        if ($isdesc == $isNullsLast) {
+        if ($isDesc == $isNullsLast) {
             return;
         }
 
-        $isnullDirect = $isdesc ? 'ASC' : 'DESC';
+        $isnullDirect = $isDesc ? 'ASC' : 'DESC';
 
-        $str = "ISNULL($colstr) $isnullDirect, $str";
+        $str = "ISNULL($columnString) $isnullDirect, $str";
     }
 
+    /**
+     * @param     $sql
+     * @param int $count
+     * @param int $offset
+     */
     protected function applyLimitClause(&$sql, int $count, int $offset): void
     {
         $sql .= ' LIMIT ' . ($offset ? "$offset, " : '') . $count;
@@ -167,9 +218,9 @@ class SelectStringifier extends QueryStringifier
 
     /**
      * @param string      $sql
-     * @param string|bool $clause
+     * @param bool|string $clause
      */
-    protected function applyForUpdateClause(string &$sql, $clause): void
+    protected function applyForUpdateClause(string &$sql, bool|string $clause): void
     {
         $sql .= ' FOR UPDATE' . (is_string($clause) ? " $clause" : '');
     }

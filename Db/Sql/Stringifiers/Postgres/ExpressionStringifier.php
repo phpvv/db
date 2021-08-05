@@ -13,23 +13,26 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Postgres;
 
+use VV\Db\Param;
+use VV\Db\Sql\Expressions\SqlParam;
+
 /**
- * Class ExpressoinStringifier
+ * Class ExpressionStringifier
  *
- * @package VV\Db\Postgres\QueryStringifiers
+ * @package VV\Db\Sql\Stringifiers\Postgres
  */
-class ExpressoinStringifier extends \VV\Db\Sql\Stringifiers\ExpressoinStringifier
+class ExpressionStringifier extends \VV\Db\Sql\Stringifiers\ExpressionStringifier
 {
 
     /**
      * @inheritDoc
      */
-    public function strParam($param, &$params)
+    public function stringifyParam(mixed $param, ?array &$params): string
     {
-        $res = parent::strParam($param, $params);
+        $res = parent::stringifyParam($param, $params);
 
-        $dbp = $param instanceof \VV\Db\Sql\Expressions\SqlParam ? $param->getParam() : $param;
-        if ($dbp instanceof \VV\Db\Param) {
+        $dbp = $param instanceof SqlParam ? $param->getParam() : $param;
+        if ($dbp instanceof Param) {
             if (!$dbp->getName()) {
                 $dbp->setNextName();
             }
@@ -39,5 +42,4 @@ class ExpressoinStringifier extends \VV\Db\Sql\Stringifiers\ExpressoinStringifie
 
         return $res;
     }
-
 }

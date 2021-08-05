@@ -18,8 +18,7 @@ use VV\Db\Exceptions\ConnectionError;
 use VV\Db\Exceptions\ConnectionIsBusy;
 use VV\Db\Sql\Expressions\Expression;
 use VV\Db\Sql\Query;
-use VV\Db\Sql\Stringifiers\Factory as SqlStringifiersFactory;
-use VV\Db\Sql\Stringifiers\QueryStringifier;
+use VV\Db\Sql\Stringifiers;
 
 /**
  * Class Connection
@@ -40,7 +39,7 @@ final class Connection
     private ?ConnectionError $connectionError = null;
     private ?Transaction $transaction = null;
     private bool $underExecution = false;
-    private ?SqlStringifiersFactory $sqlStringifiersFactory = null;
+    private ?Stringifiers\Factory $sqlStringifiersFactory = null;
 
     /**
      * Constructor
@@ -600,7 +599,7 @@ final class Connection
         }
 
         $nonEmptyClausesIds = $query->getNonEmptyClausesIds();
-        $supportedClausesIds = $stringifier->supportedClausesIds();
+        $supportedClausesIds = $stringifier->getSupportedClausesIds();
 
         $intersection = $nonEmptyClausesIds | $supportedClausesIds;
         if ($intersection != $supportedClausesIds) {
@@ -673,11 +672,11 @@ final class Connection
     /**
      * @param Query $query
      *
-     * @return QueryStringifier
+     * @return Stringifiers\QueryStringifier
      */
-    private function getStringifierForQuery(Query $query): QueryStringifier
+    private function getStringifierForQuery(Query $query): Stringifiers\QueryStringifier
     {
-        $factory = $this->sqlStringifiersFactory();
+        $factory = $this->getSqlStringifiersFactory();
 
         return match (true) {
             $query instanceof Sql\SelectQuery => $factory->createSelectStringifier($query),
@@ -688,7 +687,7 @@ final class Connection
         };
     }
 
-    private function sqlStringifiersFactory(): SqlStringifiersFactory
+    private function getSqlStringifiersFactory(): Stringifiers\Factory
     {
         $factory = &$this->sqlStringifiersFactory;
         if (!$factory) {
@@ -696,9 +695,9 @@ final class Connection
         }
         if (!$factory) {
             $factory = match ($this->driver->getDbmsName()) {
-                Driver\Driver::DBMS_MYSQL => new \VV\Db\Sql\Stringifiers\Mysql\Factory(),
-                Driver\Driver::DBMS_ORACLE => new \VV\Db\Sql\Stringifiers\Oracle\Factory(),
-                Driver\Driver::DBMS_POSTGRES => new \VV\Db\Sql\Stringifiers\Postgres\Factory(),
+                Driver\Driver::DBMS_MYSQL => new Stringifiers\Mysql\Factory(),
+                Driver\Driver::DBMS_ORACLE => new Stringifiers\Oracle\Factory(),
+                Driver\Driver::DBMS_POSTGRES => new Stringifiers\Postgres\Factory(),
             };
         }
 

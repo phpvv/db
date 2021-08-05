@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Oracle;
 
+use VV\Db\Sql\Stringifiers\ExpressionStringifier;
+
 /**
  * Trait CommonUtils
  *
@@ -21,30 +23,24 @@ namespace VV\Db\Sql\Stringifiers\Oracle;
 trait CommonUtils
 {
 
-    protected function stringifyFinalDecorate($sql)
+    /**
+     * @inheritDoc
+     */
+    protected function stringifyFinalDecorate(string $sql): string
     {
         $sql = str_replace('"', "'", $sql);
 
-        $map = [
-            'IFNULL' => 'NVL',
-            //'DATE_FORMAT' => 'TO_CHAR',
-        ];
-        foreach ($map as $k => $v) {
-            $sql = preg_replace('/\b' . $k . '\b/', $v, $sql);
-        }
-
-        $sql = preg_replace_callback('/`([\w\$]+)`/',
-            function ($m) {
-                return '"' . strtoupper($m[1]) . '"';
-            },
+        $sql = preg_replace_callback(
+            '/`([\w\$]+)`/',
+            fn ($m) => '"' . strtoupper($m[1]) . '"',
             $sql
         );
-        $sql = preg_replace_callback('/\?/',
-            function () {
-                static $i = 0;
 
-                return ':p' . (++$i);
-            },
+        $i = 0;
+        /** @noinspection PhpUnnecessaryLocalVariableInspection */
+        $sql = preg_replace_callback(
+            '/\?/',
+            fn () => ':p' . (++$i),
             $sql
         );
 
@@ -52,11 +48,11 @@ trait CommonUtils
     }
 
     /**
-     * @return ExpressoinStringifier
+     * @inheritDoc
      */
-    protected function createExprStringifier()
+    protected function createExpressionStringifier(): ExpressionStringifier
     {
         /** @var \VV\Db\Sql\Stringifiers\QueryStringifier $this */
-        return new ExpressoinStringifier($this);
+        return new ExpressionStringifier($this);
     }
 }

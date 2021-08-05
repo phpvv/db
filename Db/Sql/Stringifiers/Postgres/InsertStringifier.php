@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Postgres;
 
+use VV\Db\Param;
 use VV\Db\Sql\Clauses\InsertedIdClause;
+use VV\Db\Sql\InsertQuery;
 
 /**
  * Class InsertStringifier
@@ -22,32 +24,38 @@ use VV\Db\Sql\Clauses\InsertedIdClause;
  */
 class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
 {
-
     use CommonUtils;
 
-    private ?\VV\Db\Param $insertedIdParam = null;
-
+    private ?Param $insertedIdParam = null;
     private ?string $insertedIdField = null;
 
-    public function supportedClausesIds()
+    /**
+     * @inheritDoc
+     */
+    public function getSupportedClausesIds(): int
     {
-        return parent::supportedClausesIds()
-               | \VV\Db\Sql\InsertQuery::C_RETURN_INS_ID;
+        return parent::getSupportedClausesIds() | InsertQuery::C_RETURN_INS_ID;
     }
 
-    protected function applyInsertedIdClause(InsertedIdClause $retinsId)
+    /**
+     * @inheritDoc
+     */
+    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause)
     {
-        if ($retinsId->isEmpty()) {
+        if ($insertedIdClause->isEmpty()) {
             return;
         }
 
-        $this->insertedIdParam = ($retinsId->getParam() ?: \VV\Db\Param::chr())->setForInsertedId();
-        $this->insertedIdField = $retinsId->getPk() ?: $this->insertQuery()->getMainTablePk();
+        $this->insertedIdParam = ($insertedIdClause->getParam() ?: Param::chr())->setForInsertedId();
+        $this->insertedIdField = $insertedIdClause->getPk() ?: $this->insertQuery()->getMainTablePk();
     }
 
-    protected function strStdInsert(&$params)
+    /**
+     * @inheritDoc
+     */
+    protected function stringifyStdInsert(?array &$params): string
     {
-        $sql = parent::strStdInsert($params);
+        $sql = parent::stringifyStdInsert($params);
 
         if ($this->insertedIdParam) {
             $params[] = $this->insertedIdParam;
@@ -56,5 +64,4 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
 
         return $sql;
     }
-
 }

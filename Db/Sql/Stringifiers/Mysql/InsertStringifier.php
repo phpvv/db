@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Mysql;
 
-use VV\Db\Sql\Clauses\DatasetClause as OnDupKeyClause;
-use VV\Db\Sql\InsertQuery as InsertQuery;
+use VV\Db\Sql\Clauses\DatasetClause;
+use VV\Db\Sql\Clauses\InsertedIdClause;
+use VV\Db\Sql\InsertQuery;
 
 /**
  * Class Insert
@@ -24,35 +25,31 @@ use VV\Db\Sql\InsertQuery as InsertQuery;
 class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
 {
 
-    public function supportedClausesIds()
-    {
-        return parent::supportedClausesIds()
-               | InsertQuery::C_ON_DUP_KEY
-               | InsertQuery::C_RETURN_INS_ID;
-    }
-
     /**
-     * @param OnDupKeyClause            $ondupkey
-     * @param                           $params
-     *
-     * @return string|void
+     * @inheritDoc
      */
-    protected function strOnDupKeyClause(OnDupKeyClause $ondupkey, &$params)
+    public function getSupportedClausesIds(): int
     {
-        if ($ondupkey->isEmpty()) {
-            return '';
-        }
-
-        return ' ON DUPLICATE KEY UPDATE ' . $this->strDataset($ondupkey, $params);
+        return parent::getSupportedClausesIds() | InsertQuery::C_ON_DUP_KEY | InsertQuery::C_RETURN_INS_ID;
     }
 
     /**
      * @inheritDoc
      */
-    protected function applyInsertedIdClause(\VV\Db\Sql\Clauses\InsertedIdClause $retinsId)
+    protected function stringifyOnDupKeyClause(DatasetClause $dataset, ?array &$params): string
     {
-        if ($retinsId->isEmpty()) {
-            return;
+        if ($dataset->isEmpty()) {
+            return '';
         }
+
+        return ' ON DUPLICATE KEY UPDATE ' . $this->stringifyDataset($dataset, $params);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause)
+    {
+        // empty body
     }
 }

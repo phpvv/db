@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Oracle;
 
+use VV\Db\Sql\Clauses\InsertedIdClause;
+use VV\Db\Sql\InsertQuery;
+
 /**
  * Class Insert
  *
@@ -20,18 +23,21 @@ namespace VV\Db\Sql\Stringifiers\Oracle;
  */
 class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
 {
-
     use ModifyUtils;
     use CommonUtils;
 
-    public function supportedClausesIds()
+    /**
+     * @inheritDoc
+     */
+    public function getSupportedClausesIds(): int
     {
-        return parent::supportedClausesIds()
-               | \VV\Db\Sql\InsertQuery::C_RETURN_INTO
-               | \VV\Db\Sql\InsertQuery::C_RETURN_INS_ID;
+        return parent::getSupportedClausesIds() | InsertQuery::C_RETURN_INTO | InsertQuery::C_RETURN_INS_ID;
     }
 
-    protected function strMultiValuesInsert(&$params)
+    /**
+     * @inheritDoc
+     */
+    protected function stringifyMultiValuesInsert(?array &$params): string
     {
         $table = $this->buildTableSql($this->insertQuery()->getTableClause());
         $fields = $this->fieldsPart();
@@ -45,28 +51,31 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
         return $sql;
     }
 
-    protected function applyInsertedIdClause(\VV\Db\Sql\Clauses\InsertedIdClause $retinsId)
+    /**
+     * @inheritDoc
+     */
+    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause)
     {
-        if ($retinsId->isEmpty()) {
+        if ($insertedIdClause->isEmpty()) {
             return;
         }
 
         $query = $this->insertQuery();
-        $pk = $retinsId->getPk() ?: $query->getMainTablePk();
-        $field = \VV\Db\Sql\Expressions\DbObject::create((string)$pk);
+        $pk = $insertedIdClause->getPk() ?: $query->getMainTablePk();
+        $field = \VV\Db\Sql\Expressions\DbObject::create($pk);
 
         $pkField = null;
         if ($mtm = $query->getTableClause()->getMainTableModel()) {
             $pkField = $mtm->getFields()->get($pk);
         }
-        if (!$param = $retinsId->getParam()) {
+        if (!$param = $insertedIdClause->getParam()) {
             if ($pkField) {
-                $isnum = $pkField->getType() == \VV\Db\Model\Field::T_NUM;
+                $isNum = $pkField->getType() == \VV\Db\Model\Field::T_NUM;
             } else {
-                $isnum = true;
+                $isNum = true;
             }
 
-            $type = $isnum ? \VV\Db\Param::T_INT : \VV\Db\Param::T_CHR;
+            $type = $isNum ? \VV\Db\Param::T_INT : \VV\Db\Param::T_CHR;
             $param = new \VV\Db\Param($type);
         }
 

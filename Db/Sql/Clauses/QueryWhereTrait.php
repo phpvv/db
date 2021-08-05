@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the phpvv package.
+ * This file is part of the VV package.
  *
  * (c) Volodymyr Sarnytskyi <v00v4n@gmail.com>
  *
@@ -36,7 +36,7 @@ trait QueryWhereTrait
      */
     public function where(string|int|Expression|array|Predicate|null $field, mixed $value = null): static
     {
-        return $this->condintionAnd($this->getWhereClause(), ...func_get_args());
+        return $this->conditionAnd($this->getWhereClause(), ...func_get_args());
     }
 
     /**
@@ -146,7 +146,7 @@ trait QueryWhereTrait
         return Sql::condition();
     }
 
-    protected function condintionAnd(
+    protected function conditionAnd(
         Condition $condition,
         string|int|Expression|array|Predicate|null $field,
         mixed $value = null

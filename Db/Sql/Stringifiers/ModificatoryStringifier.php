@@ -15,9 +15,10 @@ namespace VV\Db\Sql\Stringifiers;
 
 use VV\Db\Model\Field;
 use VV\Db\Param;
-use VV\Db\Sql;
+use VV\Db\Sql\Clauses\DatasetClause;
+use VV\Db\Sql\Clauses\ReturnIntoClause;
 use VV\Db\Sql\Clauses\ReturnIntoClauseItem;
-
+use VV\Db\Sql\Expressions\Expression;
 
 /**
  * Class ModificatoryStringifier
@@ -26,29 +27,35 @@ use VV\Db\Sql\Clauses\ReturnIntoClauseItem;
  */
 abstract class ModificatoryStringifier extends QueryStringifier
 {
-
-    private $advReturnInto = [];
+    /**
+     * @var ReturnIntoClauseItem[]
+     */
+    private array $advReturnInto = [];
 
     /**
      * @return ReturnIntoClauseItem[]
      */
-    protected function advReturnInto()
+    protected function advReturnInto(): array
     {
         return $this->advReturnInto;
     }
 
-    protected function addAdvReturnInto($field, $value)
+    /**
+     * @param string|Expression $expression
+     * @param Param             $param
+     */
+    protected function addAdvReturnInto(string|Expression $expression, Param $param)
     {
-        $this->advReturnInto[] = new ReturnIntoClauseItem($field, $value);
+        $this->advReturnInto[] = new ReturnIntoClauseItem($expression, $param);
     }
 
     /**
-     * @param Sql\Clauses\ReturnIntoClause $returnInto
-     * @param                              $params
+     * @param ReturnIntoClause $returnInto
+     * @param array|null       $params
      *
      * @return string
      */
-    protected function strReturnIntoClause(Sql\Clauses\ReturnIntoClause $returnInto, &$params)
+    protected function stringifyReturnIntoClause(ReturnIntoClause $returnInto, ?array &$params): string
     {
         $items = $returnInto->getItems();
         if ($advReturnInto = $this->advReturnInto()) {
@@ -59,32 +66,38 @@ abstract class ModificatoryStringifier extends QueryStringifier
             return '';
         }
 
-        $vars = $exprs = [];
+        $vars = $expressions = [];
         foreach ($items as $item) {
-            $exprs[] = $this->strExpr($item->getExpression(), $params);
-            /** @var \VV\Db\Sql\Stringifiers\ExpressoinStringifier $exprStringifier */
-            $exprStringifier = $this->exprStringifier();
-            $vars[] = $exprStringifier->strParam($item->getParam(), $params);
+            $expressions[] = $this->stringifyExpression($item->getExpression(), $params);
+            $expressionStringifier = $this->getExpressionStringifier();
+            $vars[] = $expressionStringifier->stringifyParam($item->getParam(), $params);
         }
 
-        return ' RETURNING ' . implode(', ', $exprs) . ' INTO ' . implode(', ', $vars);
+        return ' RETURNING ' . implode(', ', $expressions) . ' INTO ' . implode(', ', $vars);
     }
 
-    protected function strValueToSave($value, $field, &$params)
+    /**
+     * @param mixed      $value
+     * @param mixed      $field
+     * @param array|null $params
+     *
+     * @return string
+     */
+    protected function stringifyValueToSave(mixed $value, mixed $field, ?array &$params): string
     {
-        if ($value instanceof Sql\Expressions\Expression) {
-            $tmparams = [];
-            $str = $this->strColumn($value, $tmparams);
-            if ($tmparams) {
-                foreach ($tmparams as $tmp) {
-                    $this->strValueToSave($tmp, $field, $params);
+        if ($value instanceof Expression) {
+            $tmpParams = [];
+            $str = $this->stringifyColumn($value, $tmpParams);
+            if ($tmpParams) {
+                foreach ($tmpParams as $tmp) {
+                    $this->stringifyValueToSave($tmp, $field, $params);
                 }
             }
 
             return $str;
         }
 
-        $fieldModel = $this->fieldModel($field, $this->queryTableClause());
+        $fieldModel = $this->getFieldModel($field, $this->getQueryTableClause());
 
         if (!$value instanceof Param) {
             if (Param::isFileValue($value)) {
@@ -111,21 +124,27 @@ abstract class ModificatoryStringifier extends QueryStringifier
         }
 
         // get custom expression
-        if ($expr = $this->exprValueToSave($value, $field)) {
+        if ($expr = $this->expressionValueToSave($value, $field)) {
             return $expr->embed($params);
         }
 
-        return $this->strParam($value, $params);
+        return $this->stringifyParam($value, $params);
     }
 
-    protected function strDataset(Sql\Clauses\DatasetClause $dataset, &$params)
+    /**
+     * @param DatasetClause $dataset
+     * @param array|null    $params
+     *
+     * @return string
+     */
+    protected function stringifyDataset(DatasetClause $dataset, ?array &$params): string
     {
         $set = [];
-        $exprStringifier = $this->exprStringifier();
+        $exprStringifier = $this->getExpressionStringifier();
         foreach ($dataset->getItems() as $item) {
-            $fldstr = $exprStringifier->strSqlObj($field = $item->getField(), $params);
-            $valstr = $this->strValueToSave($item->getValue(), $field, $params);
-            $set[] = "$fldstr=$valstr";
+            $fieldStr = $exprStringifier->stringifyDbObject($field = $item->getField(), $params);
+            $valueStr = $this->stringifyValueToSave($item->getValue(), $field, $params);
+            $set[] = "$fieldStr=$valueStr";
         }
 
         return implode(', ', $set);
@@ -135,9 +154,9 @@ abstract class ModificatoryStringifier extends QueryStringifier
      * @param mixed $value
      * @param mixed $field
      *
-     * @return \VV\Db\Sql\Stringifiers\PlainSql|null
+     * @return SqlPart|null
      */
-    protected function exprValueToSave($value, $field)
+    protected function expressionValueToSave(mixed $value, mixed $field): ?SqlPart
     {
         return null;
     }

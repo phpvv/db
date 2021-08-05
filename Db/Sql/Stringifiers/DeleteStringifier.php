@@ -13,9 +13,10 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Driver\Driver;
 use VV\Db\Sql;
-use VV\Db\Sql\DeleteQuery as DeleteQuery;
+use VV\Db\Sql\Clauses\DeleteTablesClause;
+use VV\Db\Sql\Clauses\TableClause;
+use VV\Db\Sql\DeleteQuery;
 
 /**
  * Class DeleteStringifier
@@ -24,14 +25,13 @@ use VV\Db\Sql\DeleteQuery as DeleteQuery;
  */
 class DeleteStringifier extends ModificatoryStringifier
 {
-
     private DeleteQuery $deleteQuery;
 
     /**
-     * Delete constructor.
+     * DeleteStringifier constructor.
      *
      * @param DeleteQuery $deleteQuery
-     * @param Driver      $factory
+     * @param Factory     $factory
      */
     public function __construct(DeleteQuery $deleteQuery, Factory $factory)
     {
@@ -42,55 +42,70 @@ class DeleteStringifier extends ModificatoryStringifier
     /**
      * @return DeleteQuery
      */
-    public function deleteQuery()
+    public function getDeleteQuery(): DeleteQuery
     {
         return $this->deleteQuery;
     }
 
-    public function supportedClausesIds()
+    /**
+     * @inheritDoc
+     */
+    public function getSupportedClausesIds(): int
     {
-        return DeleteQuery::C_TABLE
-               | DeleteQuery::C_WHERE;
-    }
-
-    public function stringifyRaw(&$params)
-    {
-        $query = $this->deleteQuery();
-        $this->checkQueryToStr($query);
-
-        $sql = $this->strDeleteClause($query->getDeleteTablesClause(), $params)
-               . $this->strTableClause($query->getTableClause(), $params)
-               . $this->strWhereClause($query->getWhereClause(), $params);
-
-        return $sql;
+        return DeleteQuery::C_TABLE | DeleteQuery::C_WHERE;
     }
 
     /**
-     * @return Sql\Clauses\TableClause
+     * @inheritDoc
      */
-    public function queryTableClause()
+    public function stringifyRaw(?array &$params): string
     {
-        return $this->deleteQuery()->getTableClause();
+        $query = $this->getDeleteQuery();
+        $this->checkQueryToStringify($query);
+
+        return $this->stringifyDeleteClause($query->getDeleteTablesClause(), $params)
+               . $this->stringifyTableClause($query->getTableClause(), $params)
+               . $this->stringifyWhereClause($query->getWhereClause(), $params);
     }
 
-    protected function strDeleteClause(Sql\Clauses\DeleteTablesClause $tables, &$params)
+    /**
+     * @inheritDoc
+     */
+    public function getQueryTableClause(): TableClause
+    {
+        return $this->getDeleteQuery()->getTableClause();
+    }
+
+    /**
+     * @param DeleteTablesClause $tables
+     * @param array|null         $params
+     *
+     * @return string
+     */
+    protected function stringifyDeleteClause(DeleteTablesClause $tables, ?array &$params): string
     {
         return 'DELETE';
     }
 
-    protected function strTableClause(Sql\Clauses\TableClause $table, &$params)
+    /**
+     * @param TableClause $table
+     * @param array|null  $params
+     *
+     * @return string
+     */
+    protected function stringifyTableClause(TableClause $table, ?array &$params): string
     {
         return ' FROM ' . $this->buildTableSql($table)->embed($params);
     }
 
     /**
-     * @param $query
+     * @param DeleteQuery $query
      */
-    protected function checkQueryToStr(DeleteQuery $query)
+    protected function checkQueryToStringify(DeleteQuery $query)
     {
         $checkEmptyMap = [
-            [$table = $query->getTableClause(), '&Table is not selected'],
-            [$where = $query->getWhereClause(), '&There is no where clause'],
+            [$query->getTableClause(), 'Table is not selected'],
+            [$query->getWhereClause(), 'There is no where clause'],
         ];
         /** @var Sql\Clauses\Clause $c */
         foreach ($checkEmptyMap as [$c, $m]) {
@@ -100,7 +115,10 @@ class DeleteStringifier extends ModificatoryStringifier
         }
     }
 
-    protected function useAliasForTable(Sql\Clauses\TableClause $table)
+    /**
+     * @inheritDoc
+     */
+    protected function useAliasForTable(TableClause $table): bool
     {
         return count($table->getItems()) > 1;
     }

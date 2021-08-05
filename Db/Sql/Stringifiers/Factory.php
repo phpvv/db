@@ -22,7 +22,6 @@ use VV\Db\Sql;
  */
 interface Factory
 {
-
     /**
      * @param Sql\SelectQuery $query
      *

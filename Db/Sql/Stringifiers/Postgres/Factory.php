@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of the phpvv package.
+ * This file is part of the VV package.
  *
  * (c) Volodymyr Sarnytskyi <v00v4n@gmail.com>
  *

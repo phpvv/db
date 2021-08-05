@@ -13,9 +13,10 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Driver\Driver;
-use VV\Db\Sql;
-use VV\Db\Sql\UpdateQuery as UpdateQuery;
+use VV\Db\Sql\Clauses\Clause;
+use VV\Db\Sql\Clauses\DatasetClause;
+use VV\Db\Sql\Clauses\TableClause;
+use VV\Db\Sql\UpdateQuery;
 
 /**
  * Class Update
@@ -24,14 +25,13 @@ use VV\Db\Sql\UpdateQuery as UpdateQuery;
  */
 class UpdateStringifier extends ModificatoryStringifier
 {
-
     private UpdateQuery $updateQuery;
 
     /**
-     * Update constructor.
+     * UpdateStringifier constructor.
      *
      * @param UpdateQuery $updateQuery
-     * @param Driver      $factory
+     * @param Factory     $factory
      */
     public function __construct(UpdateQuery $updateQuery, Factory $factory)
     {
@@ -42,42 +42,61 @@ class UpdateStringifier extends ModificatoryStringifier
     /**
      * @return UpdateQuery
      */
-    public function updateQuery()
+    public function getUpdateQuery(): UpdateQuery
     {
         return $this->updateQuery;
     }
 
-    public function supportedClausesIds()
+    /**
+     * @inheritDoc
+     */
+    public function getSupportedClausesIds(): int
     {
-        return UpdateQuery::C_TABLE
-               | UpdateQuery::C_DATASET
-               | UpdateQuery::C_WHERE;
+        return UpdateQuery::C_TABLE | UpdateQuery::C_DATASET | UpdateQuery::C_WHERE;
     }
 
-    public function stringifyRaw(&$params)
+    /**
+     * @inheritDoc
+     */
+    public function stringifyRaw(?array &$params): string
     {
-        $query = $this->updateQuery();
-        $this->checkQueryToStr($query);
+        $query = $this->getUpdateQuery();
+        $this->checkQueryToStringify($query);
 
-        return $this->strUpdateClause($query->getTableClause(), $params)
-               . $this->strSetClause($query->getDatasetClause(), $params)
-               . $this->strWhereClause($query->getWhereClause(), $params)
-               . $this->strReturnIntoClause($query->getReturnIntoClause(), $params);
+        return $this->stringifyUpdateClause($query->getTableClause(), $params)
+               . $this->stringifySetClause($query->getDatasetClause(), $params)
+               . $this->stringifyWhereClause($query->getWhereClause(), $params)
+               . $this->stringifyReturnIntoClause($query->getReturnIntoClause(), $params);
     }
 
-    public function queryTableClause()
+    /**
+     * @inheritDoc
+     */
+    public function getQueryTableClause(): TableClause
     {
-        return $this->updateQuery()->getTableClause();
+        return $this->getUpdateQuery()->getTableClause();
     }
 
-    protected function strUpdateClause(Sql\Clauses\TableClause $table, &$params)
+    /**
+     * @param TableClause $table
+     * @param array|null  $params
+     *
+     * @return string
+     */
+    protected function stringifyUpdateClause(TableClause $table, ?array &$params): string
     {
         return 'UPDATE ' . $this->buildTableSql($table)->embed($params);
     }
 
-    protected function strSetClause(Sql\Clauses\DatasetClause $dataset, &$params)
+    /**
+     * @param DatasetClause $dataset
+     * @param array|null    $params
+     *
+     * @return string
+     */
+    protected function stringifySetClause(DatasetClause $dataset, ?array &$params): string
     {
-        return ' SET ' . $this->strDataset($dataset, $params);
+        return ' SET ' . $this->stringifyDataset($dataset, $params);
     }
 
     /**
@@ -85,14 +104,14 @@ class UpdateStringifier extends ModificatoryStringifier
      *
      * @return array
      */
-    protected function checkQueryToStr(UpdateQuery $query)
+    protected function checkQueryToStringify(UpdateQuery $query): array
     {
         $checkEmptyMap = [
             [$table = $query->getTableClause(), 'Table is not selected'],
             [$set = $query->getDatasetClause(), 'There is no data to update'],
             [$where = $query->getWhereClause(), 'There is no where clause'],
         ];
-        /** @var Sql\Clauses\Clause $c */
+        /** @var Clause $c */
         foreach ($checkEmptyMap as [$c, $m]) {
             if ($c->isEmpty()) {
                 throw new \InvalidArgumentException($m);

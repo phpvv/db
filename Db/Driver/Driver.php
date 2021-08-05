@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Driver;
 
-use VV\Db\Sql\Stringifiers\Factory as StringifiersFactory;
+use VV\Db\Sql\Stringifiers\Factory;
 
 /**
  * Interface Driver
@@ -50,7 +50,7 @@ interface Driver
     /**
      * Returns Sql Stringifiers Factory
      *
-     * @return StringifiersFactory|null
+     * @return Factory|null
      */
-    public function getSqlStringifiersFactory(): ?StringifiersFactory;
+    public function getSqlStringifiersFactory(): ?Factory;
 }

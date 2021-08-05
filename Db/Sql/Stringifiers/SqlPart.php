@@ -18,15 +18,13 @@ namespace VV\Db\Sql\Stringifiers;
  *
  * @package VV\Db\Driver\Sql
  */
-class PlainSql
+class SqlPart
 {
-
     private string $sql;
-
     private array $params;
 
     /**
-     * Part constructor.
+     * SqlPart constructor.
      *
      * @param string $sql
      * @param array  $params
@@ -38,27 +36,11 @@ class PlainSql
     }
 
     /**
-     * @return string
-     */
-    public function sql()
-    {
-        return $this->sql;
-    }
-
-    /**
-     * @return array
-     */
-    public function params()
-    {
-        return $this->params;
-    }
-
-    /**
-     * @param $params
+     * @param array|null $params
      *
      * @return string
      */
-    public function embed(&$params): string
+    public function embed(?array &$params): string
     {
         if ($this->params) {
             if (!$params) {

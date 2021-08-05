@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Oracle;
 
+use VV\Db\Sql\DeleteQuery;
+
 /**
  * Class Delete
  *
@@ -20,11 +22,13 @@ namespace VV\Db\Sql\Stringifiers\Oracle;
  */
 class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier
 {
-
     use CommonUtils;
 
-    public function supportedClausesIds()
+    /**
+     * @inheritDoc
+     */
+    public function getSupportedClausesIds(): int
     {
-        return parent::supportedClausesIds() | \VV\Db\Sql\DeleteQuery::C_RETURN_INTO;
+        return parent::getSupportedClausesIds() | DeleteQuery::C_RETURN_INTO;
     }
 }

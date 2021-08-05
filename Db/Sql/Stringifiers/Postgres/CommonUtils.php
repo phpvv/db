@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Postgres;
 
+use VV\Db\Sql\Stringifiers\ConditionStringifier;
+use VV\Db\Sql\Stringifiers\ExpressionStringifier;
 use VV\Db\Sql\Stringifiers\QueryStringifier;
 
 /**
@@ -23,23 +25,24 @@ use VV\Db\Sql\Stringifiers\QueryStringifier;
 trait CommonUtils
 {
 
-    protected function stringifyFinalDecorate($sql)
+    /**
+     * @inheritDoc
+     */
+    protected function stringifyFinalDecorate(string $sql): string
     {
         $sql = str_replace('"', "'", $sql);
 
-        $sql = preg_replace_callback('/`([\w\$]+)`/',
-            function ($m) {
-                return '"' . $m[1] . '"';
-            },
+        $sql = preg_replace_callback(
+            '/`([\w\$]+)`/',
+            fn ($m) => '"' . strtoupper($m[1]) . '"',
             $sql
         );
 
-        $sql = preg_replace_callback('/\?/',
-            function () {
-                static $i = 0;
-
-                return ':p' . (++$i);
-            },
+        $i = 0;
+        /** @noinspection PhpUnnecessaryLocalVariableInspection */
+        $sql = preg_replace_callback(
+            '/\?/',
+            fn () => ':p' . (++$i),
             $sql
         );
 
@@ -47,15 +50,18 @@ trait CommonUtils
     }
 
     /**
-     * @return ExpressoinStringifier
+     * @inheritDoc
      */
-    protected function createExprStringifier()
+    protected function createExpressionStringifier(): ExpressionStringifier
     {
         /** @var QueryStringifier $this */
-        return new ExpressoinStringifier($this);
+        return new ExpressionStringifier($this);
     }
 
-    protected function createConditionStringifier()
+    /**
+     * @inheritDoc
+     */
+    protected function createConditionStringifier(): ConditionStringifier
     {
         /** @var QueryStringifier $this */
         return new ConditionStringifier($this);

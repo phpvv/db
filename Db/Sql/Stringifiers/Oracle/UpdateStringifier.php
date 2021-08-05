@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Oracle;
 
-use VV\Db\Sql\UpdateQuery as UpdateQuery;
+use VV\Db\Sql\UpdateQuery;
 
 /**
  * Class Update
@@ -22,12 +22,14 @@ use VV\Db\Sql\UpdateQuery as UpdateQuery;
  */
 class UpdateStringifier extends \VV\Db\Sql\Stringifiers\UpdateStringifier
 {
-
     use ModifyUtils;
     use CommonUtils;
 
-    public function supportedClausesIds()
+    /**
+     * @inheritDoc
+     */
+    public function getSupportedClausesIds(): int
     {
-        return parent::supportedClausesIds() | UpdateQuery::C_RETURN_INTO;
+        return parent::getSupportedClausesIds() | UpdateQuery::C_RETURN_INTO;
     }
 }

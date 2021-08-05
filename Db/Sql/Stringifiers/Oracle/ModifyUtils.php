@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Oracle;
 
+use VV\Db\Sql\Stringifiers\SqlPart;
+
 /**
  * Trait ModifyUtils
  *
@@ -21,14 +23,17 @@ namespace VV\Db\Sql\Stringifiers\Oracle;
 trait ModifyUtils
 {
 
-    protected function exprValueToSave($value, $field)
+    /**
+     * @inheritDoc
+     */
+    protected function expressionValueToSave(mixed $value, mixed $field): ?SqlPart
     {
         if ($value instanceof \VV\Db\Param && $value->isLob()) {
             $type = $value->getType();
             if ($type == \VV\Db\Param::T_TEXT) {
-                $emtyLobFunc = 'empty_clob()';
+                $emptyLobFunc = 'empty_clob()';
             } elseif ($type == \VV\Db\Param::T_BLOB) {
-                $emtyLobFunc = 'empty_blob()';
+                $emptyLobFunc = 'empty_blob()';
             } else {
                 throw new \UnexpectedValueException();
             }
@@ -36,10 +41,10 @@ trait ModifyUtils
             $value->setForUpload(true);
             $this->addAdvReturnInto($field, $value);
 
-            return $this->createPlainSql($emtyLobFunc);
+            return $this->createSqlPart($emptyLobFunc);
         }
 
-        /** @noinspection PhpUndefinedClassInspection */
-        return parent::exprValueToSave($value, $field);
+        /** @noinspection PhpMultipleClassDeclarationsInspection */
+        return parent::expressionValueToSave($value, $field);
     }
 }
