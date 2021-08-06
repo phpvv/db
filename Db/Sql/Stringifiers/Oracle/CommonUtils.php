@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Oracle;
 
-use VV\Db\Sql\Stringifiers\ExpressionStringifier;
+use VV\Db\Sql\Stringifiers\QueryStringifier;
 
 /**
  * Trait CommonUtils
@@ -55,7 +55,7 @@ trait CommonUtils
      */
     protected function createExpressionStringifier(): ExpressionStringifier
     {
-        /** @var \VV\Db\Sql\Stringifiers\QueryStringifier $this */
+        /** @var QueryStringifier $this */
         return new ExpressionStringifier($this);
     }
 }

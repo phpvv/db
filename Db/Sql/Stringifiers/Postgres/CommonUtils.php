@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Postgres;
 
-use VV\Db\Sql\Stringifiers\ConditionStringifier;
-use VV\Db\Sql\Stringifiers\ExpressionStringifier;
 use VV\Db\Sql\Stringifiers\QueryStringifier;
 
 /**
