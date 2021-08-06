@@ -34,15 +34,18 @@ trait CommonUtils
 
         $sql = preg_replace_callback(
             '/`([\w\$]+)`/',
-            fn ($m) => '"' . strtoupper($m[1]) . '"',
+            fn ($m) => '"' . $m[1] . '"',
             $sql
         );
 
-        $i = 0;
         /** @noinspection PhpUnnecessaryLocalVariableInspection */
         $sql = preg_replace_callback(
             '/\?/',
-            fn () => ':p' . (++$i),
+            function () {
+                static $i = 0;
+
+                return ':p' . (++$i);
+            },
             $sql
         );
 

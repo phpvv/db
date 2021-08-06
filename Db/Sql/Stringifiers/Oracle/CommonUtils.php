@@ -36,11 +36,14 @@ trait CommonUtils
             $sql
         );
 
-        $i = 0;
         /** @noinspection PhpUnnecessaryLocalVariableInspection */
         $sql = preg_replace_callback(
             '/\?/',
-            fn () => ':p' . (++$i),
+            function () {
+                static $i = 0;
+
+                return ':p' . (++$i);
+            },
             $sql
         );
 
