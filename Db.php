@@ -65,7 +65,7 @@ abstract class Db
         return $connection;
     }
 
-    public function getTransactionFreeConnection(): Connection
+    public function getFreeConnection(): Connection
     {
         foreach ($this->connections as $connection) {
             if (!$connection->isBusy()) {

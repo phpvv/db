@@ -25,7 +25,7 @@ composer require phpvv/db-oci
 use VV\Db\Param;
 use VV\Db\Sql;
 
-$db = \App\Db\Main::instance();
+$db = \App\Db\MainDb::instance();
 
 $categoryId = 102;
 $stateParam = Param::int(value: 1, name: 'state');
@@ -35,13 +35,15 @@ $query = $db->tbl->product
     ->join($db->tbl->brand)                                         // INNER JOIN tbl_brand as b ON b.brand_id = p.brand_id
     ->left($db->tbl->color, 'p')                                    // LEFT JOIN tbl_color as c ON c.color_id = p.color_id
     // ->left($db->tbl->color, on: 'c.color_id = p.color_id', alias: 'c') // same as above
-    ->where(                                                        // WHERE
+    ->where( // WHERE ...
         Sql::condition()
-            ->exists(                                               // EXISTS (
+            ->exists(                                               // WHERE EXISTS (
                 $db->tbl->productsCategories->select('1')               // SELECT 1 FROM tbl_products_categories pc
-                    ->where('`pc`.`product_id`=`p`.`product_id`')       // WHERE ("pc"."product_id"="p"."product_id")
-                    ->where('category_id', $categoryId)                 // AND pc.category_id = :p1
-                    ->where('state', $stateParam)                       // AND pc.state = :state
+                ->where('`pc`.`product_id`=`p`.`product_id`')           // WHERE ("pc"."product_id"="p"."product_id")
+                ->where([
+                    'category_id' => $categoryId,                       // AND pc.category_id = :p1
+                    'state' => $stateParam                              // AND pc.state = :state
+                ])
             )                                                       // )
             ->and('state')->eq($stateParam)                         // AND p.state = :state
             // ->and('title')->like('Comp%')
@@ -68,6 +70,10 @@ $query = $db->tbl->product
             ->when(5)->then(1)                                      // color_id = 5 - first
             ->when(1)->then(2)                                      // color_id = 1 - second
             ->else(3),                                              // other colors at the end - first
+        // Sql::case()
+        //     ->when(Sql::condition('p.color_id')->eq(5))->then(1)    // same CASE as above
+        //     ->when(['p.color_id' => 1])->then(2)
+        //     ->else(3),
         '-price',                                                   // price DESC,
         'title'                                                     // title ASC
     )
