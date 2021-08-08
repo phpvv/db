@@ -78,6 +78,14 @@ abstract class Db
         return $connection;
     }
 
+    /**
+     * @deprecated
+     */
+    public function getTransactionFreeConnection(): Connection
+    {
+        return $this->getFreeConnection();
+    }
+
     public function isInTransaction(): bool
     {
         foreach ($this->connections as $connection) {

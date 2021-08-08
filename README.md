@@ -303,7 +303,7 @@ print_r($result->rows);
 #### Configuration
 
 At start, it is needed to create somewhere `class <MyNameOf>Db extends \VV\Db` and implement one abstract method `createConnection()`.
-Example ([App/Db/Main.php](https://github.com/phpvv/db-examples/blob/master/App/Db/Main.php)):
+Example ([App/Db/MainDb.php](https://github.com/phpvv/db-examples/blob/master/App/Db/MainDb.php)):
 
 ```php
 namespace App\Db;
@@ -333,7 +333,8 @@ class MainDb extends \VV\Db {
 Just run this code ([gen-db-model.php](https://github.com/phpvv/db-examples/blob/master/examples/gen-db-model.php)):
 
 ```php
-use App\Db\MainDb;use VV\Db\Model\Generator\ModelGenerator;
+use App\Db\MainDb;
+use VV\Db\Model\Generator\ModelGenerator;
 
 (new ModelGenerator(MainDb::instance()))->build();
 ```
@@ -361,7 +362,65 @@ print_r($products);
 
 ## Select
 
-*Coming soon...*
+### Create [`SelectQuery`](./Db/Sql/SelectQuery.php)
+
+There are several variants to create `SelectQuery` ([select.php](https://github.com/phpvv/db-examples/blob/master/examples/select.php)):
+
+```php
+use App\Db\MainDb;
+
+$db = MainDb::instance();
+$connection = $db->getConnection(); // or $db->getFreeConnection();
+// $connection = new \VV\Db\Connection(...);
+
+$columns = ['product_id', 'b.title brand', 'title', 'price'];
+
+// from Connection directly
+$selectQuery = $connection->select(...$columns)->from('tbl_product');
+
+// from Db
+$selectQuery = $db->select(...$columns)->from('tbl_product');
+
+// from Table
+$selectQuery = $db->tbl->product->select(...$columns);
+```
+
+### Columns Clause
+
+Method `select(...)` (see above) returns [`SelectQuery`](./Db/Sql/SelectQuery.php) object. You can change columns using methods `SelectQuery::columns()` or `SelectQuery::addColumns()`:
+
+```php
+$query = $db->tbl->product->select()
+    ->columns('product_id', 'brand_id')
+    ->addColumns('title', 'price');
+
+print_r($query->rows);
+```
+
+All these methods accepts `string` or [`Expression`](./Db/Sql/Expressions/Expression.php) interface as each column. So you can do somthing like this:
+
+```php
+$query = $db->tbl->product->select(
+    'product_id',
+    'title product',
+    $db->tbl->brand
+        ->select('title')
+        ->where('b.brand_id = p.brand_id')
+        ->as('brand'),
+    'price',
+    Sql::case()
+        ->when(['price >= ' => 1000])->then(1)
+        ->else(0)
+        ->as('is_expensive'),
+);
+
+print_r($query->rows);
+```
+
+
+### From Clause
+
+### Where Clause
 
 ## Insert
 
