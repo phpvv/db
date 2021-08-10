@@ -1,5 +1,4 @@
-<?php /** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
-declare(strict_types=1);
+<?php
 
 /*
  * This file is part of the VV package.
@@ -9,6 +8,9 @@ declare(strict_types=1);
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+declare(strict_types=1);
+
 namespace VV\Db\Sql;
 
 use VV\Db\Model\Table;
@@ -589,7 +591,7 @@ class SelectQuery extends Query implements Expressions\Expression
      */
     public function setColumnsClause(?ColumnsClause $columnsClause): static
     {
-        $this->columnsClause = $columnsClause->setTableClause($this->getTableClause());
+        $this->columnsClause = $columnsClause?->setTableClause($this->getTableClause());
 
         return $this;
     }
