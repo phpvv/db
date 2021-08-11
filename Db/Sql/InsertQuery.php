@@ -34,9 +34,8 @@ class InsertQuery extends ModificatoryQuery
     public const C_DATASET = 0x01,
         C_FIELDS = 0x02,
         C_VALUES = 0x04,
-        C_ON_DUP_KEY = 0x08,
-        C_RETURN_INTO = 0x10,
-        C_RETURN_INS_ID = 0x20;
+        C_ON_DUPLICATE_KEY = 0x08,
+        C_RETURN_INSERTED_ID = 0x10;
 
     private ?Clauses\InsertFieldsClause $fieldsClause = null;
     private ?Clauses\InsertValuesClause $valuesClause = null;
@@ -372,14 +371,15 @@ class InsertQuery extends ModificatoryQuery
 
     protected function getNonEmptyClausesMap(): array
     {
-        return [
-            self::C_DATASET => $this->getDatasetClause(),
-            self::C_FIELDS => $this->getFieldsClause(),
-            self::C_VALUES => $this->getValuesClause(),
-            self::C_ON_DUP_KEY => $this->getOnDuplicateKeyClause(),
-            self::C_RETURN_INTO => $this->getReturnIntoClause(),
-            self::C_RETURN_INS_ID => $this->getInsertedIdClause(),
-        ];
+        return parent::getNonEmptyClausesMap()
+               + [
+                   self::C_DATASET => $this->getDatasetClause(),
+                   self::C_FIELDS => $this->getFieldsClause(),
+                   self::C_VALUES => $this->getValuesClause(),
+                   self::C_ON_DUPLICATE_KEY => $this->getOnDuplicateKeyClause(),
+                   self::C_RETURN_INTO => $this->getReturnIntoClause(),
+                   self::C_RETURN_INSERTED_ID => $this->getInsertedIdClause(),
+               ];
     }
 
     /**

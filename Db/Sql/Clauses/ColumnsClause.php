@@ -29,13 +29,26 @@ class ColumnsClause extends ColumnList
     private ?TableClause $tableClause = null;
     private ?array $resultFields = null;
     private ?array $resultFieldsMap = null;
+    private bool $asteriskOnEmpty = true;
+
+    /**
+     * @param bool $asteriskOnEmpty
+     *
+     * @return $this
+     */
+    public function setAsteriskOnEmpty(bool $asteriskOnEmpty): static
+    {
+        $this->asteriskOnEmpty = $asteriskOnEmpty;
+
+        return $this;
+    }
 
     /**
      * @return Expression[]
      */
     public function getItems(): array
     {
-        return parent::getItems() ?: [DbObject::create('*')];
+        return parent::getItems() ?: ($this->asteriskOnEmpty ? [DbObject::create('*')] : []);
     }
 
     /**
@@ -43,7 +56,7 @@ class ColumnsClause extends ColumnList
      */
     public function isEmpty(): bool
     {
-        return false; // can't be empty (*)
+        return !$this->asteriskOnEmpty && parent::isEmpty();
     }
 
     /**

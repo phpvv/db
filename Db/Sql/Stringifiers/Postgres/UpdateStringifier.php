@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Postgres;
 
-use VV\Db\Sql\UpdateQuery as UpdateQuery;
+use VV\Db\Sql\ModificatoryQuery;
 
 /**
  * Class UpdateStringifier
@@ -29,6 +29,6 @@ class UpdateStringifier extends \VV\Db\Sql\Stringifiers\UpdateStringifier
      */
     public function getSupportedClausesIds(): int
     {
-        return parent::getSupportedClausesIds() | UpdateQuery::C_RETURN_INTO;
+        return parent::getSupportedClausesIds() | ModificatoryQuery::C_RETURNING;
     }
 }

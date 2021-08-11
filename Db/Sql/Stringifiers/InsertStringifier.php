@@ -142,12 +142,13 @@ class InsertStringifier extends ModificatoryStringifier
     protected function stringifyStdInsert(?array &$params): string
     {
         $query = $this->insertQuery();
-        $this->applyInsertedIdClause($query->getInsertedIdClause());
+        $this->applyInsertedIdClause($query->getInsertedIdClause(), $params);
 
         return $this->stringifyStdInsertIntoClause($params)
                . $this->stringifyStdValuesClause($params)
                . $this->stringifyOnDupKeyClause($query->getOnDuplicateKeyClause(), $params)
-               . $this->stringifyReturnIntoClause($query->getReturnIntoClause(), $params);
+               . $this->stringifyReturnIntoClause($query->getReturnIntoClause(), $params)
+               . $this->stringifyReturningClause($query->getReturningClause(), $params);
     }
 
     /**
@@ -300,8 +301,9 @@ class InsertStringifier extends ModificatoryStringifier
 
     /**
      * @param InsertedIdClause $insertedIdClause
+     * @param array|null &     $params
      */
-    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause)
+    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause, ?array &$params)
     {
         if ($insertedIdClause->isEmpty()) {
             return;

@@ -15,6 +15,7 @@ namespace VV\Db\Sql\Stringifiers\Oracle;
 
 use VV\Db\Sql\Clauses\InsertedIdClause;
 use VV\Db\Sql\InsertQuery;
+use VV\Db\Sql\ModificatoryQuery;
 
 /**
  * Class Insert
@@ -31,7 +32,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
      */
     public function getSupportedClausesIds(): int
     {
-        return parent::getSupportedClausesIds() | InsertQuery::C_RETURN_INTO | InsertQuery::C_RETURN_INS_ID;
+        return parent::getSupportedClausesIds() | ModificatoryQuery::C_RETURN_INTO | InsertQuery::C_RETURN_INSERTED_ID;
     }
 
     /**
@@ -46,15 +47,19 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
         foreach ($this->valuesPart() as $row) {
             $sql .= "INTO {$table->embed($params)} {$fields->embed($params)} VALUES {$row->embed($params)}";
         }
+        /** @noinspection SqlResolve */
+        /** @noinspection SqlNoDataSourceInspection */
         $sql .= 'SELECT * FROM dual';
 
         return $sql;
     }
 
     /**
+     * @param array|null &$params
+     *
      * @inheritDoc
      */
-    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause)
+    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause, ?array &$params)
     {
         if ($insertedIdClause->isEmpty()) {
             return;
@@ -87,6 +92,6 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
             $param->setSize($pkField->getLength());
         }
 
-        $this->addAdvReturnInto($field, $param->setForInsertedId());
+        $this->addExtraReturnInto($field, $param->setForInsertedId());
     }
 }

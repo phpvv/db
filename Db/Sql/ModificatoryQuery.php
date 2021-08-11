@@ -15,6 +15,7 @@ namespace VV\Db\Sql;
 
 use VV\Db\Param;
 use VV\Db\Result;
+use VV\Db\Sql\Clauses\ColumnsClause;
 use VV\Db\Sql\Clauses\ReturnIntoClause;
 use VV\Db\Sql\Expressions\Expression;
 use VV\Db\Transaction;
@@ -27,8 +28,11 @@ use VV\Db\Transaction;
  */
 abstract class ModificatoryQuery extends Query
 {
+    public const C_RETURN_INTO = 0x100,
+        C_RETURNING = 0x110;
 
     protected ?ReturnIntoClause $returnIntoClause = null;
+    protected ?ColumnsClause $returningClause = null;
 
     public function __get($var): mixed
     {
@@ -39,7 +43,7 @@ abstract class ModificatoryQuery extends Query
     }
 
     /**
-     * Add `RETURNING INTO` clause (only for oracle)
+     * Add `RETURNING column INTO :param` clause (only for oracle)
      *
      * @param string|iterable|Expression $field
      * @param mixed|Param                $param
@@ -57,6 +61,20 @@ abstract class ModificatoryQuery extends Query
         int $size = null
     ): static {
         $this->getReturnIntoClause()->add($field, $param, $type, $name, $size);
+
+        return $this;
+    }
+
+    /**
+     * Add `RETURNING column1, column2, ...` clause (only for postgres)
+     *
+     * @param string|array|Expression ...$columns
+     *
+     * @return $this
+     */
+    public function returning(string|array|Expression ...$columns): static
+    {
+        $this->getReturningClause()->add(...$columns);
 
         return $this;
     }
@@ -114,6 +132,58 @@ abstract class ModificatoryQuery extends Query
     }
 
     /**
+     * Returns returningClause
+     *
+     * @return ColumnsClause
+     */
+    public function getReturningClause(): ColumnsClause
+    {
+        if (!$this->returningClause) {
+            $this->setReturningClause($this->createReturningClause());
+        }
+
+        return $this->returningClause;
+    }
+
+    /**
+     * Sets returningClause
+     *
+     * @param ColumnsClause|null $returningClause
+     *
+     * @return $this
+     */
+    public function setReturningClause(?ColumnsClause $returningClause): static
+    {
+        $this->returningClause = $returningClause;
+
+        return $this;
+    }
+
+    /**
+     * Clears returningClause property and returns previous value
+     *
+     * @return ColumnsClause
+     */
+    public function clearReturningClause(): ColumnsClause
+    {
+        try {
+            return $this->getReturningClause();
+        } finally {
+            $this->setReturningClause(null);
+        }
+    }
+
+    /**
+     * Creates default returningClause
+     *
+     * @return ColumnsClause
+     */
+    public function createReturningClause(): ColumnsClause
+    {
+        return (new ColumnsClause())->setAsteriskOnEmpty(false);
+    }
+
+    /**
      * Executes query
      *
      * @param Transaction|null $transaction
@@ -139,5 +209,13 @@ abstract class ModificatoryQuery extends Query
     public function affectedRows(Transaction $transaction = null): int
     {
         return $this->exec($transaction)->affectedRows();
+    }
+
+    protected function getNonEmptyClausesMap(): array
+    {
+        return [
+            self::C_RETURN_INTO => $this->getReturnIntoClause(),
+            self::C_RETURNING => $this->getReturningClause(),
+        ];
     }
 }

@@ -27,10 +27,9 @@ class DeleteQuery extends ModificatoryQuery
 {
     use QueryWhereTrait;
 
-    public const C_DEL_TABLES = 0x01,
-        C_TABLE = 0x02,
-        C_WHERE = 0x04,
-        C_RETURN_INTO = 0x08;
+    public const C_TABLE = 0x01,
+        C_DEL_TABLES = 0x02,
+        C_WHERE = 0x04;
 
     protected ?DeleteTablesClause $deleteTablesClause = null;
 
@@ -113,14 +112,13 @@ class DeleteQuery extends ModificatoryQuery
         return $this->setMainTable($table, $alias);
     }
 
-    /** @noinspection PhpArrayShapeAttributeCanBeAddedInspection */
     protected function getNonEmptyClausesMap(): array
     {
-        return [
-            self::C_DEL_TABLES => $this->getDeleteTablesClause(),
-            self::C_TABLE => $this->getTableClause(),
-            self::C_WHERE => $this->getWhereClause(),
-            self::C_RETURN_INTO => $this->getReturnIntoClause(),
-        ];
+        return parent::getNonEmptyClausesMap()
+               + [
+                   self::C_DEL_TABLES => $this->getDeleteTablesClause(),
+                   self::C_TABLE => $this->getTableClause(),
+                   self::C_WHERE => $this->getWhereClause(),
+               ];
     }
 }

@@ -65,7 +65,8 @@ class DeleteStringifier extends ModificatoryStringifier
 
         return $this->stringifyDeleteClause($query->getDeleteTablesClause(), $params)
                . $this->stringifyTableClause($query->getTableClause(), $params)
-               . $this->stringifyWhereClause($query->getWhereClause(), $params);
+               . $this->stringifyWhereClause($query->getWhereClause(), $params)
+               . $this->stringifyReturningClause($query->getReturningClause(), $params);
     }
 
     /**

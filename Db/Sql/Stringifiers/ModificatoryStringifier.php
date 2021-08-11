@@ -15,6 +15,8 @@ namespace VV\Db\Sql\Stringifiers;
 
 use VV\Db\Model\Field;
 use VV\Db\Param;
+use VV\Db\Sql;
+use VV\Db\Sql\Clauses\ColumnsClause;
 use VV\Db\Sql\Clauses\DatasetClause;
 use VV\Db\Sql\Clauses\ReturnIntoClause;
 use VV\Db\Sql\Clauses\ReturnIntoClauseItem;
@@ -27,26 +29,42 @@ use VV\Db\Sql\Expressions\Expression;
  */
 abstract class ModificatoryStringifier extends QueryStringifier
 {
-    /**
-     * @var ReturnIntoClauseItem[]
-     */
-    private array $advReturnInto = [];
+    /** @var ReturnIntoClauseItem[] */
+    private array $extraReturnIntoItems = [];
+    /** @var Expression[] */
+    private array $extraReturningItems = [];
 
     /**
      * @return ReturnIntoClauseItem[]
      */
-    protected function advReturnInto(): array
+    protected function getExtraReturnIntoItems(): array
     {
-        return $this->advReturnInto;
+        return $this->extraReturnIntoItems;
     }
 
     /**
      * @param string|Expression $expression
      * @param Param             $param
      */
-    protected function addAdvReturnInto(string|Expression $expression, Param $param)
+    protected function addExtraReturnInto(string|Expression $expression, Param $param)
     {
-        $this->advReturnInto[] = new ReturnIntoClauseItem($expression, $param);
+        $this->extraReturnIntoItems[] = new ReturnIntoClauseItem($expression, $param);
+    }
+
+    /**
+     * @return Expression[]
+     */
+    public function getExtraReturningItems(): array
+    {
+        return $this->extraReturningItems;
+    }
+
+    /**
+     * @param string|Expression $expression
+     */
+    protected function addExtraReturning(string|Expression $expression)
+    {
+        $this->extraReturningItems[] = Sql::expression($expression);
     }
 
     /**
@@ -58,8 +76,8 @@ abstract class ModificatoryStringifier extends QueryStringifier
     protected function stringifyReturnIntoClause(ReturnIntoClause $returnInto, ?array &$params): string
     {
         $items = $returnInto->getItems();
-        if ($advReturnInto = $this->advReturnInto()) {
-            array_push($items, ...$advReturnInto);
+        if ($extraReturnIntoItems = $this->getExtraReturnIntoItems()) {
+            array_push($items, ...$extraReturnIntoItems);
         }
 
         if (!$items) {
@@ -74,6 +92,26 @@ abstract class ModificatoryStringifier extends QueryStringifier
         }
 
         return ' RETURNING ' . implode(', ', $expressions) . ' INTO ' . implode(', ', $vars);
+    }
+
+    /**
+     * @param ColumnsClause $returning
+     * @param array|null    $params
+     *
+     * @return string
+     */
+    protected function stringifyReturningClause(ColumnsClause $returning, ?array &$params): string
+    {
+        $items = $returning->getItems();
+        if ($extraReturningItems = $this->getExtraReturningItems()) {
+            array_push($items, ...$extraReturningItems);
+        }
+
+        if (!$items) {
+            return '';
+        }
+
+        return ' RETURNING ' . $this->stringifyColumnList($items, $params, true);
     }
 
     /**

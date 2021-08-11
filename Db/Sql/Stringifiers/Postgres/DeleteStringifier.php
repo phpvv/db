@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Postgres;
 
-use VV\Db\Sql\DeleteQuery;
+use VV\Db\Sql\ModificatoryQuery;
 
 /**
  * Class DeleteStringifier
@@ -29,6 +29,6 @@ class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier
      */
     public function getSupportedClausesIds(): int
     {
-        return parent::getSupportedClausesIds() | DeleteQuery::C_RETURN_INTO;
+        return parent::getSupportedClausesIds() | ModificatoryQuery::C_RETURNING;
     }
 }

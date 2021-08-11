@@ -30,7 +30,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
      */
     public function getSupportedClausesIds(): int
     {
-        return parent::getSupportedClausesIds() | InsertQuery::C_ON_DUP_KEY | InsertQuery::C_RETURN_INS_ID;
+        return parent::getSupportedClausesIds() | InsertQuery::C_ON_DUPLICATE_KEY | InsertQuery::C_RETURN_INSERTED_ID;
     }
 
     /**
@@ -46,9 +46,11 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
     }
 
     /**
+     * @param array|null &$params
+     *
      * @inheritDoc
      */
-    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause)
+    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause, ?array &$params)
     {
         // empty body
     }

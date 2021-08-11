@@ -16,6 +16,7 @@ namespace VV\Db\Sql\Stringifiers\Postgres;
 use VV\Db\Param;
 use VV\Db\Sql\Clauses\InsertedIdClause;
 use VV\Db\Sql\InsertQuery;
+use VV\Db\Sql\ModificatoryQuery;
 
 /**
  * Class InsertStringifier
@@ -34,34 +35,23 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
      */
     public function getSupportedClausesIds(): int
     {
-        return parent::getSupportedClausesIds() | InsertQuery::C_RETURN_INS_ID;
+        return parent::getSupportedClausesIds() | InsertQuery::C_RETURN_INSERTED_ID | ModificatoryQuery::C_RETURNING;
     }
 
     /**
+     * @param array|null &$params
+     *
      * @inheritDoc
      */
-    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause)
+    protected function applyInsertedIdClause(InsertedIdClause $insertedIdClause, ?array &$params)
     {
         if ($insertedIdClause->isEmpty()) {
             return;
         }
 
-        $this->insertedIdParam = ($insertedIdClause->getParam() ?: Param::chr())->setForInsertedId();
-        $this->insertedIdField = $insertedIdClause->getPk() ?: $this->insertQuery()->getMainTablePk();
-    }
+        $params[] = ($insertedIdClause->getParam() ?: Param::chr())->setForInsertedId();
+        $field = $insertedIdClause->getPk() ?: $this->insertQuery()->getMainTablePk();
 
-    /**
-     * @inheritDoc
-     */
-    protected function stringifyStdInsert(?array &$params): string
-    {
-        $sql = parent::stringifyStdInsert($params);
-
-        if ($this->insertedIdParam) {
-            $params[] = $this->insertedIdParam;
-            $sql .= " RETURNING $this->insertedIdField AS _insertedid";
-        }
-
-        return $sql;
+        $this->addExtraReturning("$field _insertedid");
     }
 }

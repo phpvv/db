@@ -30,8 +30,7 @@ class UpdateQuery extends ModificatoryQuery
 
     public const C_TABLE = 0x01,
         C_DATASET = 0x02,
-        C_WHERE = 0x04,
-        C_RETURN_INTO = 0x08;
+        C_WHERE = 0x04;
 
     /**
      * Add from clause in sql
@@ -60,11 +59,11 @@ class UpdateQuery extends ModificatoryQuery
 
     protected function getNonEmptyClausesMap(): array
     {
-        return [
-            self::C_TABLE => $this->getTableClause(),
-            self::C_DATASET => $this->getDatasetClause(),
-            self::C_WHERE => $this->getWhereClause(),
-            self::C_RETURN_INTO => $this->getReturnIntoClause(),
-        ];
+        return parent::getNonEmptyClausesMap()
+               + [
+                   self::C_TABLE => $this->getTableClause(),
+                   self::C_DATASET => $this->getDatasetClause(),
+                   self::C_WHERE => $this->getWhereClause(),
+               ];
     }
 }

@@ -39,7 +39,7 @@ trait ModifyUtils
             }
 
             $value->setForUpload(true);
-            $this->addAdvReturnInto($field, $value);
+            $this->addExtraReturnInto($field, $value);
 
             return $this->createSqlPart($emptyLobFunc);
         }
