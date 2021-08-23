@@ -255,7 +255,7 @@ try {
     // you can execute important statement in transaction free connection
     $db->tbl->log->insert()
         ->set(['title' => "new order #$orderId"])
-        ->setConnection($db->getTransactionFreeConnection()) // set new conenction for query
+        ->setConnection($db->getTransactionFreeConnection()) // set new connection for query
         ->exec();
 
     // throw new \RuntimeException('Test transactionFreeConnection()');
@@ -397,7 +397,7 @@ $query = $db->tbl->product->select()
 print_r($query->rows);
 ```
 
-All these methods accepts `string` or [`Expression`](./Db/Sql/Expressions/Expression.php) interface as each column. So you can do somthing like this:
+All these methods accepts `string` or [`Expression`](./Db/Sql/Expressions/Expression.php) interface as each column. So you can do something like this:
 
 ```php
 $query = $db->tbl->product->select(
@@ -417,8 +417,74 @@ $query = $db->tbl->product->select(
 print_r($query->rows);
 ```
 
-
 ### From Clause
+
+To set table or view to query you can call `from()` method or create query directly from [`Table`](./Db/Model/Table.php) or [`View`](./Db/Model/View.php):
+```php
+$query = $db->tbl->product->select(/*...*/);
+// or
+$query = $db->select(/*...*/)->from($db->tbl->product); // same as above
+// or
+$query = $db->select(/*...*/)->from('tbl_product'); // not same as above regarding JOIN clause
+```
+
+By default, alias of table (or view) consists of first letters of each word of table (or view) name without prefix (`tbl_`,`t_`, `vw_`, `v_`). For example: `tbl_order` -> `o`, `tbl_order_item` -> `oi`.
+
+To change table alias, call `mainTableAs()` method of query:
+```php
+$query = $db->tbl->product->select(/*...*/)->mainTableAs('prod');
+```
+
+### Join Clause
+
+To set JOIN clause use these methods: `join()`, `left()`, `right()`, `full()`.
+
+Example:
+```php
+$query = $db->tbl->orderItem->select(/*...*/)  // SELECT ... FROM "tbl_order_item" "oi"
+    ->join($db->tbl->order)                    // JOIN "tbl_order" "o" ON "o"."order_id" = "oi"."order_id"
+    ->left($db->tbl->orderState)               // LEFT JOIN "tbl_order_state" "os" ON "os"."state_id" = "o"."state_id"
+    ->join($db->tbl->product, 'oi')            // JOIN "tbl_product" "p" ON "p"."product_id" = "oi"."product_id"
+    ->where('o.state_id', 1);                  // WHERE "o"."state_id" = ?
+```
+
+By default, table joins to previous table by primary key. Default alias of table is first letters of each word of table name. You can change ON condition (second parameter) and alias (third parameter):
+```php
+$query = $db->tbl->orderItem->select(/*...*/)
+    ->join(
+        $db->tbl->order,
+        'order.order_id=oi.order_id', // string
+        'order'
+    )
+    ->left(
+        $db->tbl->orderState,
+        Sql::condition()              // Condition object
+            ->and('os.state_id')->eq(Sql::expression('o.state_id'))
+            ->and('os.state_id')->eq(1)
+    );
+```
+
+#### ON condition shortcuts
+
+Specify alias of table to which join is needed:
+```php
+$query = $db->tbl->orderItem->select(/*...*/)
+    ->join($db->tbl->order)
+    ->join($db->tbl->product, 'oi'); // join to tbl_order_item (not tbl_order) by product_id field
+```
+
+Specify column of table to which join is needed:
+```php
+$query = $db->tbl->orderItem->select(/*...*/)
+    ->join($db->tbl->order, '.foo_id'); // "o"."order_id" = "oi"."foo_id"
+```
+
+Specify alias and column of table to which join is needed:
+```php
+$query = $db->tbl->orderItem->select(/*...*/)
+    ->join($db->tbl->order)
+    ->join($db->tbl->product, 'oi.foo_id'); // "p"."product_id" = "oi"."foo_id"
+```
 
 ### Where Clause
 
