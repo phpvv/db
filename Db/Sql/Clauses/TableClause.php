@@ -405,6 +405,17 @@ class TableClause extends ItemList
     }
 
     /**
+     * @param string|Table|Expression $table
+     * @param string|null             $alias
+     *
+     * @return Item
+     */
+    public function createItem(string|Table|Expression $table, string $alias = null): Item
+    {
+        return new Item($table, $alias);
+    }
+
+    /**
      * @param Item $firstItem
      *
      * @return $this
@@ -518,38 +529,54 @@ class TableClause extends ItemList
             return $condition->expr($on[0])->custom(...array_slice($on, 1));
         }
 
-        // todo: need comment with examples
         $lastItem = $this->getLastItem();
         if (!$on) {
             $on = $lastItem->getTable()->getAlias();
         }
 
+        if (!is_string($on)) {
+            throw new \InvalidArgumentException('Invalid $on type');
+        }
+
         /** @var DbObject $rightField */
         $rightField = null;
-        if (is_string($on) && str_starts_with($on, '.')) {
+        if (str_starts_with($on, '.')) {
+            // $on == '.fk_field' (prev_table.fk_field)
             $rightField = DbObject::create(substr($on, 1));
             if ($rightField) {
-                $prevAliAs = $lastItem->getTable()->getAlias();
-                $rightField->setOwner($prevAliAs);
+                $prevAlias = $lastItem->getTable()->getAlias();
+                $rightField->setOwner($prevAlias);
             }
         }
 
         if (!$rightField) {
-            $rightField = DbObject::create($on);
-            if ($rightField) {
-                if (!$rightField->getOwner()) {
-                    $tableModel = $item->getTableModel();
-                    if (!$tableModel) {
-                        throw new \LogicException('Can\'t determine previous table PK field');
-                    }
-
-                    $rightField = $rightField->createChild($tableModel->getPk());
+            // check if $on == 'table_alias' or $on == 'table_alias.fk_field'
+            $rightField = (function () use ($item, $on) {
+                $rightField = DbObject::create($on);
+                if (!$rightField) {
+                    // not DbObject expression
+                    return null;
                 }
-            }
+
+                if ($rightField->getOwner()) {
+                    // $on == 'table_alias.fk_field'
+                    return $rightField;
+                }
+
+                // $on == 'table_alias'
+                $tableModel = $item->getTableModel();
+                if (!$tableModel) {
+                    throw new \LogicException('Can\'t determine previous table PK field');
+                }
+
+                // target table field name = joined table PK field name
+                return  $rightField->createChild($tableModel->getPk());
+            })();
         }
 
         if ($rightField) {
-            $leftField = DbObject::create($rightField->getName(), $item->getTable()->getAlias());
+            $name = ($tableModel = $item->getTableModel()) ? $tableModel->getPk() : $rightField->getName();
+            $leftField = DbObject::create($name, $item->getTable()->getAlias());
         } else {
             [$leftField, $rightField] = $this->parseCustomCompare($on);
         }
@@ -574,17 +601,6 @@ class TableClause extends ItemList
         }
 
         return $this->addItem($item);
-    }
-
-    /**
-     * @param string|Table|Expression $table
-     * @param string|null             $alias
-     *
-     * @return Item
-     */
-    public function createItem(string|Table|Expression $table, string $alias = null): Item
-    {
-        return new Item($table, $alias);
     }
 
     /**
