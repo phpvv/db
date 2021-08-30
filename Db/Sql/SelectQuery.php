@@ -22,6 +22,7 @@ use VV\Db\Sql\Clauses\LimitClause;
 use VV\Db\Sql\Clauses\OrderByClause;
 use VV\Db\Sql\Clauses\QueryWhereTrait;
 use VV\Db\Sql\Clauses\TableClause;
+use VV\Db\Sql\Expressions\DbObject;
 use VV\Db\Sql\Expressions\Expression;
 use VV\Db\Sql\Predicates\Predicate;
 
@@ -53,8 +54,6 @@ class SelectQuery extends Query implements Expressions\Expression
         C_LIMIT = 0x40,
         C_DISTINCT = 0x80,
         C_FOR_UPDATE = 0x0100;
-
-    protected const MAX_RESULT_FIELD_NAME_LEN = 30;
 
     private ?ColumnsClause $columnsClause = null;
     private ?GroupByClause $groupByClause = null;
@@ -179,51 +178,19 @@ class SelectQuery extends Query implements Expressions\Expression
     }
 
     /**
-     * Appends columns list
+     * Appends nested columns
      *
-     * @param string|string[]       $group
-     * @param string                $defaultTableAlias
+     * @param string|string[]       $path
      * @param string|int|Expression ...$columns
      *
      * @return $this
      */
-    public function addColumnsGroup(
-        array|string $group,
-        string $defaultTableAlias,
-        string|int|Expression ...$columns
-    ): static {
-        if (!is_array($group)) {
-            $group = [$group];
-        }
+    public function addNestedColumns(array|string $path, string|int|Expression ...$columns): static
+    {
+        $alias = $this->getTableClause()->getLastTableAlias();
+        $this->getColumnsClause()->addNested($path, $alias, ...$columns);
 
-        // todo: need review/refactoring
-        $columnsClause = $this->getColumnsClause();
-        $map = $columnsClause->getResultFieldsMap();
-        foreach ($columns as &$col) {
-            if (is_string($col)) {
-                $col = Expressions\DbObject::create($col, $defaultTableAlias);
-                $col->as($col->getResultName());
-            }
-
-            if (!$col instanceof Expressions\Expression) {
-                throw new \InvalidArgumentException('$column must be string or Sql\Expr');
-            }
-
-            $path = $group;
-            $path[] = $col->getAlias();
-
-            // build short alias name
-            $sqlAlias = $this->buildColumnsGroupAlias($path, $map);
-
-            // add path to map and save column alias
-            $map[$sqlAlias] = $path;
-            $col->as($sqlAlias);
-        }
-        unset($col);
-
-        $columnsClause->setResultFieldsMap($map);
-
-        return $this->addColumns(...$columns);
+        return $this;
     }
 
 
@@ -383,35 +350,35 @@ class SelectQuery extends Query implements Expressions\Expression
     /**
      * @param Table|SelectQuery           $table
      * @param string|array|Condition|null $on
-     * @param array|string|null           $group
+     * @param array|string|null           $path
      * @param string|null                 $alias
      *
      * @return $this
      */
-    public function joinAsColumnsGroup(
+    public function joinNestedColumns(
         Table|SelectQuery $table,
         string|array|Condition $on = null,
-        array|string $group = null,
+        array|string $path = null,
         string $alias = null,
     ): static {
-        return $this->addJoinAsColumnsGroup([$this, 'join'], $table, $on, $group, $alias);
+        return $this->addJoinNestedColumns([$this, 'join'], $table, $on, $path, $alias);
     }
 
     /**
      * @param Table|SelectQuery           $table
      * @param string|array|Condition|null $on
-     * @param array|string|null           $group
+     * @param array|string|null           $path
      * @param string|null                 $alias
      *
      * @return $this
      */
-    public function leftAsColumnsGroup(
+    public function leftNestedColumns(
         Table|SelectQuery $table,
         string|array|Condition $on = null,
-        array|string $group = null,
+        array|string $path = null,
         string $alias = null,
     ): static {
-        return $this->addJoinAsColumnsGroup([$this, 'left'], $table, $on, $group, $alias);
+        return $this->addJoinNestedColumns([$this, 'left'], $table, $on, $path, $alias);
     }
 
     /**
@@ -831,9 +798,17 @@ class SelectQuery extends Query implements Expressions\Expression
     /**
      * @return array|null
      */
+    public function getResultColumnsMap(): ?array
+    {
+        return $this->getColumnsClause()->getResultColumnsMap();
+    }
+
+    /**
+     * @deprecated
+     */
     public function getResultFieldsMap(): ?array
     {
-        return $this->getColumnsClause()->getResultFieldsMap();
+        return $this->getResultColumnsMap();
     }
 
     /**
@@ -844,60 +819,37 @@ class SelectQuery extends Query implements Expressions\Expression
         return spl_object_hash($this);
     }
 
-    protected function addJoinAsColumnsGroup(
+    protected function addJoinNestedColumns(
         callable $joinCallback,
         Table|SelectQuery $from,
         string|array|Condition $on = null,
-        array|string $group = null,
+        array|string $path = null,
         string $alias = null
     ): static {
-        if (!$group && $on) {
+        if (!$path && $on) {
             if (!is_string($on)) {
-                throw new \LogicException('$group not set and $on is not string');
+                throw new \LogicException('$path not set and $on is not string');
             }
 
-            $nameRx = Expressions\DbObject::NAME_RX;
-            if (preg_match("/^$nameRx\.($nameRx)$", $on, $m)) {
-                $group = $m[1];
+            $nameRx = DbObject::NAME_RX;
+            if (preg_match("/^$nameRx\.($nameRx)$/", $on, $m)) {
+                $path = $m[1];
             }
         }
         if (!$alias) {
-            $alias = $group;
+            if (is_array($path)) {
+                $alias = end($path);
+            } else {
+                $alias = (string)$path;
+            }
         }
 
         $joinCallback($from, $on, $alias);
+
         $alias = $this->getTableClause()->getLastTableAlias();
+        $this->getColumnsClause()->addNestedFrom($from, $path, $alias);
 
-        if (!is_array($group)) {
-            $group = [$group];
-        }
-
-        if ($from instanceof Table) {
-            return $this->addColumnsGroup($group, $alias, ...$from->getFields()->getNames());
-        }
-
-        if ($from instanceof SelectQuery) {
-            $resultFields = $from->getColumnsClause()->getResultFields();
-            // todo: need review/refactoring
-            if ($joinMap = $from->getResultFieldsMap()) {
-                $resultFields = array_diff($resultFields, array_keys($joinMap));
-                $columnsClause = $this->getColumnsClause();
-
-                $map = $columnsClause->getResultFieldsMap();
-                foreach ($joinMap as $subField => $path) {
-                    $jPath = array_merge($group, $path);
-                    $sqlAlias = $this->buildColumnsGroupAlias($jPath, $map);
-                    $map[$sqlAlias] = $jPath;
-                    $this->addColumns("$alias.$subField $sqlAlias");
-                }
-
-                $columnsClause->setResultFieldsMap($map);
-            }
-
-            return $this->addColumnsGroup($group, $alias, ...$resultFields);
-        }
-
-        throw new \InvalidArgumentException('Wrong $table type');
+        return $this;
     }
 
     protected function getNonEmptyClausesMap(): array
@@ -915,38 +867,4 @@ class SelectQuery extends Query implements Expressions\Expression
         ];
     }
 
-    /**
-     * @param array      $path
-     * @param array|null $resultFieldsMap
-     *
-     * @return string
-     */
-    public static function buildColumnsGroupAlias(array $path, ?array $resultFieldsMap): string
-    {
-        $sqlAlias = '$' . implode('_', $path);
-        $maxLength = static::MAX_RESULT_FIELD_NAME_LEN;
-        $len = strlen($sqlAlias);
-        if ($len > $maxLength) {
-            $sqlAlias = substr($sqlAlias, 0, $maxLength);
-            $len = $maxLength;
-        }
-
-        $i = 1;
-        if ($resultFieldsMap) {
-            $d = $maxLength - $len;
-
-            while (array_key_exists($sqlAlias, $resultFieldsMap)) {
-                $sfx = '_' . $i++;
-                $sfxLen = strlen($sfx);
-
-                $cutAlias = $d < $sfxLen
-                    ? substr($sqlAlias, 0, $maxLength - $sfxLen + $d)
-                    : $sqlAlias;
-
-                $sqlAlias = $cutAlias . $sfx;
-            }
-        }
-
-        return $sqlAlias;
-    }
 }

@@ -13,11 +13,14 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Clauses;
 
+use VV\Db\Model\Table;
 use VV\Db\Sql;
+use VV\Db\Sql\Condition;
 use VV\Db\Sql\Expressions\AliasableExpression;
 use VV\Db\Sql\Expressions\DbObject;
 use VV\Db\Sql\Expressions\Expression;
 use VV\Db\Sql\Expressions\PlainSql;
+use VV\Db\Sql\SelectQuery;
 
 /**
  * Class ColumnsClause
@@ -26,9 +29,11 @@ use VV\Db\Sql\Expressions\PlainSql;
  */
 class ColumnsClause extends ColumnList
 {
+    protected const MAX_RESULT_COLUMN_NAME_LENGTH = 30;
+
     private ?TableClause $tableClause = null;
-    private ?array $resultFields = null;
-    private ?array $resultFieldsMap = null;
+    private ?array $resultColumns = null;
+    private ?array $resultColumnsMap = null;
     private bool $asteriskOnEmpty = true;
 
     /**
@@ -72,11 +77,11 @@ class ColumnsClause extends ColumnList
     /**
      * @return string[]
      */
-    public function getResultFields(): array
+    public function getResultColumns(): array
     {
-        $rf = &$this->resultFields;
-        if ($rf === null) {
-            $rf = [];
+        $columns = &$this->resultColumns;
+        if ($columns === null) {
+            $columns = [];
             foreach ($this->getItems() as $col) {
                 $a = null;
 
@@ -95,7 +100,7 @@ class ColumnsClause extends ColumnList
                                 throw new \LogicException("Can't get result fields: no table model for *");
                             }
 
-                            $rf = array_merge($rf, $tbl->getFields()->getNames());
+                            $columns = array_merge($columns, $tbl->getFields()->getNames());
                             continue;
                         }
                     }
@@ -107,11 +112,17 @@ class ColumnsClause extends ColumnList
                     throw new \LogicException("Alias for field $col is not set");
                 }
 
-                $rf[] = $a;
+                $columns[] = $a;
             }
         }
 
-        return $rf;
+        return $columns;
+    }
+
+    /** @deprecated */
+    public function getResultFields(): array
+    {
+        return $this->getResultColumns();
     }
 
     /**
@@ -137,21 +148,107 @@ class ColumnsClause extends ColumnList
     /**
      * @return array|null
      */
-    public function getResultFieldsMap(): ?array
+    public function getResultColumnsMap(): ?array
     {
-        return $this->resultFieldsMap;
+        return $this->resultColumnsMap;
     }
 
     /**
-     * @param array|null $resultFieldsMap
+     * @param array|null $resultColumnsMap
      *
      * @return $this|ColumnsClause
      */
-    public function setResultFieldsMap(?array $resultFieldsMap): self
+    public function setResultColumnsMap(?array $resultColumnsMap): self
     {
-        $this->resultFieldsMap = $resultFieldsMap;
+        $this->resultColumnsMap = $resultColumnsMap;
 
         return $this;
+    }
+
+    /**
+     * Appends nested columns
+     *
+     * @param string|string[]       $path
+     * @param string                $defaultTableAlias
+     * @param string|int|Expression ...$columns
+     *
+     * @return $this
+     */
+    public function addNested(
+        array|string $path,
+        string $defaultTableAlias,
+        string|int|Expression ...$columns
+    ): static {
+        if (!is_array($path)) {
+            $path = [$path];
+        }
+
+        $map = &$this->resultColumnsMap;
+        foreach ($columns as &$col) {
+            if (is_string($col)) {
+                $col = DbObject::create($col, $defaultTableAlias);
+                $col->as($col->getResultName());
+            }
+
+            if (!$col instanceof Expression) {
+                throw new \InvalidArgumentException('$column must be string or Sql\Expr');
+            }
+
+            $columnPath = $path;
+            $columnPath[] = $col->getAlias();
+
+            // build short alias name
+            $sqlAlias = ColumnsClause::buildNestedColumnAlias($columnPath, $map);
+
+            // add columnPath to map and save column alias
+            $map[$sqlAlias] = $columnPath;
+            $col->as($sqlAlias);
+        }
+        unset($col, $map);
+
+        return $this->add(...$columns);
+    }
+
+    /**
+     * Appends nested columns from another SelectQuery or Table
+     *
+     * @param Table|SelectQuery           $from
+     * @param string|string[]             $path
+     * @param string|null                 $alias
+     *
+     * @return $this
+     */
+    public function addNestedFrom(Table|SelectQuery $from, array|string $path = null, string $alias = null): static
+    {
+        if ($path === null) {
+            $path = [$alias];
+        }
+
+        if (!is_array($path)) {
+            $path = [$path];
+        }
+
+        if ($from instanceof Table) {
+            return $this->addNested($path, $alias, ...$from->getFields()->getNames());
+        }
+
+        $resultColumns = $from->getColumnsClause()->getResultColumns();
+
+        if ($joinedMap = $from->getResultColumnsMap()) {
+            $resultColumns = array_diff($resultColumns, array_keys($joinedMap));
+
+            $map = $this->getResultColumnsMap();
+            foreach ($joinedMap as $subField => $subPath) {
+                $jPath = array_merge($path, $subPath);
+                $sqlAlias = ColumnsClause::buildNestedColumnAlias($jPath, $map);
+                $map[$sqlAlias] = $jPath;
+                $this->add("$alias.$subField $sqlAlias");
+            }
+
+            $this->setResultColumnsMap($map);
+        }
+
+        return $this->addNested($path, $alias, ...$resultColumns);
     }
 
     /**
@@ -178,5 +275,40 @@ class ColumnsClause extends ColumnList
     protected function getAllowedObjectTypes(): array
     {
         return [Expression::class];
+    }
+
+    /**
+     * @param array      $path
+     * @param array|null $resultFieldsMap
+     *
+     * @return string
+     */
+    public static function buildNestedColumnAlias(array $path, ?array $resultFieldsMap): string
+    {
+        $sqlAlias = '$' . implode('_', $path);
+        $maxLength = static::MAX_RESULT_COLUMN_NAME_LENGTH;
+        $len = strlen($sqlAlias);
+        if ($len > $maxLength) {
+            $sqlAlias = substr($sqlAlias, 0, $maxLength);
+            $len = $maxLength;
+        }
+
+        $i = 1;
+        if ($resultFieldsMap) {
+            $d = $maxLength - $len;
+
+            while (array_key_exists($sqlAlias, $resultFieldsMap)) {
+                $sfx = '_' . $i++;
+                $sfxLen = strlen($sfx);
+
+                $cutAlias = $d < $sfxLen
+                    ? substr($sqlAlias, 0, $maxLength - $sfxLen + $d)
+                    : $sqlAlias;
+
+                $sqlAlias = $cutAlias . $sfx;
+            }
+        }
+
+        return $sqlAlias;
     }
 }

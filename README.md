@@ -448,7 +448,7 @@ $query = $db->tbl->orderItem->select(/*...*/)  // SELECT ... FROM "tbl_order_ite
     ->where('o.state_id', 1);                  // WHERE "o"."state_id" = ?
 ```
 
-By default, table joins to previous table by primary key. Default alias of table is first letters of each word of table name. You can change ON condition (second parameter) and alias (third parameter):
+By default, table joins to previous table by primary key column. Default alias of table is first letters of each word of table name. You can change ON condition (second parameter) and alias (third parameter):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)
     ->join(
@@ -484,6 +484,128 @@ Specify alias and column of table to which join is needed:
 $query = $db->tbl->orderItem->select(/*...*/)
     ->join($db->tbl->order)
     ->join($db->tbl->product, 'oi.foo_id'); // "p"."product_id" = "oi"."foo_id"
+```
+
+`joinParent()`:
+```php
+$query = $db->tbl->productCategory->select(/*...*/)
+    //->joinParent('pc2', 'pc', 'parent_id') // same as below
+    ->joinParent('pc2'); // JOIN "tbl_product_category" "pc2" ON ("pc2"."category_id" = "pc"."parent_id")
+```
+`joinBack()`:
+```php
+$query = $db->tbl->order->select(/*...*/)
+    ->joinBack($db->tbl->orderItem); // JOIN "tbl_order_item" "oi" ON ("oi"."item_id" = "o"."order_id")
+```
+
+### Nested Columns
+
+Nest resulting columns manually:
+```php
+$query = $db->tbl->product->select('product_id', 'price', 'weight')
+    ->addNestedColumns('brand', 'b.brand_id', 'b.title') // first argument is nesting path: string|string[]
+    ->addNestedColumns(['nested', 'color'], 'c.color_id', 'c.title')
+    ->addNestedColumns(['nested', 'size'], 'width', 'height', 'depth')
+    ->join($db->tbl->brand)
+    ->join($db->tbl->color, 'p');
+
+print_r($query->row);
+```
+Result:
+```
+Array
+(
+    [product_id] => 10
+    [price] => 1000.00
+    [weight] => 10000
+    [brand] => Array
+        (
+            [brand_id] => 1
+            [title] => Brand 1
+        )
+
+    [nested] => Array
+        (
+            [color] => Array
+                (
+                    [color_id] => 1
+                    [title] => Black
+                )
+
+            [size] => Array
+                (
+                    [width] => 250.0
+                    [height] => 500.0
+                    [depth] => 500.0
+                )
+
+        )
+
+)
+```
+
+Nest resulting columns with join:
+```php
+$query = $db->tbl->orderItem->select('item_id', 'price', 'quantity')
+    ->joinNestedColumns(
+        $db->tbl->order->select('order_id', 'amount', 'comment'), // sub query
+        'oi.order_id',                                            // ON condition (see above)
+        ['my', 'nested', 'order']                                 // nesting path
+    )
+    ->joinNestedColumns(
+        $db->tbl->product->select('product_id', 'title')          // sub query
+            ->joinNestedColumns(
+                $db->tbl->brand->select('brand_id', 'title'),     // sub sub query
+                'p.brand_id'
+            )
+            ->joinNestedColumns($db->tbl->color, 'p', 'color'),   // just join table - select all its columns
+        'oi.product_id',
+        'product'
+    );
+
+print_r($query->row);
+```
+Result:
+```
+Array
+(
+    [item_id] => 1
+    [price] => 1000.00
+    [quantity] => 1
+    [my] => Array
+        (
+            [nested] => Array
+                (
+                    [order] => Array
+                        (
+                            [order_id] => 1
+                            [amount] => 1133.47
+                            [comment] =>
+                        )
+
+                )
+
+        )
+
+    [product] => Array
+        (
+            [brand_id] => Array
+                (
+                    [brand_id] => 1
+                    [title] => Brand 1
+                )
+
+            [color] => Array
+                (
+                    [color_id] => 1
+                    [title] => Black
+                )
+
+            [product_id] => 10
+            [title] => Computer 10
+        )
+
+)
 ```
 
 ### Where Clause
