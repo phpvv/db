@@ -18,7 +18,7 @@ composer require phpvv/db-oci
 ```
 
 ## Big Select Example
-
+                                                            r
 [big-select.php](https://github.com/phpvv/db-examples/blob/master/examples/big-select.php) in [DB Examples Project](https://github.com/phpvv/db-examples):
 
 ```php
@@ -609,6 +609,56 @@ Array
 ```
 
 ### Where Clause
+
+To set query condition use `where()` method. Each `where()` adds `AND` condition.
+Method accepts:
+- `Condition` as first argument:
+```php
+$query = $db->tbl->product->select(/*...*/)
+    ->where(                                // WHERE
+        Sql::condition()
+            ->and('color_id')->eq(5)            // ("color_id" = ?
+            ->and('price')->lte(2000)           // AND "price" <= ?
+            ->and('title')->isNotNull()         // AND "title" IS NOT NULL
+            ->and('brand_id')->in(2, 3)         // AND "brand_id" IN (?, ?)
+            ->and('width')->between(250, 350)   // AND "width" BETWEEN ? AND ?
+            ->and('state=1')->custom()          // AND state=1) -- w/o quotes: custom query not changed
+    );
+
+```
+- `Expression|string` as first argument and (binding) value to compare as second argument:
+```php
+$query = $db->tbl->product->select(/*...*/)
+    ->where('color_id', 5)      // same: `->where('color_id =', 5)`
+    ->where('price <=', 2000)   // supported operators: = | != | <> | < | > | <= | >=
+    ->where('title !=', null);
+```
+- `string` as custom SQL as first argument and (binding) array of values as second argument:
+```php
+$query = $db->tbl->product->select(/*...*/)
+    ->where('`width` BETWEEN ? AND ?', [250, 350])  // custom sql with binding parameters
+    ->where('state=1');                             // custom sql w/o binding parameters
+```
+- array as first argument ():
+```php
+$query = $db->tbl->product->select(/*...*/)
+    ->where([
+        'color_id' => 5,
+        'price <=' => 2000,
+        'title !=' => null,
+        Sql::condition('brand_id')->eq(2)->or->eq(3),   // AND ("brand_id" = ? OR "brand_id" = ?)
+        '`width` BETWEEN ? AND ?' => [250, 350],
+        'state=1',
+    ]);
+```
+
+#### Where shortcuts
+
+Query has some shortcuts methods:
+- `->whereId(1)` (for `$db->tbl->product->select()` - `product_id = ?`);
+- `->where[Not]In('brand_id', 1, 2, 3)`;
+- `->whereId[Not]In(1, 2, 3)`;
+- `->where[Not]Between('width', 250, 350)`.
 
 ## Insert
 

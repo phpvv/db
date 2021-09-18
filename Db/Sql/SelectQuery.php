@@ -454,12 +454,12 @@ class SelectQuery extends Query implements Expressions\Expression
     /**
      * Add `HAVING` clause
      *
-     * @param string|int|array|Expression|Predicate|null $field
-     * @param mixed                                      $value
+     * @param string|int|Expression|Predicate|array $expression
+     * @param mixed|array|Expression|null           $param
      *
      * @return SelectQuery
      */
-    public function having(string|int|array|Expression|Predicate|null $field, mixed $value = null): SelectQuery
+    public function having(string|int|Expression|Predicate|array $expression, mixed $param = null): SelectQuery
     {
         return $this->conditionAnd($this->getHavingClause(), ...func_get_args());
     }

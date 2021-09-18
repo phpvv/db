@@ -69,17 +69,13 @@ class SqlParam implements Expression
      */
     public static function checkType(mixed $param): bool
     {
-        return is_string($param)
+        return is_scalar($param)
                || is_int($param)
                || is_double($param)
                || is_null($param)
                // parameter object
-               || (is_object($param)
-                   && (
-                       $param instanceof Param
-                       || $param instanceof \DateTimeInterface
-                   )
-               );
+               || $param instanceof Param
+               || $param instanceof \DateTimeInterface;
     }
 
     /**
@@ -87,11 +83,11 @@ class SqlParam implements Expression
      */
     public static function throwIfWrongType(mixed $param)
     {
-        if (!static::checkType($param)) {
-            $type = is_object($param) ? get_class($param) : gettype($param);
-            throw new \InvalidArgumentException(
-                "Parameter can be string, integer, double or instance of VV\\Db\\P; $type given"
-            );
+        if (static::checkType($param)) {
+            return;
         }
+
+        $type = is_object($param) ? get_class($param) : gettype($param);
+        throw new \InvalidArgumentException("Invalid parameter type: $type");
     }
 }

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql;
 
+use VV\Db\Sql;
 use VV\Db\Sql\Clauses\ItemList;
 use VV\Db\Sql\Expressions\DbObject;
 use VV\Db\Sql\Expressions\Expression;
@@ -53,31 +54,27 @@ class Condition extends ItemList implements Predicate
         };
     }
 
+    /** Sets expression (target) for next comparison method */
+    public function expression(string|int|Expression $expression): static
+    {
+        return $this->setTarget($expression);
+    }
+
     /**
-     * @param string|int|Expression $expression
-     *
-     * @return $this
+     * @deprecated Use {@see \VV\Db\Sql\Condition::expression()}
      */
     public function expr(string|int|Expression $expression): static
     {
         return $this->setTarget($expression);
     }
 
-    /**
-     * @param bool $flag
-     *
-     * @return $this
-     */
+    /** Sets negation for next comparison method */
     public function not(bool $flag = true): static
     {
         return $this->setItemNegation($flag);
     }
 
-    /**
-     * @param string|int|Expression|null $expression
-     *
-     * @return static
-     */
+    /** Creates sub condition and adds it to current condition */
     public function sub(string|int|Expression $expression = null): static
     {
         $sub = new self();
@@ -86,7 +83,7 @@ class Condition extends ItemList implements Predicate
             $expression = $this->getTarget();
         }
         if ($expression) {
-            $sub->expr($expression);
+            $sub->setTarget($expression);
         }
 
         $this->addPredicate($sub);
@@ -94,11 +91,7 @@ class Condition extends ItemList implements Predicate
         return $sub;
     }
 
-    /**
-     * @param array $and
-     *
-     * @return $this
-     */
+    /** Adds sub expression and applies $and array to `and()` of sub condition */
     public function subAnd(array $and): static
     {
         $this->sub()->and($and);
@@ -106,11 +99,7 @@ class Condition extends ItemList implements Predicate
         return $this;
     }
 
-    /**
-     * @param array $or
-     *
-     * @return $this
-     */
+    /** Adds sub expression and applies $or array to `or()` of sub condition */
     public function subOr(array $or): static
     {
         $this->sub()->or($or);
@@ -131,7 +120,7 @@ class Condition extends ItemList implements Predicate
         }
 
         // check for "is (not) null"
-        if (\VV\emt($param)) {
+        if ($param === null || $param === '') {
             switch ($operator) {
                 case Cmp::OP_EQ:
                     return $this->isNull();
@@ -207,12 +196,12 @@ class Condition extends ItemList implements Predicate
     }
 
     /**
-     * @param $from
-     * @param $till
+     * @param mixed $from
+     * @param mixed $till
      *
      * @return $this
      */
-    public function between($from, $till): static
+    public function between(mixed $from, mixed $till): static
     {
         $predicate = new BetweenPredicate(
             $this->getTarget(),
@@ -229,7 +218,7 @@ class Condition extends ItemList implements Predicate
      *
      * @return $this
      */
-    public function in(...$params): static
+    public function in(mixed ...$params): static
     {
         if (count($params) && is_array($params[0])) {
             $params = $params[0];
@@ -248,7 +237,7 @@ class Condition extends ItemList implements Predicate
         $target = $this->getTarget();
         $parentNot = $this->isItemNegation();
 
-        $inPredic = $notNullParams
+        $inPredicate = $notNullParams
             ? new InPredicate($target, $notNullParams, $parentNot)
             : null;
 
@@ -257,8 +246,8 @@ class Condition extends ItemList implements Predicate
         // NOT IN       (1, 2) ==> NOT IN (1, 2) OR IS NULL
         if ($containNull == !$parentNot) {
             $sub = new self();
-            if ($inPredic) {
-                $sub->plainAddPredicate($inPredic);
+            if ($inPredicate) {
+                $sub->plainAddPredicate($inPredicate);
             }
             $sub->or($target)->isNull();
 
@@ -266,7 +255,7 @@ class Condition extends ItemList implements Predicate
         }
 
         // if $notNullParams is empty
-        if (!$inPredic) {
+        if (!$inPredicate) {
             // NOT IN (null) ==> NOT NULL
             if ($containNull) {
                 return $this->isNotNull();
@@ -276,10 +265,10 @@ class Condition extends ItemList implements Predicate
                 return $this;
             }
             // NO RECORDS
-            $inPredic = new InPredicate($target, [\VV\Db\Sql::plain('NULL')]);
+            $inPredicate = new InPredicate($target, [Sql::plain('NULL')]);
         }
 
-        return $this->plainAddPredicate($inPredic);
+        return $this->plainAddPredicate($inPredicate);
     }
 
     /**
@@ -460,22 +449,22 @@ class Condition extends ItemList implements Predicate
 
     /**
      * @param string|int|array|Expression|Predicate|null $target
-     * @param mixed                                      ...$params
+     * @param mixed|null                                 $param
      *
      * @return $this
      */
-    public function and(string|int|array|Expression|Predicate $target = null, mixed ...$params): static
+    public function and(string|int|array|Expression|Predicate $target = null, mixed $param = null): static
     {
         return $this->append(ConditionItem::CONN_AND, ...func_get_args());
     }
 
     /**
      * @param string|int|array|Expression|Predicate|null $target
-     * @param mixed                                      ...$params
+     * @param mixed                                      $param
      *
      * @return $this
      */
-    public function or(string|int|array|Expression|Predicate $target = null, mixed ...$params): static
+    public function or(string|int|array|Expression|Predicate $target = null, mixed $param = null): static
     {
         return $this->append(ConditionItem::CONN_OR, ...func_get_args());
     }
@@ -569,18 +558,18 @@ class Condition extends ItemList implements Predicate
     /**
      * @param string                                     $connector
      * @param string|int|array|Expression|Predicate|null $target
-     * @param mixed                                      ...$params
+     * @param mixed                                      $param
      *
      * @return $this
      */
     private function append(
         string $connector,
         string|int|array|Expression|Predicate $target = null,
-        mixed ...$params
+        mixed $param = null
     ): static {
         $this->setConnector($connector);
 
-        // if nothing passed, just set connector (traget is previous)
+        // if nothing passed, just set connector (target is previous)
         if (1 >= $argc = func_num_args()) {
             return $this;
         }
@@ -596,173 +585,58 @@ class Condition extends ItemList implements Predicate
                     } else {
                         throw new \LogicException('Unsupported predicate');
                     }
-                } elseif (is_array($v)) {
-                    $this->setTarget($k)->custom(...$v);
                 } else {
-                    $this->append($connector, $k, $v);
+                    $this->appendTargetParam($k, $v);
                 }
             }
 
             return $this;
         }
 
+        // target - is complete condition/predicate
         if ($target instanceof Predicate) {
             return $this->addPredicate($target);
         }
 
+        // if no params argument - just leave target set (common case)
+        // further call of predicate acceptance method (`eq()`, `in()`, `like()`...) is required
         if ($argc < 3) {
             return $this->setTarget($target);
         }
 
-        if (is_array($params[0]) && is_string($target)) {
-            return $this->setTarget($target)->custom(...$params[0]);
-        }
-
-        // try to parse
-        if (is_array($params[0])) {
-            $params = $params[0];
-        }
-
-        $equals = is_object($target);
-        if (!$equals && $obj = DbObject::create($target, null, false)) {
-            $target = $obj;
-            $equals = true;
-        }
-
-        if (!$equals && is_string($target)) {
-            $operatorAccepted =
-                $this->parseCompareTarget($target, $params)
-                || $this->parseLikeTarget($target, $params)
-                || $this->parseInTarget($target, $params)
-                || $this->parseIsNullTarget($target, $params)
-                || $this->parseBetweenTarget($target, $params);
-
-            if ($operatorAccepted) {
-                return $this;
-            }
-        }
-
-        $this->throwIfWrongParamsCount($params, 1)
-            ->setTarget($target)
-            ->eq(...$params);
-
-        return $this;
+        return $this->appendTargetParam($target, $param);
     }
 
-    /**
-     * @param string $target
-     * @param array  $params
-     *
-     * @return $this|null
-     */
-    private function parseCompareTarget(string $target, array $params): ?self
+    private function appendTargetParam(string|int|Expression $target, mixed $param): static
     {
-        if (!$this->parseTargetOperator($target, '= | != | <> | < | > | <= | >=', $m)) {
-            return null;
+        // if $param is array - add custom condition
+        if (is_array($param)) {
+            return $this->setTarget($target)->custom(...$param);
         }
 
-        return $this
-            ->throwIfWrongParamsCount($params, 1)
-            ->compare($params[0], $m[2]);
-    }
-
-    /**
-     * @param string $target
-     * @param array  $params
-     *
-     * @return $this|null
-     */
-    private function parseLikeTarget(string $target, array $params): ?self
-    {
-        if (!$this->parseTargetOperator($target, '(not \s*)? like')) {
-            return null;
+        // Expression - only for equals
+        if ($target instanceof Expression) {
+            return $this->setTarget($target)->eq($param);
         }
 
-        return $this
-            ->throwIfWrongParamsCount($params, 1)
-            ->like($params[0]);
-    }
-
-    /**
-     * @param string $target
-     * @param array  $params
-     *
-     * @return $this|null
-     */
-    private function parseBetweenTarget(string $target, array $params): ?self
-    {
-        if (!$this->parseTargetOperator($target, '(not \s*)? between')) {
-            return null;
+        if (!is_string($target)) {
+            throw new \InvalidArgumentException('Invalid $target');
+        }
+        if (is_array($param)) {
+            throw new \InvalidArgumentException('Invalid $param');
         }
 
-        return $this
-            ->throwIfWrongParamsCount($params, 2)
-            ->between(...$params);
-    }
-
-    /**
-     * @param string $target
-     * @param array  $params
-     *
-     * @return $this|null
-     */
-    private function parseInTarget(string $target, array $params): ?self
-    {
-        if (!$this->parseTargetOperator($target, '(not \s*)? in')) {
-            return null;
+        // $target is column (table.column)
+        if ($dbObject = DbObject::create($target, null, false)) {
+            return $this->setTarget($dbObject)->eq($param);
         }
 
-        return $this->in(...$params);
-    }
-
-    /**
-     * @param string $target
-     * @param array  $params
-     *
-     * @return $this|null
-     */
-    private function parseIsNullTarget(string $target, array $params): ?self
-    {
-        if (!$this->parseTargetOperator($target, 'is (\s* not)?')) {
-            return null;
+        // parse comparison operator
+        if (preg_match('/^(.+?) \s* (= | != | <> | < | > | <= | >=) \s*$/xi', $target, $m)) {
+            return $this->setTarget($m[1])->compare($param, $m[2]);
         }
 
-        return $this
-            ->throwIfWrongParamsCount($params, 0)
-            ->isNull();
-    }
-
-    /**
-     * @param string $str
-     * @param string $operatorRx
-     * @param null   $matches
-     *
-     * @return $this|null
-     */
-    private function parseTargetOperator(string $str, string $operatorRx, &$matches = null): ?self
-    {
-        if (!preg_match('/^(.+?) \s* (' . $operatorRx . ') \s*$/xi', $str, $matches)) {
-            return null;
-        }
-
-        return $this
-            ->setTarget($matches[1])
-            ->setItemNegation(count($matches) > 3);
-    }
-
-    /**
-     * @param array $params
-     * @param int   $count
-     *
-     * @return $this
-     */
-    private function throwIfWrongParamsCount(array $params, int $count): static
-    {
-        if ($count != $realCount = count($params)) {
-            throw new \InvalidArgumentException("Method expects $count parameters, $realCount given");
-        }
-
-        return $this;
+        throw new \InvalidArgumentException('Invalid $target');
     }
 
     /**
@@ -772,7 +646,7 @@ class Condition extends ItemList implements Predicate
      */
     public static function toExpression(string|int|Expression $expression): Expression
     {
-        return \VV\Db\Sql::expression($expression);
+        return Sql::expression($expression, parseAlias: false);
     }
 
     /**
@@ -782,7 +656,7 @@ class Condition extends ItemList implements Predicate
      */
     public static function toParam(mixed $param): Expression
     {
-        return \VV\Db\Sql::param($param);
+        return Sql::param($param);
     }
 
     /**

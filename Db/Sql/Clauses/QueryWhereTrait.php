@@ -29,12 +29,12 @@ trait QueryWhereTrait
     /**
      * Add `WHERE` clause
      *
-     * @param string|int|array|Expression|Predicate|null $field
-     * @param mixed|array|Expression|null                $value
+     * @param string|int|Expression|Predicate|array $expression
+     * @param mixed|array|Expression|null           $param
      *
      * @return $this
      */
-    public function where(string|int|Expression|array|Predicate|null $field, mixed $value = null): static
+    public function where(string|int|Expression|Predicate|array $expression, mixed $param = null): static
     {
         return $this->conditionAnd($this->getWhereClause(), ...func_get_args());
     }
@@ -55,27 +55,27 @@ trait QueryWhereTrait
     }
 
     /**
-     * @param string|int|Expression $field
+     * @param string|int|Expression $expression
      * @param mixed|Expression      ...$values
      *
      * @return $this
      */
-    public function whereIn(string|int|Expression $field, ...$values): static
+    public function whereIn(string|int|Expression $expression, ...$values): static
     {
-        $this->getWhereClause()->and($field)->in(...$values);
+        $this->getWhereClause()->and($expression)->in(...$values);
 
         return $this;
     }
 
     /**
-     * @param string|int|Expression $field
+     * @param string|int|Expression $expression
      * @param mixed|Expression      ...$values
      *
      * @return $this
      */
-    public function whereNotIn(string|int|Expression $field, ...$values): static
+    public function whereNotIn(string|int|Expression $expression, ...$values): static
     {
-        $this->getWhereClause()->and($field)->not->in(...$values);
+        $this->getWhereClause()->and($expression)->not->in(...$values);
 
         return $this;
     }
@@ -98,6 +98,60 @@ trait QueryWhereTrait
     public function whereIdNotIn(mixed ...$values): static
     {
         return $this->whereNotIn($this->getMainTablePk(), ...$values);
+    }
+
+    /**
+     * @param string|int|Expression $expression
+     * @param mixed                 $from
+     * @param mixed                 $till
+     *
+     * @return $this
+     */
+    public function whereBetween(string|int|Expression $expression, mixed $from, mixed $till): static
+    {
+        $this->getWhereClause()->and($expression)->between($from, $till);
+
+        return $this;
+    }
+
+    /**
+     * @param string|int|Expression $expression
+     * @param mixed                 $from
+     * @param mixed                 $till
+     *
+     * @return $this
+     */
+    public function whereNotBetween(string|int|Expression $expression, mixed $from, mixed $till): static
+    {
+        $this->getWhereClause()->and($expression)->not->between($from, $till);
+
+        return $this;
+    }
+
+    /**
+     * @param string|int|Expression $expression
+     * @param string                $pattern
+     *
+     * @return $this
+     */
+    public function whereLike(string|int|Expression $expression, string $pattern): static
+    {
+        $this->getWhereClause()->and($expression)->like($pattern);
+
+        return $this;
+    }
+
+    /**
+     * @param string|int|Expression $expression
+     * @param string                $pattern
+     *
+     * @return $this
+     */
+    public function whereNotLike(string|int|Expression $expression, string $pattern): static
+    {
+        $this->getWhereClause()->and($expression)->not->like($pattern);
+
+        return $this;
     }
 
     /**
@@ -148,24 +202,17 @@ trait QueryWhereTrait
 
     protected function conditionAnd(
         Condition $condition,
-        string|int|Expression|array|Predicate|null $field,
-        mixed $value = null
+        string|int|Expression|Predicate|array $expression,
+        mixed $param = null
     ): static {
-        if ($field) {
-            if (is_array($field)) {
-                $condition->and($field);
-            } elseif ($field instanceof Predicate) {
-                $condition->and($field);
-            } else {
-                if (func_num_args() < 3) {
-                    $value = [];
-                }
-                if (is_array($value)) {
-                    $condition->and($field)->custom(...$value);
-                } else {
-                    $condition->and($field, $value);
-                }
-            }
+        if (is_array($expression)) {
+            $condition->and($expression);
+        } elseif ($expression instanceof Predicate) {
+            $condition->and($expression);
+        } elseif (func_num_args() < 3) {
+            $condition->and($expression)->custom();
+        } else {
+            $condition->and($expression, $param);
         }
 
         return $this;

@@ -28,34 +28,23 @@ use VV\Db\Sql\Predicates\Predicate;
  */
 final class Sql
 {
-    /**
-     * @param string|int|Expression $expression
-     * @param array                 $params
-     *
-     * @return Expression
-     */
-    public static function expression(string|int|Expression $expression, array $params = []): Expression
-    {
-        if (is_object($expression)) {
-            if (!$expression instanceof Expression) {
-                throw new \InvalidArgumentException('Wrong object type');
-            }
 
+    public static function expression(
+        string|int|Expression $expression,
+        array $params = [],
+        bool $parseAlias = true
+    ): Expression {
+        if ($expression instanceof Expression) {
             return $expression;
         }
 
-        if ($o = DbObject::create($expression)) {
+        if ($o = DbObject::create($expression, null, $parseAlias)) {
             return $o;
         }
 
         return self::plain((string)$expression, $params);
     }
 
-    /**
-     * @param mixed $param
-     *
-     * @return Expression
-     */
     public static function param(mixed $param): Expression
     {
         if ($param instanceof Expression) {
@@ -65,27 +54,14 @@ final class Sql
         return new SqlParam($param);
     }
 
-    /**
-     * @param string|int $sql
-     * @param array      $params
-     *
-     * @return PlainSql
-     */
-    public static function plain(
-        string|int $sql,
-        array $params = []
-    ): PlainSql {
+    public static function plain(string|int $sql, array $params = []): PlainSql
+    {
         return new PlainSql($sql, $params);
     }
 
-    /**
-     * @param string|int|array|Expression|Predicate|null $condition
-     *
-     * @return Condition
-     */
     public static function condition(array|string|int|Expression|Predicate $condition = null): Condition
     {
-        if (!$condition) {
+        if ($condition === null) {
             return new Condition();
         }
 
@@ -101,7 +77,7 @@ final class Sql
             return (new Condition())->and($condition);
         }
 
-        return (new Condition())->expr($condition);
+        return (new Condition())->expression($condition);
     }
 
     /**

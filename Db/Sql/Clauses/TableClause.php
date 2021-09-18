@@ -526,7 +526,7 @@ class TableClause extends ItemList
         }
         // custom on as array: ['f.foo = b.bar AND b.field = ?', ['fieldValue']]
         if (is_array($on)) {
-            return $condition->expr($on[0])->custom(...array_slice($on, 1));
+            return $condition->expression($on[0])->custom(...array_slice($on, 1));
         }
 
         $lastItem = $this->getLastItem();
@@ -586,10 +586,10 @@ class TableClause extends ItemList
                 throw new \LogicException('JOIN ON leftField == rightField');
             }
 
-            return $condition->expr($leftField)->eq($rightField);
+            return $condition->expression($leftField)->eq($rightField);
         }
 
-        return $condition->expr($on)->custom();
+        return $condition->expression($on)->custom();
     }
 
     protected function createAndAddItem($table, $on = null, $alias = null, $joinType = null): static
