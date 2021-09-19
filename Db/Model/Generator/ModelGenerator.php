@@ -13,16 +13,19 @@ declare(strict_types=1);
 
 namespace VV\Db\Model\Generator;
 
+use VV\Db;
+use VV\Db\Connection;
 use VV\Db\Driver\Driver;
+use VV\Db\Model\DataObject;
 
 class ModelGenerator
 {
 
-    private \VV\Db\Connection $connection;
+    private Connection $connection;
     private string $ns;
     private string $dir;
     private array $dataObjectsGetterPhpdoc;
-    private array $todel;
+    private array $toDel;
 
     private string $dfltTop = <<<CODE
         <?php
@@ -33,7 +36,7 @@ class ModelGenerator
 
         CODE;
 
-    public function __construct(\VV\Db $db)
+    public function __construct(Db $db)
     {
         $connection = $this->connection = $db->getConnection();
         if (!$connection->isConnected()) {
@@ -43,14 +46,14 @@ class ModelGenerator
         $reflect = new \ReflectionObject($db);
         $this->ns = $reflect->getName();
 
-        $this->dir = $dir = dirname($reflect->getFileName()) . \VV\DS . $reflect->getShortName() . \VV\DS;
+        $this->dir = $dir = dirname($reflect->getFileName()) . '/' . $reflect->getShortName() . '/';
         if (!file_exists($dir)) {
             mkdir($dir);
         }
 
         $this->dataObjectsGetterPhpdoc = array_fill_keys($a = ['Table', 'View'], '');
-        $this->todel = array_fill_keys($a, []);
-        foreach ($this->todel as $k => &$v) {
+        $this->toDel = array_fill_keys($a, []);
+        foreach ($this->toDel as $k => &$v) {
             $d = "$dir$k/";
             if (file_exists($d)) {
                 foreach (scandir($d) as $f) {
@@ -122,7 +125,7 @@ class ModelGenerator
 
         // remove excess files
         echo "\r\nRemoved files/directories:\r\n";
-        foreach ($this->todel as $dataObjectType => $v) {
+        foreach ($this->toDel as $dataObjectType => $v) {
             foreach ($v as $f => $ff) {
                 echo "\tMain/$dataObjectType/$f\r\n";
                 @unlink($ff);
@@ -130,7 +133,7 @@ class ModelGenerator
         }
     }
 
-    protected function createStructBuilder(\VV\Db\Connection $connection): StructBuilder
+    protected function createStructBuilder(Connection $connection): StructBuilder
     {
         return match ($connection->getDbmsName()) {
             Driver::DBMS_MYSQL => new StructBuilder\Mysql(),
@@ -142,8 +145,8 @@ class ModelGenerator
     protected function processObject(ObjectInfo $object)
     {
         $type = $object->type();
-        $tableWopfx = \VV\Db\Model\DataObject::trimPrefix($object->name());
-        $name = \VV\camelCase($tableWopfx);
+        $tableWoPfx = DataObject::trimPrefix($object->name());
+        $name = DataObject::camelCase($tableWoPfx);
         $className = ucfirst($name) . $type;
         $relNs = $object->typePlural();
         $ns = "$this->ns\\$relNs";
@@ -197,7 +200,7 @@ class ModelGenerator
 
         $pkConst = implode(', ', $pkFields);
         $pkFieldsConst = implode("', '", $pkFields);
-        $alias = \VV\Db\Model\DataObject::nameToAlias($tableWopfx, []);
+        $alias = DataObject::nameToAlias($tableWoPfx, []);
 
         [$phpDoc, $advTopContent, $advBottomContent] = $this->parseClassAdvContent($fqcn);
 
@@ -225,7 +228,7 @@ class ModelGenerator
 
         @mkdir($this->dir . $relNs);
         $file = $this->dir . $relNs . '/' . ($f = $className . '.php');
-        unset($this->todel[$type][$f]);
+        unset($this->toDel[$type][$f]);
 
         file_put_contents($file, $content);
     }
@@ -250,7 +253,7 @@ class ModelGenerator
         $topLines = $bottomLines = [];
         $stage = 0;
         foreach ($classLines as $line) {
-            $starts = fn ($with) => str_starts_with(trim($line), $with);
+            $starts = fn($with) => str_starts_with(trim($line), $with);
 
             switch ($stage) {
                 case 0:
@@ -274,19 +277,18 @@ class ModelGenerator
                         $stage = 3;
                     }
                     break;
-                /** @noinspection PhpMissingBreakStatementInspection */
                 case 3:
                     $stage = 4;
                     if ($starts('//')) {
                         break;
                     }
-                    // no break
+                // no break
                 case 4:
                     $bottomLines[] = $line;
             }
         }
 
-        $lines2code = fn ($lines) => $lines && array_filter($lines, fn ($v) => trim($v))
+        $lines2code = fn($lines) => $lines && array_filter($lines, fn($v) => trim($v))
             ? implode('', $lines)
             : '';
 

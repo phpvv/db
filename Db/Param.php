@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace VV\Db;
 
+use VV\Db\Param as DbParam;
+
 /**
  * Class Param
  *
@@ -316,11 +318,11 @@ final class Param
             switch ($this->type) {
                 case self::T_TEXT:
                 case self::T_BLOB:
-                    if (\VV\Db\Param::isFileValue($value)) {
-                        return \VV\readFileIterator($value, $this->getLobWriteBlockSize());
+                    if (DbParam::isFileValue($value)) {
+                        return self::readFileIterator($value, $this->getLobWriteBlockSize());
                     }
                     if (!is_iterable($value)) {
-                        return \VV\readStringIterator((string)$value, $this->getLobWriteBlockSize());
+                        return self::readStringIterator((string)$value, $this->getLobWriteBlockSize());
                     }
 
                     break;
@@ -431,6 +433,72 @@ final class Param
      */
     public static function isFileValue(mixed $value): bool
     {
-        return \VV\isStream($value) || $value instanceof \SplFileObject;
+        return self::isStream($value) || $value instanceof \SplFileObject;
+    }
+
+    /** Creates read string iterator */
+    public static function readStringIterator(string $data, int $blockSize = 64 * 1024): \Iterator
+    {
+        if (strlen($data) <= $blockSize) {
+            yield $data;
+
+            return;
+        }
+
+        $prevPos = 0;
+        while ($part = substr($data, $prevPos, $prevPos += $blockSize)) {
+            yield $part;
+        }
+    }
+
+    /**
+     * Creates read file iterator
+     *
+     * @param string|resource|\SplFileObject $file
+     */
+    public static function readFileIterator(
+        mixed $file,
+        int $blockSize = 64 * 1024,
+        bool $autoClose = true
+    ): \Iterator {
+        if (is_string($file)) {
+            $file = fopen($file, 'r');
+        }
+
+        if (self::isStream($file)) {
+            try {
+                while (!feof($file)) {
+                    yield fread($file, $blockSize);
+                }
+            } finally {
+                if ($autoClose) {
+                    fclose($file);
+                }
+            }
+
+            return;
+        }
+
+        if ($file instanceof \SplFileObject) {
+            try {
+                while (!$file->eof()) {
+                    yield $file->fread($blockSize);
+                }
+            } finally {
+                if ($autoClose) {
+                    $file = null;
+                } // just in case
+            }
+
+            return;
+        }
+        throw new \InvalidArgumentException('Wrong file type');
+    }
+
+
+    /** Returns true if the $value is a stream resource */
+    public static function isStream(mixed $value): bool
+    {
+        return is_resource($value) && get_resource_type($value) == 'stream';
     }
 }

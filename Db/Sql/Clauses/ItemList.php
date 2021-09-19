@@ -54,4 +54,18 @@ abstract class ItemList implements Clause
 
         return $this;
     }
+
+    /**
+     * Returns true if $object is instance of at least one of $classes
+     */
+    protected static function instanceOf(object $object, string ...$classes): bool
+    {
+        foreach ($classes as $class) {
+            if (is_a($object, $class)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

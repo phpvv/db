@@ -44,9 +44,7 @@ class Mysql implements \VV\Db\Model\Generator\StructBuilder
             $result = $connection->query('SHOW COLUMNS FROM ' . $table);
             foreach ($result as $row) {
                 preg_match('/(\w+)(?:\((\d+)\))?(?: (\w+))?/', $row['Type'], $m);
-                $m = \VV\aget(range(0, 3), $m);
-
-                $l = explode(',', $m[2]);
+                $l = explode(',', $m[2] ?? '');
 
                 $dataType = $m[1];
                 $type = $typed($dataType);
@@ -67,7 +65,7 @@ class Mysql implements \VV\Db\Model\Generator\StructBuilder
                     scale: $l[1] ?? null,
                     default: $row['Default'],
                     notnull: $row['Null'] == 'NO',
-                    unsigned: $m[3] == 'unsigned',
+                    unsigned: ($m[3] ?? '') == 'unsigned',
                     inpk: $row['Key'] == 'PRI',
                 );
             }

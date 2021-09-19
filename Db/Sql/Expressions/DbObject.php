@@ -185,8 +185,8 @@ class DbObject implements Expression
         $nameRx = static::NAME_RX;
 
         $alias = $parseAlias ? static::parseAlias($name, $name) : null;
+        $names = preg_split("!\s*\.\s*!", trim($name), flags: PREG_SPLIT_NO_EMPTY) ?: [];
 
-        $names = \VV\splitNoEmpty($name, '\.', true);
         $outNames = [];
         foreach ($names as $i => $name) {
             if ($name == '*') {

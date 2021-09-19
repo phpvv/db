@@ -227,7 +227,7 @@ class Condition extends ItemList implements Predicate
         $notNullParams = [];
         $containNull = false;
         foreach ($params as $p) {
-            if (\VV\emt($p)) {
+            if ($p === null || $p === '') {
                 $containNull = true;
             } else {
                 $notNullParams[] = $p;

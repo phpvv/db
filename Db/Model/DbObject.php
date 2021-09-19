@@ -89,4 +89,14 @@ abstract class DbObject
 
         return $name;
     }
+
+    public static function camelCase(string $under_scored): string
+    {
+        return preg_replace_callback('/_+(\w)/', fn($m) => strtoupper($m[1]), $under_scored);
+    }
+
+    private static function studlyCaps(string $under_scored): string
+    {
+        return preg_replace_callback('/(?:^|[-_]+)(\w)/', fn($m) => strtoupper($m[1]), $under_scored);
+    }
 }

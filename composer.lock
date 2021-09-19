@@ -4,56 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "05885b6136852074edff71690ba36ccb",
-    "packages": [
-        {
-            "name": "phpvv/runtime",
-            "version": "0.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/phpvv/runtime.git",
-                "reference": "d407151fd0b19ca09759ab30d8c80304911a5080"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/phpvv/runtime/zipball/d407151fd0b19ca09759ab30d8c80304911a5080",
-                "reference": "d407151fd0b19ca09759ab30d8c80304911a5080",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^8.0"
-            },
-            "require-dev": {
-                "jetbrains/phpstorm-attributes": "^1.0"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "const.php",
-                    "func.php"
-                ],
-                "classmap": [
-                    "VV.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Volodymyr Sarnytskyi",
-                    "email": "v00v4n@gmail.com"
-                }
-            ],
-            "description": "VV Runtime",
-            "support": {
-                "issues": "https://github.com/phpvv/runtime/issues",
-                "source": "https://github.com/phpvv/runtime/tree/v0.2.0"
-            },
-            "time": "2021-03-28T07:57:57+00:00"
-        }
-    ],
+    "content-hash": "a196c3226905abe1680f590b9cd8ff5d",
+    "packages": [],
     "packages-dev": [
         {
             "name": "squizlabs/php_codesniffer",

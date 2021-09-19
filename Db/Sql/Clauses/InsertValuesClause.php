@@ -44,7 +44,7 @@ class InsertValuesClause extends ItemList
             $allowedObjTypes = [Param::class, Expression::class, \DateTimeInterface::class];
             foreach ($values as $i => &$v) {
                 if (is_object($v)) {
-                    if (!\VV\instOf($v, ...$allowedObjTypes)) {
+                    if (!self::instanceOf($v, ...$allowedObjTypes)) {
                         throw new \InvalidArgumentException("Wrong type of values #$i");
                     }
                 } elseif (!is_scalar($v) && $v !== null) {
