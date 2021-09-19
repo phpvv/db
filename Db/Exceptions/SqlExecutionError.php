@@ -13,12 +13,6 @@ declare(strict_types=1);
 
 namespace VV\Db\Exceptions;
 
-/**
- * Class SqlExecError
- *
- * @package VV\Db\Error
- */
 class SqlExecutionError extends \RuntimeException
 {
-    use \VV\Exception\Core;
 }

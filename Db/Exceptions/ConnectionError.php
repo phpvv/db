@@ -13,12 +13,6 @@ declare(strict_types=1);
 
 namespace VV\Db\Exceptions;
 
-/**
- * Class ConnectionError
- *
- * @package VV\Db\Error
- */
 class ConnectionError extends \RuntimeException
 {
-    use \VV\Exception\Core;
 }

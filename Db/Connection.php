@@ -114,7 +114,7 @@ final class Connection
             );
         } catch (\Exception $e) {
             if (!$e instanceof ConnectionError) {
-                $e = new ConnectionError(null, null, $e);
+                $e = new ConnectionError('Connection Error', previous: $e);
             }
 
             $this->connectionError = $e;

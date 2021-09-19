@@ -29,14 +29,13 @@ class Mysql implements \VV\Db\Model\Generator\StructBuilder
         $tables = $connection->query('SHOW TABLES')->rows(\VV\Db::FETCH_ASSOC);
 
         $typed = ModelGenerator::buildTypeDecorator([
-                'NUM' => ['.*int', 'decimal', 'integer', 'numeric', 'double', 'float', 'real'],
-                'TEXT' => '.*text',
-                'BLOB' => '.*blob',
-                'DATETIME' => ['timestamp', 'datetime'],
-                'DATE' => ['date', 'year'],
-                'TIME' => 'time',
-            ]
-        );
+            'NUM' => ['.*int', 'decimal', 'integer', 'numeric', 'double', 'float', 'real'],
+            'TEXT' => '.*text',
+            'BLOB' => '.*blob',
+            'DATETIME' => ['timestamp', 'datetime'],
+            'DATE' => ['date', 'year'],
+            'TIME' => 'time',
+        ]);
 
         foreach ($tables as $v) {
             $table = current($v);

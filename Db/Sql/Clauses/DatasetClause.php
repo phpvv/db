@@ -94,7 +94,11 @@ class DatasetClause extends ItemList
     protected function setItem(mixed $field, mixed $value): static
     {
         if (is_array($value)) {
-            [$field, $expr] = explode('=', $field);
+            $exploded = explode('=', $field);
+            if (count($exploded) != 2) {
+                throw new \InvalidArgumentException('For custom query $field must by with "=" symbol');
+            }
+            [$field, $expr] = $exploded;
             $value = Sql::plain($expr, $value);
         }
 

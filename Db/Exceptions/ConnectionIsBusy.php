@@ -13,12 +13,6 @@ declare(strict_types=1);
 
 namespace VV\Db\Exceptions;
 
-/**
- * Class DbBusy
- *
- * @package VV\Db\Error
- */
 class ConnectionIsBusy extends \RuntimeException
 {
-    use \VV\Exception\Core;
 }
