@@ -20,11 +20,23 @@ namespace VV\Db;
  */
 final class Param
 {
-    public const T_CHR = 1,
-        T_INT = 2,
-        T_TEXT = 3,
-        T_BLOB = 4,
-        T_BIN = 5;
+    public const
+        T_INT = 0b0001,
+        T_FLOAT = 0b0011,
+        T_BOOL = 0b0100,
+        // T_NULL = 0b1000,
+        T_STR = 0b0001 << 4,
+        /** @deprecated */
+        T_CHR = self::T_STR,
+        T_BIN = 0b0011 << 4,
+        T_TEXT = 0b0101 << 4,
+        T_BLOB = 0b0111 << 4;
+
+    public const
+        T_MASK_NUM = 1,
+        T_MASK_STR = 1 << 4,
+        T_MASK_BIN = 1 << 5,
+        T_MASK_LOB = 1 << 6;
 
     private const DFLT_LOB_WRITE_BLOCK_SIZE = 512 * 1024;
 
@@ -35,7 +47,7 @@ final class Param
     private int $lobWriteBlockSize = self::DFLT_LOB_WRITE_BLOCK_SIZE;
     private bool $forUpload = false;
     private bool $forInsertedId = false;
-    private bool $binded = false;
+    private bool $bound = false;
 
     /**
      * Param constructor.
@@ -107,11 +119,33 @@ final class Param
     /**
      * @return bool
      */
+    public function isNumber(): bool
+    {
+        return (bool)($this->getType() & self::T_MASK_NUM);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChar(): bool
+    {
+        return (bool)($this->getType() & self::T_MASK_STR);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBin(): bool
+    {
+        return (bool)($this->getType() & self::T_MASK_BIN);
+    }
+
+    /**
+     * @return bool
+     */
     public function isLob(): bool
     {
-        static $lobTypes = [self::T_TEXT, self::T_BLOB];
-
-        return in_array($this->getType(), $lobTypes);
+        return (bool)($this->getType() & self::T_MASK_LOB);
     }
 
     /**
@@ -169,9 +203,9 @@ final class Param
             }
 
             if (($value = $this->getValue()) !== null) {
-                $strlen = strlen((string)$value);
-                if ($strlen > $size) {
-                    throw new \LogicException("Can't set Size less than Value length ($size < $strlen)");
+                $len = strlen((string)$value);
+                if ($len > $size) {
+                    throw new \LogicException("Can't set Size less than Value length ($size < $len)");
                 }
             }
 
@@ -188,7 +222,7 @@ final class Param
     {
         $type = $this->getType();
 
-        return $type == self::T_CHR || $type == self::T_BIN;
+        return $type == self::T_STR || $type == self::T_BIN;
     }
 
     /**
@@ -254,19 +288,19 @@ final class Param
     /**
      * @return bool
      */
-    public function isBinded(): bool
+    public function isBound(): bool
     {
-        return $this->binded;
+        return $this->bound;
     }
 
     /**
-     * @param bool $binded
+     * @param bool $bound
      *
      * @return $this
      */
-    public function setBinded(bool $binded = true): self
+    public function setBound(bool $bound = true): self
     {
-        $this->binded = $binded;
+        $this->bound = $bound;
 
         return $this;
     }
@@ -296,14 +330,14 @@ final class Param
                     }
                     break;
                 case self::T_BIN:
-                case self::T_CHR:
+                case self::T_STR:
                     if (is_scalar($value)) {
                         $value = (string)$value;
 
-                        if (($size = $this->getSize()) || $this->isBinded()) {
-                            $strlen = strlen($value);
-                            if ($strlen > $size) {
-                                throw new \LogicException("Can't set Value longer than Size ($strlen > $size)");
+                        if (($size = $this->getSize()) || $this->isBound()) {
+                            $len = strlen($value);
+                            if ($len > $size) {
+                                throw new \LogicException("Can't set Value longer than Size ($len > $size)");
                             }
                         }
 
@@ -334,62 +368,45 @@ final class Param
         return (new self($type, null, $name, $size))->setValueRef($value);
     }
 
-    /**
-     * @param string|null $value
-     * @param string|null $name
-     * @param int|null    $size
-     *
-     * @return self
-     */
-    public static function chr(string $value = null, string $name = null, int $size = null): self
-    {
-        return new self(self::T_CHR, $value, $name, $size);
-    }
-
-    /**
-     * @param int|null    $value
-     * @param string|null $name
-     * @param int|null    $size
-     *
-     * @return self
-     */
     public static function int(int $value = null, string $name = null, int $size = null): self
     {
         return new self(self::T_INT, $value, $name, $size);
     }
 
-    /**
-     * @param iterable|string|null $value
-     * @param string|null          $name
-     *
-     * @return self
-     */
+    public static function float(float $value = null, string $name = null, int $size = null): self
+    {
+        return new self(self::T_FLOAT, $value, $name, $size);
+    }
+
+    public static function bool(float $value = null, string $name = null, int $size = null): self
+    {
+        return new self(self::T_BOOL, $value, $name, $size);
+    }
+
+    public static function str(string $value = null, string $name = null, int $size = null): self
+    {
+        return new self(self::T_STR, $value, $name, $size);
+    }
+
+    /** @deprecated */
+    public static function chr(string $value = null, string $name = null, int $size = null): self
+    {
+        return self::str(...func_get_args());
+    }
+
+    public static function bin(string $value = null, string $name = null, int $size = null): self
+    {
+        return new self(self::T_BIN, $value, $name, $size);
+    }
+
     public static function text(iterable|string $value = null, string $name = null): self
     {
         return new self(self::T_TEXT, $value, $name);
     }
 
-    /**
-     * @param iterable|string|null $value
-     * @param string|null          $name
-     *
-     * @return self
-     */
     public static function blob(iterable|string $value = null, string $name = null): self
     {
         return new self(self::T_BLOB, $value, $name);
-    }
-
-    /**
-     * @param string|null $value
-     * @param string|null $name
-     * @param int|null    $size
-     *
-     * @return self
-     */
-    public static function bin(string $value = null, string $name = null, int $size = null): self
-    {
-        return new self(self::T_BIN, $value, $name, $size);
     }
 
     /**
@@ -403,7 +420,7 @@ final class Param
             Model\Field::T_TEXT => self::T_TEXT,
             Model\Field::T_BLOB => self::T_BLOB,
             Model\Field::T_BIN => self::T_BIN,
-            default => self::T_CHR,
+            default => self::T_STR,
         };
     }
 

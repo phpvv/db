@@ -80,7 +80,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
                 $isNum = true;
             }
 
-            $type = $isNum ? \VV\Db\Param::T_INT : \VV\Db\Param::T_CHR;
+            $type = $isNum ? \VV\Db\Param::T_INT : \VV\Db\Param::T_STR;
             $param = new \VV\Db\Param($type);
         }
 

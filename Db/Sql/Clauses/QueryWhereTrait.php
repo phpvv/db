@@ -131,12 +131,16 @@ trait QueryWhereTrait
     /**
      * @param string|int|Expression $expression
      * @param string                $pattern
+     * @param bool                  $caseInsensitive
      *
      * @return $this
      */
-    public function whereLike(string|int|Expression $expression, string $pattern): static
-    {
-        $this->getWhereClause()->and($expression)->like($pattern);
+    public function whereLike(
+        string|int|Expression $expression,
+        string $pattern,
+        bool $caseInsensitive = false
+    ): static {
+        $this->getWhereClause()->and($expression)->like($pattern, $caseInsensitive);
 
         return $this;
     }
@@ -144,12 +148,16 @@ trait QueryWhereTrait
     /**
      * @param string|int|Expression $expression
      * @param string                $pattern
+     * @param bool                  $caseInsensitive
      *
      * @return $this
      */
-    public function whereNotLike(string|int|Expression $expression, string $pattern): static
-    {
-        $this->getWhereClause()->and($expression)->not->like($pattern);
+    public function whereNotLike(
+        string|int|Expression $expression,
+        string $pattern,
+        bool $caseInsensitive = false
+    ): static {
+        $this->getWhereClause()->and($expression)->not->like($pattern, $caseInsensitive);
 
         return $this;
     }

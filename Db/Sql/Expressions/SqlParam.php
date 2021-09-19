@@ -70,9 +70,7 @@ class SqlParam implements Expression
     public static function checkType(mixed $param): bool
     {
         return is_scalar($param)
-               || is_int($param)
-               || is_double($param)
-               || is_null($param)
+               || $param === null
                // parameter object
                || $param instanceof Param
                || $param instanceof \DateTimeInterface;

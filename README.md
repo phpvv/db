@@ -231,9 +231,9 @@ try {
             $prepared = $db->tbl->orderItem->insert()
                 ->set([
                     'order_id' => Param::int($orderId),
-                    'product_id' => $productIdParam = Param::chr(size: 16),
-                    'price' => $priceParam = Param::chr(size: 16),
-                    'quantity' => $quantityParam = Param::chr(size: 16),
+                    'product_id' => $productIdParam = Param::str(size: 16),
+                    'price' => $priceParam = Param::str(size: 16),
+                    'quantity' => $quantityParam = Param::str(size: 16),
                 ]);
 
             foreach ($productIterExtended as [$productId, $price, $quantity]) {
@@ -658,7 +658,8 @@ Query has some shortcuts methods:
 - `->whereId(1)` (for `$db->tbl->product->select()` - `product_id = ?`);
 - `->where[Not]In('brand_id', 1, 2, 3)`;
 - `->whereId[Not]In(1, 2, 3)`;
-- `->where[Not]Between('width', 250, 350)`.
+- `->where[Not]Between('width', 250, 350)`;
+- `->where[Not]Like('title', 'computer%', caseInsensitive: true)`.
 
 ## Insert
 

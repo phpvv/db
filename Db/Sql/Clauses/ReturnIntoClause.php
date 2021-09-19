@@ -51,7 +51,7 @@ class ReturnIntoClause extends ItemList
         }
 
         $P = !$param instanceof Param
-            ? Param::getPointer($type ?: Param::T_CHR, $param, $name, $size)
+            ? Param::getPointer($type ?: Param::T_STR, $param, $name, $size)
             : $param;
 
         $item = $this->creteItem($expression, $P);

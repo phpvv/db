@@ -49,7 +49,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
             return;
         }
 
-        $params[] = ($insertedIdClause->getParam() ?: Param::chr())->setForInsertedId();
+        $params[] = ($insertedIdClause->getParam() ?: Param::str())->setForInsertedId();
         $field = $insertedIdClause->getPk() ?: $this->insertQuery()->getMainTablePk();
 
         $this->addExtraReturning("$field _insertedid");
