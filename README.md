@@ -18,7 +18,6 @@ composer require phpvv/db-oci
 ```
 
 ## Big Select Example
-                                                            r
 [big-select.php](https://github.com/phpvv/db-examples/blob/master/examples/big-select.php) in [DB Examples Project](https://github.com/phpvv/db-examples):
 
 ```php
@@ -639,7 +638,7 @@ $query = $db->tbl->product->select(/*...*/)
     ->where('`width` BETWEEN ? AND ?', [250, 350])  // custom sql with binding parameters
     ->where('state=1');                             // custom sql w/o binding parameters
 ```
-- array as first argument ():
+- array as first argument ($expression => $param):
 ```php
 $query = $db->tbl->product->select(/*...*/)
     ->where([
@@ -660,6 +659,15 @@ Query has some shortcuts methods:
 - `->whereId[Not]In(1, 2, 3)`;
 - `->where[Not]Between('width', 250, 350)`;
 - `->where[Not]Like('title', 'computer%', caseInsensitive: true)`.
+
+### GroupBy Clause
+
+### Having Clause
+
+Use method `having()` like `where()`
+
+### OrderBy Clause
+
 
 ## Insert
 

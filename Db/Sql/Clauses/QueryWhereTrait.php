@@ -29,12 +29,12 @@ trait QueryWhereTrait
     /**
      * Add `WHERE` clause
      *
-     * @param string|int|Expression|Predicate|array $expression
-     * @param mixed|array|Expression|null           $param
+     * @param string|int|Expression|Predicate|array|null $expression
+     * @param mixed|array|Expression|null                $param
      *
      * @return $this
      */
-    public function where(string|int|Expression|Predicate|array $expression, mixed $param = null): static
+    public function where(string|int|Expression|Predicate|array|null $expression, mixed $param = null): static
     {
         return $this->conditionAnd($this->getWhereClause(), ...func_get_args());
     }
@@ -210,9 +210,13 @@ trait QueryWhereTrait
 
     protected function conditionAnd(
         Condition $condition,
-        string|int|Expression|Predicate|array $expression,
+        string|int|Expression|Predicate|array|null $expression,
         mixed $param = null
     ): static {
+        if ($expression === null) {
+            return $this;
+        }
+
         if (is_array($expression)) {
             $condition->and($expression);
         } elseif ($expression instanceof Predicate) {
