@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace VV\Db\Sql\Stringifiers;
 
 use VV\Db\Model\Field;
+use VV\Db\Param;
 use VV\Db\Sql\Clauses\TableClause;
 use VV\Db\Sql\Condition;
 use VV\Db\Sql\Expressions\DbObject;
@@ -27,6 +28,10 @@ use VV\Db\Sql\Expressions\SqlParam;
  */
 abstract class QueryStringifier
 {
+    protected const DATE_FORMAT = 'Y-m-d';
+    protected const TIME_FORMAT = 'H:i:s.u';
+    protected const TIME_ZONE_FORMAT = 'P';
+
     private Factory $factory;
     private array $params = [];
     private ?ExpressionStringifier $expressionStringifier = null;
@@ -61,7 +66,9 @@ abstract class QueryStringifier
      */
     final public function toString(): string
     {
-        return $this->stringifyRaw($params);
+        $stringifyRaw = $this->stringifyRaw($params);
+
+        return $stringifyRaw;
     }
 
     /**
@@ -118,13 +125,64 @@ abstract class QueryStringifier
 
     public function decorateParamForCondition(mixed $param, mixed $field): mixed
     {
-        if ($param instanceof \VV\Db\Param) {
-            return $param->setValue($this->decorateParamForCondition($param->getValue(), $field));
+        $fieldModel = $this->getFieldModel($field);
+        if ($param instanceof Param) {
+            return $param->setValue($this->decorateParamValueForCondition($param->getValue(), $fieldModel));
         }
 
-        return ($o = $this->getFieldModel($field, $this->getQueryTableClause()))
-            ? $o->prepeareValueForCondition($param)
-            : $param;
+        return $this->decorateParamValueForCondition($param, $fieldModel);
+    }
+
+    public function decorateParamValueForCondition(mixed $value, ?Field $field): mixed
+    {
+        if ($value instanceof \DateTimeInterface) {
+            if (!$field) {
+                throw new \InvalidArgumentException('Can\'t detect format for \DateTimeInterface');
+            }
+
+            return $this->formatDateTimeForField($value, $field);
+        }
+
+        if ($value instanceof \Stringable) {
+            $value = (string)$value;
+        }
+
+        if (is_scalar($value) && $field) {
+            if ($field->isNumeric() && !is_numeric($value)) {
+                return null;
+            }
+            if ($field->getType() == Field::T_BOOL && !is_bool($value)) {
+                if ($value === 1 || $value === 0) {
+                    return (bool)$value;
+                }
+
+                return null;
+            }
+        }
+
+        return $value;
+    }
+
+    public function formatDateTimeForField(\DateTimeInterface $dateTime, Field $field): string
+    {
+        $parts = [];
+        if ($field->hasDate()) {
+            $parts[] = $this->getDateFormat();
+        }
+        if ($field->hasTime()) {
+            $parts[] = $this->getTimeFormat();
+        }
+        if (!$parts) {
+            throw new \InvalidArgumentException('Column type has neither date nor time');
+        }
+
+        if ($field->hasTimeZone()) {
+            $parts[] = $this->getTimeZoneFormat();
+        }
+
+        $format = join(' ', $parts);
+
+        return $dateTime->format($format);
     }
 
     /**
@@ -191,12 +249,12 @@ abstract class QueryStringifier
     abstract public function getQueryTableClause(): TableClause;
 
     /**
-     * @param mixed       $field
-     * @param TableClause $tableClause
+     * @param mixed            $field
+     * @param TableClause|null $tableClause
      *
      * @return Field|null
      */
-    protected function getFieldModel(mixed $field, TableClause $tableClause): ?Field
+    protected function getFieldModel(mixed $field, TableClause $tableClause = null): ?Field
     {
         if (!$field) {
             return null;
@@ -214,7 +272,7 @@ abstract class QueryStringifier
         }
 
         $owner = $field->getOwner();
-        $table = $tableClause->getTableModelOrMain($owner ? $owner->getName() : null);
+        $table = ($tableClause ?? $this->getQueryTableClause())->getTableModelOrMain($owner?->getName());
         if ($table) {
             return $table->getFields()->get($field->getName());
         }
@@ -341,5 +399,20 @@ abstract class QueryStringifier
     protected function useAliasForTable(TableClause $table): bool
     {
         return true;
+    }
+
+    protected function getDateFormat(): string
+    {
+        return static::DATE_FORMAT;
+    }
+
+    protected function getTimeFormat(): string
+    {
+        return static::TIME_FORMAT;
+    }
+
+    protected function getTimeZoneFormat(): string
+    {
+        return static::TIME_ZONE_FORMAT;
     }
 }

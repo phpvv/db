@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Oracle;
 
+use VV\Db\Param;
 use VV\Db\Sql\Stringifiers\SqlPart;
 
 /**
@@ -28,11 +29,11 @@ trait ModifyUtils
      */
     protected function expressionValueToSave(mixed $value, mixed $field): ?SqlPart
     {
-        if ($value instanceof \VV\Db\Param && $value->isLob()) {
+        if ($value instanceof Param && $value->isLob()) {
             $type = $value->getType();
-            if ($type == \VV\Db\Param::T_TEXT) {
+            if ($type == Param::T_TEXT) {
                 $emptyLobFunc = 'empty_clob()';
-            } elseif ($type == \VV\Db\Param::T_BLOB) {
+            } elseif ($type == Param::T_BLOB) {
                 $emptyLobFunc = 'empty_blob()';
             } else {
                 throw new \UnexpectedValueException();

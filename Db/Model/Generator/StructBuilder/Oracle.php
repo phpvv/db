@@ -13,18 +13,20 @@ declare(strict_types=1);
 
 namespace VV\Db\Model\Generator\StructBuilder;
 
+use VV\Db\Connection;
 use VV\Db\Model\Generator\ModelGenerator;
 use VV\Db\Model\Generator\ObjectInfo;
+use VV\Db\Model\Generator\StructBuilder;
 
 /**
  * Class Oracle
  *
  * @package VV\Db\ModelGenerator\StructBuilder
  */
-class Oracle implements \VV\Db\Model\Generator\StructBuilder
+class Oracle implements StructBuilder
 {
 
-    public function objectIterator(\VV\Db\Connection $connection): iterable
+    public function objectIterator(Connection $connection): iterable
     {
         // todo: variable to properties and setters
         $tblPrefix = 'tbl_';
@@ -45,13 +47,12 @@ SQL
         )->assoc;
 
         $typed = ModelGenerator::buildTypeDecorator([
-                'NUM' => 'number',
-                'TEXT' => 'clob',
-                'BLOB' => 'blob',
-                'BIN' => 'raw',
-                'DATETIME' => ['TIMESTAMP', 'DATE'],
-            ]
-        );
+            'NUM' => 'number',
+            'TEXT' => 'clob',
+            'BLOB' => 'blob',
+            'BIN' => 'raw',
+            'DATETIME' => ['TIMESTAMP', 'DATE'],
+        ]);
 
         foreach ($tables as $table) {
             $type = (stripos($table, $vwPrefix) === 0) ? 'View' : 'Table';

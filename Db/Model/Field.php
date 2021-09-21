@@ -20,24 +20,44 @@ namespace VV\Db\Model;
  */
 class Field
 {
-    /** Short strings: VARCHAR, CHAR */
-    public const T_CHR = 1;
-    /** Numeric fields like INT, FLOAT, NUMBER, DECIMAL... */
-    public const T_NUM = 2;
-    /** Large text object like mysql TEXT or oracle CLOB */
-    public const T_TEXT = 3;
-    /** Large binary object */
-    public const T_BLOB = 4;
-    /** Raw short binary data like mysql BINARY, VARBINARY or orcale RAW */
-    public const T_BIN = 5;
-    /** Date and Time */
-    public const T_DATETIME = 6;
-    /** Date */
-    public const T_DATE = 7;
-    /** Time */
-    public const T_TIME = 8;
+    /** Integer fields like INT, BIGINT, SMALLINT... */
+    public const T_INT = 0b0001;
+    /** Numeric fields with precision like FLOAT, NUMBER, DECIMAL... */
+    public const T_NUM = 0b0011;
     /** Boolean */
-    public const T_BOOL = 9;
+    public const T_BOOL = 0b0100;
+
+    /** Short strings: VARCHAR, CHAR */
+    public const T_CHR = self::T_MASK_STR;
+    /** Raw short binary data like mysql BINARY, VARBINARY or oracle RAW */
+    public const T_BIN = self::T_MASK_STR | self::T_MASK_BIN;
+    /** Large text object like mysql TEXT or oracle CLOB */
+    public const T_TEXT = self::T_MASK_STR | self::T_MASK_LOB;
+    /** Large binary object */
+    public const T_BLOB = self::T_MASK_STR | self::T_MASK_LOB | self::T_MASK_BIN;
+
+    /** Date */
+    public const T_DATE = self::T_MASK_DATE;
+    /** Time */
+    public const T_TIME = self::T_MASK_TIME;
+    /** Time with Time Zone */
+    public const T_TIME_TZ = self::T_MASK_TIME | self::T_MASK_TIME_ZONE;
+    /** Date and Time */
+    public const T_DATETIME = self::T_MASK_DATE | self::T_MASK_TIME;
+    /** Date and Time with Time Zone*/
+    public const T_DATETIME_TZ = self::T_DATETIME | self::T_MASK_TIME_ZONE;
+
+    public const
+        T_MASK_NUM = 1,
+        // string masks
+        T_MASK_STR = 0b0001 << 4,
+        T_MASK_BIN = 0b0010 << 4,
+        T_MASK_LOB = 0b0100 << 4,
+        // date & time masks
+        T_MASK_DATE = 0b0001 << 8,
+        T_MASK_TIME = 0b0100 << 8,
+        T_MASK_DATETIME = self::T_MASK_DATE | self::T_MASK_TIME,
+        T_MASK_TIME_ZONE = 0b1000 << 8;
 
     private string $name;
     private int $type;
@@ -64,118 +84,83 @@ class Field
         ] = $data;
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return int
-     */
     public function getType(): int
     {
         return $this->type;
     }
 
-    /**
-     * @return int
-     */
+    public function isNumeric(): bool
+    {
+        return ($this->getType() & self::T_MASK_NUM) == self::T_MASK_NUM;
+    }
+
+    public function isStringable(): bool
+    {
+        return ($this->getType() & self::T_MASK_STR) == self::T_MASK_STR;
+    }
+
+    public function isBinary(): bool
+    {
+        return ($this->getType() & self::T_MASK_BIN) == self::T_MASK_BIN;
+    }
+
+    public function hasDate(): bool
+    {
+        return ($this->getType() & self::T_MASK_DATE) == self::T_MASK_DATE;
+    }
+
+    public function hasTime(): bool
+    {
+        return ($this->getType() & self::T_MASK_TIME) == self::T_MASK_TIME;
+    }
+
+    public function hasDateTime(): bool
+    {
+        return ($this->getType() & self::T_MASK_DATETIME) == self::T_MASK_DATETIME;
+    }
+
+    public function hasTimeZone(): bool
+    {
+        return ($this->getType() & self::T_MASK_TIME_ZONE) == self::T_MASK_TIME_ZONE;
+    }
+
     public function getLength(): int
     {
         return $this->length;
     }
 
-    /**
-     * @return int|null
-     */
     public function getIntSize(): ?int
     {
         return $this->intSize;
     }
 
-    /**
-     * @return int|null
-     */
     public function getPrecision(): ?int
     {
         return $this->precision;
     }
 
-    /**
-     * @return int|null
-     */
     public function getScale(): ?int
     {
         return $this->scale;
     }
 
-    /**
-     * @return string|null
-     */
     public function getDefaultValue(): ?string
     {
         return $this->defaultValue;
     }
 
-    /**
-     * @return bool
-     */
     public function isNotNull(): bool
     {
         return $this->notNull;
     }
 
-    /**
-     * @return bool
-     */
     public function isUnsigned(): bool
     {
         return $this->unsigned;
-    }
-
-    /**
-     * Process data for saving
-     *
-     * @param mixed $value
-     *
-     * @return mixed
-     */
-    public function prepeareValueForCondition(mixed $value): mixed
-    {
-        if (is_scalar($value)) {
-            if ($this->type == self::T_NUM && !is_numeric($value)) {
-                $value = 0;
-            }
-            if ((string)$value === '') {
-                $value = null;
-            }
-        }
-
-        return $value;
-    }
-
-    /**
-     * Process data for saving
-     *
-     * @param mixed $value
-     *
-     * @return mixed
-     */
-    public function prepareValueToSave(mixed $value): mixed
-    {
-        if (is_scalar($value)) {
-            if ((string)$value === '') {
-                if ($this->notNull && $this->type == self::T_NUM) {
-                    $value = 0;
-                } else {
-                    $value = null;
-                }
-            }
-        }
-
-        return $value;
     }
 }

@@ -26,11 +26,8 @@ final class Param
         T_INT = 0b0001,
         T_FLOAT = 0b0011,
         T_BOOL = 0b0100,
-        // T_NULL = 0b1000,
         T_STR = 0b0001 << 4,
-        /** @deprecated */
-        T_CHR = self::T_STR,
-        T_BIN = 0b0011 << 4,
+        T_BIN_STR = 0b0011 << 4,
         T_TEXT = 0b0101 << 4,
         T_BLOB = 0b0111 << 4;
 
@@ -121,7 +118,7 @@ final class Param
     /**
      * @return bool
      */
-    public function isNumber(): bool
+    public function isNumeric(): bool
     {
         return (bool)($this->getType() & self::T_MASK_NUM);
     }
@@ -129,7 +126,7 @@ final class Param
     /**
      * @return bool
      */
-    public function isChar(): bool
+    public function isStringable(): bool
     {
         return (bool)($this->getType() & self::T_MASK_STR);
     }
@@ -137,7 +134,7 @@ final class Param
     /**
      * @return bool
      */
-    public function isBin(): bool
+    public function isBinary(): bool
     {
         return (bool)($this->getType() & self::T_MASK_BIN);
     }
@@ -224,7 +221,7 @@ final class Param
     {
         $type = $this->getType();
 
-        return $type == self::T_STR || $type == self::T_BIN;
+        return $type == self::T_STR || $type == self::T_BIN_STR;
     }
 
     /**
@@ -331,7 +328,7 @@ final class Param
                         return (int)$value;
                     }
                     break;
-                case self::T_BIN:
+                case self::T_BIN_STR:
                 case self::T_STR:
                     if (is_scalar($value)) {
                         $value = (string)$value;
@@ -398,7 +395,7 @@ final class Param
 
     public static function bin(string $value = null, string $name = null, int $size = null): self
     {
-        return new self(self::T_BIN, $value, $name, $size);
+        return new self(self::T_BIN_STR, $value, $name, $size);
     }
 
     public static function text(iterable|string $value = null, string $name = null): self
@@ -421,7 +418,7 @@ final class Param
         return match ($field->getType()) {
             Model\Field::T_TEXT => self::T_TEXT,
             Model\Field::T_BLOB => self::T_BLOB,
-            Model\Field::T_BIN => self::T_BIN,
+            Model\Field::T_BIN => self::T_BIN_STR,
             default => self::T_STR,
         };
     }

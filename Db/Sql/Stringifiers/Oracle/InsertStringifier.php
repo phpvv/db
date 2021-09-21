@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Oracle;
 
+use VV\Db\Param;
 use VV\Db\Sql\Clauses\InsertedIdClause;
+use VV\Db\Sql\Expressions\DbObject;
 use VV\Db\Sql\InsertQuery;
 use VV\Db\Sql\ModificatoryQuery;
 
@@ -67,21 +69,17 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
 
         $query = $this->insertQuery();
         $pk = $insertedIdClause->getPk() ?: $query->getMainTablePk();
-        $field = \VV\Db\Sql\Expressions\DbObject::create($pk);
+        $field = DbObject::create($pk);
 
         $pkField = null;
         if ($mtm = $query->getTableClause()->getMainTableModel()) {
             $pkField = $mtm->getFields()->get($pk);
         }
         if (!$param = $insertedIdClause->getParam()) {
-            if ($pkField) {
-                $isNum = $pkField->getType() == \VV\Db\Model\Field::T_NUM;
-            } else {
-                $isNum = true;
-            }
+            $isNum = $pkField?->isNumeric() ?? true;
 
-            $type = $isNum ? \VV\Db\Param::T_INT : \VV\Db\Param::T_STR;
-            $param = new \VV\Db\Param($type);
+            $type = $isNum ? Param::T_INT : Param::T_STR;
+            $param = new Param($type);
         }
 
         if (!$param->getSize() && $param->isSizable()) {

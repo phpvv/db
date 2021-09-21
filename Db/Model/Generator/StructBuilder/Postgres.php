@@ -13,38 +13,59 @@ declare(strict_types=1);
 
 namespace VV\Db\Model\Generator\StructBuilder;
 
+use VV\Db;
+use VV\Db\Connection;
 use VV\Db\Model\Generator\ModelGenerator;
 use VV\Db\Model\Generator\ObjectInfo;
+use VV\Db\Model\Generator\StructBuilder;
 
 /**
  * Class Postgres
  *
  * @package VV\Db\ModelGenerator\StructBuilder
  */
-class Postgres implements \VV\Db\Model\Generator\StructBuilder
+class Postgres implements StructBuilder
 {
 
-    public function objectIterator(\VV\Db\Connection $connection): iterable
+    public function objectIterator(Connection $connection): iterable
     {
+        //  character
+        //  date
+        //  smallint
+        //  timestamp without time zone
+        //  boolean
+        //  character varying
+        //  time without time zone
+        //  text
+        //  integer
+        //  numeric
+        //  timestamp with time zone
+        //  bigint
+
         $typed = ModelGenerator::buildTypeDecorator([
-                'NUM' => ['.*int', 'decimal', 'integer', 'numeric', 'double', 'float', 'real'],
-                'TEXT' => '.*text',
-                'BLOB' => '.*blob',
-                'DATETIME' => ['timestamp.*', 'datetime'],
-                'DATE' => ['date', 'year'],
-                'TIME' => 'time',
-                'BOOL' => ['boolean', 'bool'],
-            ]
-        );
+            'INT' => ['.*int', 'integer'],
+            'NUM' => ['decimal', 'numeric', 'double', 'float', 'real'],
+            'TEXT' => '.*text',
+            'BLOB' => '.*blob',
+            'DATETIME' => 'timestamp without time zone',
+            'DATETIME_TZ' => 'timestamp with time zone',
+            'DATE' => ['date', 'year'],
+            'TIME' => 'time without time zone',
+            'TIME_TZ' => 'time with time zone',
+            'BOOL' => ['boolean', 'bool'],
+        ]);
 
         $tableIter = $connection
-            ->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name")
-            ->setFlags(\VV\Db::FETCH_NUM);
+            ->query(
+                "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"
+            )
+            ->setFlags(Db::FETCH_NUM);
 
         foreach ($tableIter as [$table]) {
             $objectInfo = new ObjectInfo($table, 'Table');
 
-            $pks = $connection->query(<<<SQL
+            $pks = $connection->query(
+                <<<SQL
 SELECT c.column_name
 FROM information_schema.table_constraints tc
          JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name)
@@ -111,7 +132,7 @@ SQL;
                 WHERE constraint_type = 'FOREIGN KEY' AND table_schema = 'public' AND table_name = '$table';
                 SQL;
 
-            $result = $connection->query($query, null, \VV\Db::FETCH_NUM);
+            $result = $connection->query($query, null, Db::FETCH_NUM);
             foreach ($result as [$name]) {
                 $fromCols = $connection
                     ->query(
@@ -134,7 +155,7 @@ SQL;
                             WHERE table_schema = 'public' and constraint_name = '$name';
                             SQL,
                         null,
-                        \VV\Db::FETCH_NUM
+                        Db::FETCH_NUM
                     );
 
                 foreach ($result as [$tbl, $col]) {

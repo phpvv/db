@@ -120,7 +120,7 @@ class Condition extends ItemList implements Predicate
         }
 
         // check for "is (not) null"
-        if ($param === null || $param === '') {
+        if ($param === null) {
             switch ($operator) {
                 case Cmp::OP_EQ:
                     return $this->isNull();

@@ -20,8 +20,6 @@ namespace VV\Db;
  */
 final class Statement
 {
-    public const DATETIME_FORMAT = 'Y-m-d H:i:s';
-
     private ?Driver\Statement $driver;
     private Connection $connection;
     private Driver\Connection $driverConnection;
@@ -83,7 +81,6 @@ final class Statement
      */
     public function bind(array $params): self
     {
-        $this->castParamList($params);
         $this->getDriverOrThrow()->bind($params);
 
         return $this;
@@ -155,42 +152,5 @@ final class Statement
         }
 
         return $this->driver;
-    }
-
-    /**
-     * @param $params
-     */
-    protected function castParamList(&$params): void
-    {
-        foreach ($params as &$param) {
-            if ($param instanceof Param) {
-                $param->setValue($this->castParam($param->getValue()));
-            } else {
-                $param = $this->castParam($param);
-            }
-        }
-    }
-
-    /**
-     * @param mixed $param
-     *
-     * @return mixed
-     */
-    protected function castParam(mixed $param): mixed
-    {
-        return match (true) {
-            $param instanceof \DateTimeInterface => $this->formatDateTime($param),
-            default => $param,
-        };
-    }
-
-    /**
-     * @param \DateTimeInterface $datetime
-     *
-     * @return string
-     */
-    protected function formatDateTime(\DateTimeInterface $datetime): string
-    {
-        return $datetime->format(self::DATETIME_FORMAT);
     }
 }

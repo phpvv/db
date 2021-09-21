@@ -135,14 +135,14 @@ abstract class ModificatoryStringifier extends QueryStringifier
             return $str;
         }
 
-        $fieldModel = $this->getFieldModel($field, $this->getQueryTableClause());
+        $fieldModel = $this->getFieldModel($field);
 
         if (!$value instanceof Param) {
             if (Param::isFileValue($value)) {
-                // auto detect file to blob
+                // auto-detect file to blob
                 $value = Param::blob($value);
             } elseif ($fieldModel && $value !== null) {
-                // auto detect large strings to b/clob
+                // auto-detect large strings to b/clob
                 if ($fieldModel->getType() == Field::T_TEXT) {
                     $value = Param::text($value);
                 } elseif ($fieldModel->getType() == Field::T_BLOB) {
@@ -151,14 +151,11 @@ abstract class ModificatoryStringifier extends QueryStringifier
             }
         }
 
-        if ($fieldModel) {
-            // prepare value according db table model
-            if ($value instanceof Param) {
-                /** @var Param $value */
-                $value->setValue($fieldModel->prepareValueToSave($value->getValue()));
-            } else {
-                $value = $fieldModel->prepareValueToSave($value);
-            }
+        if ($value instanceof Param) {
+            /** @var Param $value */
+            $value->setValue($this->prepareParamValueToSave($value->getValue(), $fieldModel));
+        } else {
+            $value = $this->prepareParamValueToSave($value, $fieldModel);
         }
 
         // get custom expression
@@ -167,6 +164,27 @@ abstract class ModificatoryStringifier extends QueryStringifier
         }
 
         return $this->stringifyParam($value, $params);
+    }
+
+    protected function prepareParamValueToSave(mixed $value, ?Field $field): mixed
+    {
+        if ($value instanceof \DateTimeInterface) {
+            if (!$field) {
+                throw new \InvalidArgumentException('Can\'t detect format for \DateTimeInterface');
+            }
+
+            return $this->formatDateTimeForField($value, $field);
+        }
+
+        if ($value instanceof \Stringable) {
+            $value = (string)$value;
+        }
+
+        if ($value === '') {
+            return null;
+        }
+
+        return $value;
     }
 
     /**

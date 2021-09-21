@@ -13,22 +13,26 @@ declare(strict_types=1);
 
 namespace VV\Db\Model\Generator\StructBuilder;
 
+use VV\Db;
+use VV\Db\Connection;
 use VV\Db\Model\Generator\ModelGenerator;
 use VV\Db\Model\Generator\ObjectInfo;
+use VV\Db\Model\Generator\StructBuilder;
 
 /**
  * Class Mysql
  *
  * @package VV\Db\ModelGenerator\StructBuilder
  */
-class Mysql implements \VV\Db\Model\Generator\StructBuilder
+class Mysql implements StructBuilder
 {
 
-    public function objectIterator(\VV\Db\Connection $connection): iterable
+    public function objectIterator(Connection $connection): iterable
     {
-        $tables = $connection->query('SHOW TABLES')->rows(\VV\Db::FETCH_ASSOC);
+        $tables = $connection->query('SHOW TABLES')->rows(Db::FETCH_ASSOC);
 
         $typed = ModelGenerator::buildTypeDecorator([
+            'INT' => ['.*int', 'decimal', 'integer', 'numeric', 'double', 'float', 'real'],
             'NUM' => ['.*int', 'decimal', 'integer', 'numeric', 'double', 'float', 'real'],
             'TEXT' => '.*text',
             'BLOB' => '.*blob',
