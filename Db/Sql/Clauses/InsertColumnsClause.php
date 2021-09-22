@@ -16,12 +16,9 @@ namespace VV\Db\Sql\Clauses;
 use VV\Db\Sql\Expressions\DbObject;
 
 /**
- * Class InsertFieldsClause
- *
- * @package VV\Db\Sql\Clauses
  * @method DbObject[] getItems(): array
  */
-class InsertFieldsClause extends ColumnList
+class InsertColumnsClause extends ColumnList
 {
     /**
      * @inheritDoc

@@ -40,7 +40,7 @@ trait QueryWhereTrait
     }
 
     /**
-     * Add `WHERE pk_field=`
+     * Add `WHERE pk_column=`
      *
      *
      * @param string|int|Expression $id

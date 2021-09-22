@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Model\Field;
+use VV\Db\Model\Column;
 use VV\Db\Param;
 use VV\Db\Sql\Clauses\TableClause;
 use VV\Db\Sql\Condition;
@@ -125,7 +125,7 @@ abstract class QueryStringifier
 
     public function decorateParamForCondition(mixed $param, mixed $field): mixed
     {
-        $fieldModel = $this->getFieldModel($field);
+        $fieldModel = $this->getColumnModel($field);
         if ($param instanceof Param) {
             return $param->setValue($this->decorateParamValueForCondition($param->getValue(), $fieldModel));
         }
@@ -133,25 +133,25 @@ abstract class QueryStringifier
         return $this->decorateParamValueForCondition($param, $fieldModel);
     }
 
-    public function decorateParamValueForCondition(mixed $value, ?Field $field): mixed
+    public function decorateParamValueForCondition(mixed $value, ?Column $column): mixed
     {
         if ($value instanceof \DateTimeInterface) {
-            if (!$field) {
+            if (!$column) {
                 throw new \InvalidArgumentException('Can\'t detect format for \DateTimeInterface');
             }
 
-            return $this->formatDateTimeForField($value, $field);
+            return $this->formatDateTimeForField($value, $column);
         }
 
         if ($value instanceof \Stringable) {
             $value = (string)$value;
         }
 
-        if (is_scalar($value) && $field) {
-            if ($field->isNumeric() && !is_numeric($value)) {
+        if (is_scalar($value) && $column) {
+            if ($column->isNumeric() && !is_numeric($value)) {
                 return null;
             }
-            if ($field->getType() == Field::T_BOOL && !is_bool($value)) {
+            if ($column->getType() == Column::T_BOOL && !is_bool($value)) {
                 if ($value === 1 || $value === 0) {
                     return (bool)$value;
                 }
@@ -163,20 +163,20 @@ abstract class QueryStringifier
         return $value;
     }
 
-    public function formatDateTimeForField(\DateTimeInterface $dateTime, Field $field): string
+    public function formatDateTimeForField(\DateTimeInterface $dateTime, Column $column): string
     {
         $parts = [];
-        if ($field->hasDate()) {
+        if ($column->hasDate()) {
             $parts[] = $this->getDateFormat();
         }
-        if ($field->hasTime()) {
+        if ($column->hasTime()) {
             $parts[] = $this->getTimeFormat();
         }
         if (!$parts) {
             throw new \InvalidArgumentException('Column type has neither date nor time');
         }
 
-        if ($field->hasTimeZone()) {
+        if ($column->hasTimeZone()) {
             $parts[] = $this->getTimeZoneFormat();
         }
 
@@ -249,32 +249,32 @@ abstract class QueryStringifier
     abstract public function getQueryTableClause(): TableClause;
 
     /**
-     * @param mixed            $field
+     * @param mixed            $columnName
      * @param TableClause|null $tableClause
      *
-     * @return Field|null
+     * @return Column|null
      */
-    protected function getFieldModel(mixed $field, TableClause $tableClause = null): ?Field
+    protected function getColumnModel(mixed $columnName, TableClause $tableClause = null): ?Column
     {
-        if (!$field) {
+        if (!$columnName) {
             return null;
         }
 
-        if ($field instanceof Field) {
-            return $field;
+        if ($columnName instanceof Column) {
+            return $columnName;
         }
 
-        if (!$field instanceof DbObject) {
-            $field = DbObject::create($field);
-            if (!$field) {
+        if (!$columnName instanceof DbObject) {
+            $columnName = DbObject::create($columnName);
+            if (!$columnName) {
                 return null;
             }
         }
 
-        $owner = $field->getOwner();
+        $owner = $columnName->getOwner();
         $table = ($tableClause ?? $this->getQueryTableClause())->getTableModelOrMain($owner?->getName());
         if ($table) {
-            return $table->getFields()->get($field->getName());
+            return $table->getColumns()->get($columnName->getName());
         }
 
         return null;

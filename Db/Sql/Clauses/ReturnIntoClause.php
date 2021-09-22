@@ -76,13 +76,13 @@ class ReturnIntoClause extends ItemList
     }
 
     /**
-     * @param string|Expression $field
+     * @param string|Expression $expression
      * @param Param             $param
      *
      * @return ReturnIntoClauseItem
      */
-    protected function creteItem(string|Expression $field, Param $param): ReturnIntoClauseItem
+    protected function creteItem(string|Expression $expression, Param $param): ReturnIntoClauseItem
     {
-        return new ReturnIntoClauseItem($field, $param);
+        return new ReturnIntoClauseItem($expression, $param);
     }
 }

@@ -46,15 +46,15 @@ class UpdateQuery extends ModificatoryQuery
     }
 
     /**
-     * Sets to null all fields in argument list
+     * Sets to null all columns in argument list
      *
-     * @param string|Expression ...$fields
+     * @param string|Expression ...$columns
      *
      * @return $this
      */
-    public function setNull(string|Expression ...$fields): static
+    public function setNull(string|Expression ...$columns): static
     {
-        return $this->set(array_fill_keys($fields, null));
+        return $this->set(array_fill_keys($columns, null));
     }
 
     protected function getNonEmptyClausesMap(): array

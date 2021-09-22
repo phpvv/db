@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers;
 
-use VV\Db\Model\Field;
+use VV\Db\Model\Column;
 use VV\Db\Param;
 use VV\Db\Sql;
 use VV\Db\Sql\Clauses\ColumnsClause;
@@ -135,7 +135,7 @@ abstract class ModificatoryStringifier extends QueryStringifier
             return $str;
         }
 
-        $fieldModel = $this->getFieldModel($field);
+        $fieldModel = $this->getColumnModel($field);
 
         if (!$value instanceof Param) {
             if (Param::isFileValue($value)) {
@@ -143,9 +143,9 @@ abstract class ModificatoryStringifier extends QueryStringifier
                 $value = Param::blob($value);
             } elseif ($fieldModel && $value !== null) {
                 // auto-detect large strings to b/clob
-                if ($fieldModel->getType() == Field::T_TEXT) {
+                if ($fieldModel->getType() == Column::T_TEXT) {
                     $value = Param::text($value);
-                } elseif ($fieldModel->getType() == Field::T_BLOB) {
+                } elseif ($fieldModel->getType() == Column::T_BLOB) {
                     $value = Param::blob($value);
                 }
             }
@@ -166,7 +166,7 @@ abstract class ModificatoryStringifier extends QueryStringifier
         return $this->stringifyParam($value, $params);
     }
 
-    protected function prepareParamValueToSave(mixed $value, ?Field $field): mixed
+    protected function prepareParamValueToSave(mixed $value, ?Column $field): mixed
     {
         if ($value instanceof \DateTimeInterface) {
             if (!$field) {
@@ -198,7 +198,7 @@ abstract class ModificatoryStringifier extends QueryStringifier
         $set = [];
         $exprStringifier = $this->getExpressionStringifier();
         foreach ($dataset->getItems() as $item) {
-            $fieldStr = $exprStringifier->stringifyDbObject($field = $item->getField(), $params);
+            $fieldStr = $exprStringifier->stringifyDbObject($field = $item->getColumn(), $params);
             $valueStr = $this->stringifyValueToSave($item->getValue(), $field, $params);
             $set[] = "$fieldStr=$valueStr";
         }
@@ -208,11 +208,11 @@ abstract class ModificatoryStringifier extends QueryStringifier
 
     /**
      * @param mixed $value
-     * @param mixed $field
+     * @param mixed $column
      *
      * @return SqlPart|null
      */
-    protected function expressionValueToSave(mixed $value, mixed $field): ?SqlPart
+    protected function expressionValueToSave(mixed $value, mixed $column): ?SqlPart
     {
         return null;
     }

@@ -24,7 +24,7 @@ abstract class ColumnList extends ItemList
 {
 
     /**
-     * Add field(s)
+     * Add column(s)
      *
      * @param string|array|Expression ...$columns
      *

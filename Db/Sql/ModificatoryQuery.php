@@ -45,7 +45,7 @@ abstract class ModificatoryQuery extends Query
     /**
      * Add `RETURNING column INTO :param` clause (only for oracle)
      *
-     * @param string|iterable|Expression $field
+     * @param string|iterable|Expression $expression
      * @param mixed|Param                $param
      * @param int|null                   $type \VV\Db\P::T_...
      * @param string|null                $name
@@ -54,13 +54,13 @@ abstract class ModificatoryQuery extends Query
      * @return $this
      */
     public function returnInto(
-        string|iterable|Expression $field,
+        string|iterable|Expression $expression,
         mixed &$param = null,
         int $type = null,
         string $name = null,
         int $size = null
     ): static {
-        $this->getReturnIntoClause()->add($field, $param, $type, $name, $size);
+        $this->getReturnIntoClause()->add($expression, $param, $type, $name, $size);
 
         return $this;
     }

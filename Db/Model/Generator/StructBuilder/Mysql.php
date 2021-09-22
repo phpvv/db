@@ -70,7 +70,7 @@ class Mysql implements StructBuilder
                     default: $row['Default'],
                     notnull: $row['Null'] == 'NO',
                     unsigned: ($m[3] ?? '') == 'unsigned',
-                    inpk: $row['Key'] == 'PRI',
+                    inPk: $row['Key'] == 'PRI',
                 );
             }
 

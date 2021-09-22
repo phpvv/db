@@ -24,20 +24,20 @@ use VV\Db\Sql\Expressions\Expression;
  */
 class DatasetClauseItem
 {
-    private DbObject $field;
+    private DbObject $column;
     /** @var mixed|Expression|Param */
     private mixed $value;
 
     /**
      * Item constructor.
      *
-     * @param string|DbObject        $field
+     * @param string|DbObject        $column
      * @param mixed|Expression|Param $value
      *
      */
-    public function __construct(string|DbObject $field, mixed $value = null)
+    public function __construct(string|DbObject $column, mixed $value = null)
     {
-        $this->setField($field);
+        $this->setColumn($column);
         if (func_num_args() > 1) {
             $this->setValue($value);
         }
@@ -46,9 +46,9 @@ class DatasetClauseItem
     /**
      * @return DbObject
      */
-    public function getField(): DbObject
+    public function getColumn(): DbObject
     {
-        return $this->field;
+        return $this->column;
     }
 
     /**
@@ -60,20 +60,20 @@ class DatasetClauseItem
     }
 
     /**
-     * @param DbObject|string $field
+     * @param DbObject|string $column
      *
      * @return $this
      */
-    protected function setField(DbObject|string $field): static
+    protected function setColumn(DbObject|string $column): static
     {
-        if (!$field instanceof DbObject) {
-            $field = DbObject::create($field);
+        if (!$column instanceof DbObject) {
+            $column = DbObject::create($column);
         }
 
-        if (!$field) {
+        if (!$column) {
             throw new \InvalidArgumentException();
         }
-        $this->field = $field;
+        $this->column = $column;
 
         return $this;
     }

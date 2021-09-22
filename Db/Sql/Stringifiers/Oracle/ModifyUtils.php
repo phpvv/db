@@ -27,7 +27,7 @@ trait ModifyUtils
     /**
      * @inheritDoc
      */
-    protected function expressionValueToSave(mixed $value, mixed $field): ?SqlPart
+    protected function expressionValueToSave(mixed $value, mixed $column): ?SqlPart
     {
         if ($value instanceof Param && $value->isLob()) {
             $type = $value->getType();
@@ -40,12 +40,12 @@ trait ModifyUtils
             }
 
             $value->setForUpload(true);
-            $this->addExtraReturnInto($field, $value);
+            $this->addExtraReturnInto($column, $value);
 
             return $this->createSqlPart($emptyLobFunc);
         }
 
         /** @noinspection PhpMultipleClassDeclarationsInspection */
-        return parent::expressionValueToSave($value, $field);
+        return parent::expressionValueToSave($value, $column);
     }
 }

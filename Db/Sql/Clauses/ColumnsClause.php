@@ -82,7 +82,7 @@ class ColumnsClause extends ColumnList
         $columns = &$this->resultColumns;
         if ($columns === null) {
             $columns = [];
-            foreach ($this->getItems() as $col) {
+            foreach ($this->getItems() as $i => $col) {
                 $a = null;
 
                 if ($col instanceof DbObject) {
@@ -97,10 +97,10 @@ class ColumnsClause extends ColumnList
                             $owner = ($o = $col->getOwner()) ? $o->getName() : null;
                             $tbl = $tableClause->getTableModelOrMain($owner);
                             if (!$tbl) {
-                                throw new \LogicException("Can't get result fields: no table model for *");
+                                throw new \LogicException("Can't get result column name: no table model for *");
                             }
 
-                            $columns = array_merge($columns, $tbl->getFields()->getNames());
+                            $columns = array_merge($columns, $tbl->getColumns()->getNames());
                             continue;
                         }
                     }
@@ -109,7 +109,7 @@ class ColumnsClause extends ColumnList
                 }
 
                 if (!$a) {
-                    throw new \LogicException("Alias for field $col is not set");
+                    throw new \LogicException("Alias for column #$i is not set");
                 }
 
                 $columns[] = $a;
@@ -117,12 +117,6 @@ class ColumnsClause extends ColumnList
         }
 
         return $columns;
-    }
-
-    /** @deprecated */
-    public function getResultFields(): array
-    {
-        return $this->getResultColumns();
     }
 
     /**
@@ -229,7 +223,7 @@ class ColumnsClause extends ColumnList
         }
 
         if ($from instanceof Table) {
-            return $this->addNested($path, $alias, ...$from->getFields()->getNames());
+            return $this->addNested($path, $alias, ...$from->getColumns()->getNames());
         }
 
         $resultColumns = $from->getColumnsClause()->getResultColumns();
@@ -238,11 +232,11 @@ class ColumnsClause extends ColumnList
             $resultColumns = array_diff($resultColumns, array_keys($joinedMap));
 
             $map = $this->getResultColumnsMap();
-            foreach ($joinedMap as $subField => $subPath) {
+            foreach ($joinedMap as $subColumn => $subPath) {
                 $jPath = array_merge($path, $subPath);
                 $sqlAlias = ColumnsClause::buildNestedColumnAlias($jPath, $map);
                 $map[$sqlAlias] = $jPath;
-                $this->add("$alias.$subField $sqlAlias");
+                $this->add("$alias.$subColumn $sqlAlias");
             }
 
             $this->setResultColumnsMap($map);
@@ -279,11 +273,11 @@ class ColumnsClause extends ColumnList
 
     /**
      * @param array      $path
-     * @param array|null $resultFieldsMap
+     * @param array|null $resultColumnsMap
      *
      * @return string
      */
-    public static function buildNestedColumnAlias(array $path, ?array $resultFieldsMap): string
+    public static function buildNestedColumnAlias(array $path, ?array $resultColumnsMap): string
     {
         $sqlAlias = '$' . implode('_', $path);
         $maxLength = static::MAX_RESULT_COLUMN_NAME_LENGTH;
@@ -294,10 +288,10 @@ class ColumnsClause extends ColumnList
         }
 
         $i = 1;
-        if ($resultFieldsMap) {
+        if ($resultColumnsMap) {
             $d = $maxLength - $len;
 
-            while (array_key_exists($sqlAlias, $resultFieldsMap)) {
+            while (array_key_exists($sqlAlias, $resultColumnsMap)) {
                 $sfx = '_' . $i++;
                 $sfxLen = strlen($sfx);
 

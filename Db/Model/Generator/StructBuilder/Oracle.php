@@ -87,7 +87,7 @@ SQL
                     default: $default,
                     notnull: $row['nullable'] == 'N',
                     unsigned: false,
-                    inpk: in_array($name, $pks)
+                    inPk: in_array($name, $pks)
                 );
             }
 

@@ -20,16 +20,16 @@ class ForeignKey
 {
     private string $name;
     /** @var string[] */
-    private array $fromFields;
+    private array $fromColumns;
     private string $toTable;
     /** @var string[] */
-    private array $toFields;
+    private array $toColumns;
 
     public function __construct(string $name, array $data)
     {
         $this->name = $name;
 
-        static $props = ['fromFields', 'toTable', 'toFields'];
+        static $props = ['fromColumns', 'toTable', 'toColumns'];
         foreach ($props as $k => $v) {
             $this->$v = $data[$k];
         }
@@ -38,9 +38,9 @@ class ForeignKey
     /**
      * @return string[]
      */
-    public function getFromField(): array
+    public function getFromColumns(): array
     {
-        return $this->fromFields;
+        return $this->fromColumns;
     }
 
     /**
@@ -54,8 +54,8 @@ class ForeignKey
     /**
      * @return string[]
      */
-    public function getToField(): array
+    public function getToColumns(): array
     {
-        return $this->toFields;
+        return $this->toColumns;
     }
 }

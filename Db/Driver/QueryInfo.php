@@ -33,9 +33,9 @@ class QueryInfo
     private string $string;
     private string $type;
     private ?bool $isModificatory;
-    private ?array $resultFieldsMap;
+    private ?array $resultColumnsMap;
 
-    public function __construct($queryString, array $resultFieldsMap = null)
+    public function __construct($queryString, array $resultColumnsMap = null)
     {
         $this->string = $queryString;
 
@@ -45,7 +45,7 @@ class QueryInfo
 
         $this->type = strtolower($m[1]);
         $this->isModificatory = null;
-        $this->resultFieldsMap = $resultFieldsMap;
+        $this->resultColumnsMap = $resultColumnsMap;
 
         return $this;
     }
@@ -129,9 +129,9 @@ class QueryInfo
     /**
      * @return array|null
      */
-    public function getResultFieldsMap(): ?array
+    public function getResultColumnsMap(): ?array
     {
-        return $this->resultFieldsMap;
+        return $this->resultColumnsMap;
     }
 
     public static function isModificatoryType($type): bool

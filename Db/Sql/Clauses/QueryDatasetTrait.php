@@ -27,12 +27,12 @@ trait QueryDatasetTrait
     /**
      * Add set
      *
-     * @param iterable|string|Expression $field
+     * @param iterable|string|Expression $column
      * @param mixed|null                 $value
      *
      * @return $this
      */
-    public function set(iterable|string|Expression $field, mixed $value = null): static
+    public function set(iterable|string|Expression $column, mixed $value = null): static
     {
         $this->getDatasetClause()->add(...func_get_args());
 

@@ -26,16 +26,16 @@ use VV\Db\Sql\Expressions\Expression;
 class DatasetClause extends ItemList
 {
     /**
-     * @param iterable|string|Expression $field
+     * @param iterable|string|Expression $column
      * @param mixed|null                 $value
      *
      * @return $this
      */
-    public function add(iterable|string|Expression $field, mixed $value = null): static
+    public function add(iterable|string|Expression $column, mixed $value = null): static
     {
-        if ($field) {
-            if (is_iterable($field)) {
-                foreach ($field as $k => $v) {
+        if ($column) {
+            if (is_iterable($column)) {
+                foreach ($column as $k => $v) {
                     if (is_int($k)) {
                         $k = $v;
                         $v = [];
@@ -47,7 +47,7 @@ class DatasetClause extends ItemList
                     $value = [];
                 }
 
-                $this->setItem($field, $value);
+                $this->setItem($column, $value);
             }
 
             return $this;
@@ -57,19 +57,19 @@ class DatasetClause extends ItemList
     }
 
     /**
-     * Returns tuple [$fields[], $values[]]
+     * Returns tuple [$columns[], $values[]]
      *
      * @return array
      */
     public function split(): array
     {
-        $fields = $values = [];
+        $columns = $values = [];
         foreach ($this->getItems() as $item) {
-            $fields[] = $item->getField();
+            $columns[] = $item->getColumn();
             $values[] = $item->getValue();
         }
 
-        return [$fields, $values];
+        return [$columns, $values];
     }
 
     /**
@@ -79,44 +79,44 @@ class DatasetClause extends ItemList
     {
         $map = [];
         foreach ($this->getItems() as $item) {
-            $map[$item->getField()->getName()] = $item->getValue();
+            $map[$item->getColumn()->getName()] = $item->getValue();
         }
 
         return $map;
     }
 
     /**
-     * @param mixed $field
+     * @param mixed $column
      * @param mixed $value
      *
      * @return $this
      */
-    protected function setItem(mixed $field, mixed $value): static
+    protected function setItem(mixed $column, mixed $value): static
     {
         if (is_array($value)) {
-            $exploded = explode('=', $field);
+            $exploded = explode('=', $column);
             if (count($exploded) != 2) {
-                throw new \InvalidArgumentException('For custom query $field must by with "=" symbol');
+                throw new \InvalidArgumentException('For custom query $column must be with "=" symbol');
             }
-            [$field, $expr] = $exploded;
+            [$column, $expr] = $exploded;
             $value = Sql::plain($expr, $value);
         }
 
-        $item = $this->creteItem($field, $value);
-        $itemName = $item->getField()->getExpressionId();
+        $item = $this->creteItem($column, $value);
+        $itemName = $item->getColumn()->getExpressionId();
         $this->items[$itemName] = $item;
 
         return $this;
     }
 
     /**
-     * @param string|DbObject $field
+     * @param string|DbObject $column
      * @param mixed           $value
      *
      * @return DatasetClauseItem
      */
-    protected function creteItem(string|DbObject $field, mixed $value): DatasetClauseItem
+    protected function creteItem(string|DbObject $column, mixed $value): DatasetClauseItem
     {
-        return new DatasetClauseItem($field, $value);
+        return new DatasetClauseItem($column, $value);
     }
 }

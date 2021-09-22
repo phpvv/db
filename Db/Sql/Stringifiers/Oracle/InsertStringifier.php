@@ -42,12 +42,12 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
      */
     protected function stringifyMultiValuesInsert(?array &$params): string
     {
-        $table = $this->buildTableSql($this->insertQuery()->getTableClause());
-        $fields = $this->fieldsPart();
+        $table = $this->buildTableSql($this->getInsertQuery()->getTableClause());
+        $columnsPart = $this->getColumnsPart();
 
         $sql = 'INSERT ALL ';
-        foreach ($this->valuesPart() as $row) {
-            $sql .= "INTO {$table->embed($params)} {$fields->embed($params)} VALUES {$row->embed($params)}";
+        foreach ($this->getValuesPart() as $row) {
+            $sql .= "INTO {$table->embed($params)} {$columnsPart->embed($params)} VALUES {$row->embed($params)}";
         }
         /** @noinspection SqlResolve */
         /** @noinspection SqlNoDataSourceInspection */
@@ -67,29 +67,29 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
             return;
         }
 
-        $query = $this->insertQuery();
+        $query = $this->getInsertQuery();
         $pk = $insertedIdClause->getPk() ?: $query->getMainTablePk();
-        $field = DbObject::create($pk);
+        $column = DbObject::create($pk);
 
-        $pkField = null;
+        $pkColumn = null;
         if ($mtm = $query->getTableClause()->getMainTableModel()) {
-            $pkField = $mtm->getFields()->get($pk);
+            $pkColumn = $mtm->getColumns()->get($pk);
         }
         if (!$param = $insertedIdClause->getParam()) {
-            $isNum = $pkField?->isNumeric() ?? true;
+            $isNum = $pkColumn?->isNumeric() ?? true;
 
             $type = $isNum ? Param::T_INT : Param::T_STR;
             $param = new Param($type);
         }
 
         if (!$param->getSize() && $param->isSizable()) {
-            if (!$pkField) {
-                throw new \LogicException('pkField is empty');
+            if (!$pkColumn) {
+                throw new \LogicException('pkColumn is empty');
             }
 
-            $param->setSize($pkField->getLength());
+            $param->setSize($pkColumn->getLength());
         }
 
-        $this->addExtraReturnInto($field, $param->setForInsertedId());
+        $this->addExtraReturnInto($column, $param->setForInsertedId());
     }
 }

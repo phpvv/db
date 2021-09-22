@@ -13,16 +13,11 @@ declare(strict_types=1);
 
 namespace VV\Db\Model;
 
-/**
- * Class Field
- *
- * @package VV\Db\Model
- */
-class Field
+class Column
 {
-    /** Integer fields like INT, BIGINT, SMALLINT... */
+    /** Integer types like INT, BIGINT, SMALLINT... */
     public const T_INT = 0b0001;
-    /** Numeric fields with precision like FLOAT, NUMBER, DECIMAL... */
+    /** Numeric types with precision like FLOAT, NUMBER, DECIMAL... */
     public const T_NUM = 0b0011;
     /** Boolean */
     public const T_BOOL = 0b0100;

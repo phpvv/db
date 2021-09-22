@@ -320,13 +320,13 @@ class SelectQuery extends Query implements Expressions\Expression
      *
      * @param string      $alias
      * @param string|null $onTable
-     * @param string|null $parentField Default - "parent_id"
+     * @param string|null $parentColumn Default - "parent_id"
      *
      * @return $this
      */
-    public function joinParent(string $alias, string $onTable = null, string $parentField = null): static
+    public function joinParent(string $alias, string $onTable = null, string $parentColumn = null): static
     {
-        $this->getTableClause()->joinParent($alias, $onTable, $parentField);
+        $this->getTableClause()->joinParent($alias, $onTable, $parentColumn);
 
         return $this;
     }
@@ -336,13 +336,13 @@ class SelectQuery extends Query implements Expressions\Expression
      *
      * @param string      $alias
      * @param string|null $onTable
-     * @param string|null $parentField Default - "parent_id"
+     * @param string|null $parentColumn Default - "parent_id"
      *
      * @return $this
      */
-    public function leftParent(string $alias, string $onTable = null, string $parentField = null): static
+    public function leftParent(string $alias, string $onTable = null, string $parentColumn = null): static
     {
-        $this->getTableClause()->leftParent($alias, $onTable, $parentField);
+        $this->getTableClause()->leftParent($alias, $onTable, $parentColumn);
 
         return $this;
     }
@@ -801,14 +801,6 @@ class SelectQuery extends Query implements Expressions\Expression
     public function getResultColumnsMap(): ?array
     {
         return $this->getColumnsClause()->getResultColumnsMap();
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getResultFieldsMap(): ?array
-    {
-        return $this->getResultColumnsMap();
     }
 
     /**

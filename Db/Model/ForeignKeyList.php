@@ -46,26 +46,26 @@ class ForeignKeyList implements \IteratorAggregate
     }
 
     /**
-     * Get ForeignKey object by fields names
+     * Get ForeignKey object by column names
      *
-     * @param string[] $fieldsNames
+     * @param string[] $columnNames
      *
      * @return ForeignKey| null
      */
-    public function getFromFields(array $fieldsNames): ?ForeignKey
+    public function getFromColumns(array $columnNames): ?ForeignKey
     {
-        $cnt = count($fieldsNames);
+        $cnt = count($columnNames);
         foreach ($this->foreignKeys as $fk) {
-            $fromField = $fk->getFromField();
+            $fromColumns = $fk->getFromColumns();
 
-            if (count($fromField) != $cnt) {
+            if (count($fromColumns) != $cnt) {
                 continue;
             }
             if ($cnt == 1) {
-                if ($fromField === $fieldsNames) {
+                if ($fromColumns === $columnNames) {
                     return $fk;
                 }
-            } elseif (!array_diff($fromField, $fieldsNames)) {
+            } elseif (!array_diff($fromColumns, $columnNames)) {
                 return $fk;
             }
         }

@@ -32,12 +32,12 @@ class InsertQuery extends ModificatoryQuery
     use QueryDatasetTrait;
 
     public const C_DATASET = 0x01,
-        C_FIELDS = 0x02,
+        C_COLUMNS = 0x02,
         C_VALUES = 0x04,
         C_ON_DUPLICATE_KEY = 0x08,
         C_RETURN_INSERTED_ID = 0x10;
 
-    private ?Clauses\InsertFieldsClause $fieldsClause = null;
+    private ?Clauses\InsertColumnsClause $columnsClause = null;
     private ?Clauses\InsertValuesClause $valuesClause = null;
     private ?Clauses\DatasetClause $onDuplicateKeyClause = null;
     private ?Clauses\InsertedIdClause $insertedIdClause = null;
@@ -66,17 +66,17 @@ class InsertQuery extends ModificatoryQuery
     }
 
     /**
-     * @param string|Expression|Clauses\InsertFieldsClause ...$columns
+     * @param string|Expression|Clauses\InsertColumnsClause ...$columns
      *
      * @return $this
      */
     public function columns(...$columns): static
     {
-        $clause = $columns[0] instanceof Clauses\InsertFieldsClause
+        $clause = $columns[0] instanceof Clauses\InsertColumnsClause
             ? $columns[0]
-            : $this->createFieldsClause()->add(...$columns);
+            : $this->createColumnsClause()->add(...$columns);
 
-        return $this->setFieldsClause($clause);
+        return $this->setColumnsClause($clause);
     }
 
     /**
@@ -102,12 +102,12 @@ class InsertQuery extends ModificatoryQuery
     /**
      * Add on duplicate key update clause
      *
-     * @param string|Expression $field
+     * @param string|Expression $column
      * @param mixed             $value
      *
      * @return $this
      */
-    public function onDuplicateKey(Expression|string $field, mixed $value = null): static
+    public function onDuplicateKey(Expression|string $column, mixed $value = null): static
     {
         $this->getOnDuplicateKeyClause()->add(...func_get_args());
 
@@ -115,55 +115,55 @@ class InsertQuery extends ModificatoryQuery
     }
 
     /**
-     * Returns fieldsClause
+     * Returns columnsClause
      *
-     * @return Clauses\InsertFieldsClause
+     * @return Clauses\InsertColumnsClause
      */
-    public function getFieldsClause(): Clauses\InsertFieldsClause
+    public function getColumnsClause(): Clauses\InsertColumnsClause
     {
-        if (!$this->fieldsClause) {
-            $this->setFieldsClause($this->createFieldsClause());
+        if (!$this->columnsClause) {
+            $this->setColumnsClause($this->createColumnsClause());
         }
 
-        return $this->fieldsClause;
+        return $this->columnsClause;
     }
 
     /**
-     * Sets fieldsClause
+     * Sets columnsClause
      *
-     * @param Clauses\InsertFieldsClause|null $fieldsClause
+     * @param Clauses\InsertColumnsClause|null $columnsClause
      *
      * @return $this
      */
-    public function setFieldsClause(?Clauses\InsertFieldsClause $fieldsClause): static
+    public function setColumnsClause(?Clauses\InsertColumnsClause $columnsClause): static
     {
-        $this->fieldsClause = $fieldsClause;
+        $this->columnsClause = $columnsClause;
 
         return $this;
     }
 
     /**
-     * Clears fieldsClause property and returns previous value
+     * Clears columnsClause property and returns previous value
      *
-     * @return Clauses\InsertFieldsClause|null
+     * @return Clauses\InsertColumnsClause|null
      */
-    public function clearFieldsClause(): ?Clauses\InsertFieldsClause
+    public function clearColumnsClause(): ?Clauses\InsertColumnsClause
     {
         try {
-            return $this->getFieldsClause();
+            return $this->getColumnsClause();
         } finally {
-            $this->setFieldsClause(null);
+            $this->setColumnsClause(null);
         }
     }
 
     /**
-     * Creates default fieldsClause
+     * Creates default columnsClause
      *
-     * @return Clauses\InsertFieldsClause
+     * @return Clauses\InsertColumnsClause
      */
-    public function createFieldsClause(): Clauses\InsertFieldsClause
+    public function createColumnsClause(): Clauses\InsertColumnsClause
     {
-        return new Clauses\InsertFieldsClause();
+        return new Clauses\InsertColumnsClause();
     }
 
     /**
@@ -374,7 +374,7 @@ class InsertQuery extends ModificatoryQuery
         return parent::getNonEmptyClausesMap()
                + [
                    self::C_DATASET => $this->getDatasetClause(),
-                   self::C_FIELDS => $this->getFieldsClause(),
+                   self::C_COLUMNS => $this->getColumnsClause(),
                    self::C_VALUES => $this->getValuesClause(),
                    self::C_ON_DUPLICATE_KEY => $this->getOnDuplicateKeyClause(),
                    self::C_RETURN_INTO => $this->getReturnIntoClause(),

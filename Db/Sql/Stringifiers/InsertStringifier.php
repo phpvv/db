@@ -27,7 +27,7 @@ use VV\Db\Sql\SelectQuery;
 class InsertStringifier extends ModificatoryStringifier
 {
     private InsertQuery $insertQuery;
-    private ?SqlPart $fieldsPart = null;
+    private ?SqlPart $columnsPart = null;
     /** @var SqlPart[] */
     private ?array $valuesPart = null;
 
@@ -46,7 +46,7 @@ class InsertStringifier extends ModificatoryStringifier
     /**
      * @return InsertQuery
      */
-    final public function insertQuery(): InsertQuery
+    final public function getInsertQuery(): InsertQuery
     {
         return $this->insertQuery;
     }
@@ -54,23 +54,23 @@ class InsertStringifier extends ModificatoryStringifier
     /**
      * @return SqlPart
      */
-    final public function fieldsPart(): SqlPart
+    final public function getColumnsPart(): SqlPart
     {
-        if (!$this->fieldsPart) {
+        if (!$this->columnsPart) {
             if ($this->isStdFieldsValues()) {
-                $this->fieldsPart = $this->buildFieldsPart();
+                $this->columnsPart = $this->buildFieldsPart();
             } else {
                 $this->fillFieldsValuesFromDataset();
             }
         }
 
-        return $this->fieldsPart;
+        return $this->columnsPart;
     }
 
     /**
      * @return SqlPart[]
      */
-    final public function valuesPart(): array
+    final public function getValuesPart(): array
     {
         if (!$this->valuesPart) {
             if ($this->isStdFieldsValues()) {
@@ -88,7 +88,7 @@ class InsertStringifier extends ModificatoryStringifier
      */
     public function getSupportedClausesIds(): int
     {
-        return InsertQuery::C_DATASET | InsertQuery::C_FIELDS | InsertQuery::C_VALUES;
+        return InsertQuery::C_DATASET | InsertQuery::C_COLUMNS | InsertQuery::C_VALUES;
     }
 
     /**
@@ -96,13 +96,13 @@ class InsertStringifier extends ModificatoryStringifier
      */
     public function stringifyRaw(?array &$params): string
     {
-        $query = $this->insertQuery();
+        $query = $this->getInsertQuery();
         $table = $query->getTableClause();
         if ($table->isEmpty()) {
             throw new \LogicException('Table is not selected');
         }
 
-        if (count($this->valuesPart()) > 1) {
+        if (count($this->getValuesPart()) > 1) {
             return $this->stringifyMultiValuesInsert($params);
         }
 
@@ -114,7 +114,7 @@ class InsertStringifier extends ModificatoryStringifier
      */
     public function getQueryTableClause(): TableClause
     {
-        return $this->insertQuery()->getTableClause();
+        return $this->getInsertQuery()->getTableClause();
     }
 
     /**
@@ -127,7 +127,7 @@ class InsertStringifier extends ModificatoryStringifier
         $sql = $this->stringifyStdInsertIntoClause($params);
 
         $valuesStr = [];
-        foreach ($this->valuesPart() as $row) {
+        foreach ($this->getValuesPart() as $row) {
             $valuesStr[] = $row->embed($params);
         }
 
@@ -141,7 +141,7 @@ class InsertStringifier extends ModificatoryStringifier
      */
     protected function stringifyStdInsert(?array &$params): string
     {
-        $query = $this->insertQuery();
+        $query = $this->getInsertQuery();
         $this->applyInsertedIdClause($query->getInsertedIdClause(), $params);
 
         return $this->stringifyStdInsertIntoClause($params)
@@ -156,7 +156,7 @@ class InsertStringifier extends ModificatoryStringifier
      */
     protected function buildFieldsPart(): SqlPart
     {
-        $fields = $this->insertQuery()->getFieldsClause()->getItems();
+        $fields = $this->getInsertQuery()->getColumnsClause()->getItems();
 
         return $this->fieldListToPart($fields);
     }
@@ -166,11 +166,11 @@ class InsertStringifier extends ModificatoryStringifier
      */
     protected function buildValuesPart(): array
     {
-        $query = $this->insertQuery();
-        $fieldsClause = $query->getFieldsClause();
+        $query = $this->getInsertQuery();
+        $fieldsClause = $query->getColumnsClause();
         if ($fieldsClause->isEmpty()) {
             $mainTable = $query->getTableClause()->getMainTableModel();
-            $fields = $mainTable ? $mainTable->getFields()->getNames() : [];
+            $fields = $mainTable ? $mainTable->getColumns()->getNames() : [];
         } else {
             $fields = $fieldsClause->getItems();
         }
@@ -185,7 +185,7 @@ class InsertStringifier extends ModificatoryStringifier
      */
     protected function buildFieldsValuesFromDataset(): array
     {
-        [$fields, $values] = $this->insertQuery()->getDatasetClause()->split();
+        [$fields, $values] = $this->getInsertQuery()->getDatasetClause()->split();
 
         return [
             $this->fieldListToPart($fields),
@@ -249,7 +249,7 @@ class InsertStringifier extends ModificatoryStringifier
      */
     protected function isSelectValues(): bool
     {
-        $valuesClause = $this->insertQuery()->getValuesClause();
+        $valuesClause = $this->getInsertQuery()->getValuesClause();
         if (!$valuesClause->getItems()) {
             return false;
         }
@@ -262,7 +262,7 @@ class InsertStringifier extends ModificatoryStringifier
      */
     protected function isStdFieldsValues(): bool
     {
-        return !$this->insertQuery()->getValuesClause()->isEmpty();
+        return !$this->getInsertQuery()->getValuesClause()->isEmpty();
     }
 
     /**
@@ -272,7 +272,7 @@ class InsertStringifier extends ModificatoryStringifier
      */
     protected function stringifyStdValuesClause(&$params): string
     {
-        $values = $this->valuesPart()[0];
+        $values = $this->getValuesPart()[0];
         if (!$values) {
             return ' DEFAULT VALUES';
         }
@@ -318,8 +318,8 @@ class InsertStringifier extends ModificatoryStringifier
      */
     protected function stringifyStdInsertIntoClause(?array &$params): string
     {
-        $fields = $this->fieldsPart();
-        $table = $this->buildTableSql($this->insertQuery()->getTableClause());
+        $fields = $this->getColumnsPart();
+        $table = $this->buildTableSql($this->getInsertQuery()->getTableClause());
 
         /** @noinspection SqlNoDataSourceInspection */
         return "INSERT INTO {$table->embed($params)} {$fields->embed($params)}";
@@ -335,6 +335,6 @@ class InsertStringifier extends ModificatoryStringifier
 
     private function fillFieldsValuesFromDataset(): void
     {
-        [$this->fieldsPart, $this->valuesPart] = $this->buildFieldsValuesFromDataset();
+        [$this->columnsPart, $this->valuesPart] = $this->buildFieldsValuesFromDataset();
     }
 }

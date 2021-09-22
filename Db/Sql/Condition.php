@@ -60,14 +60,6 @@ class Condition extends ItemList implements Predicate
         return $this->setTarget($expression);
     }
 
-    /**
-     * @deprecated Use {@see \VV\Db\Sql\Condition::expression()}
-     */
-    public function expr(string|int|Expression $expression): static
-    {
-        return $this->setTarget($expression);
-    }
-
     /** Sets negation for next comparison method */
     public function not(bool $flag = true): static
     {

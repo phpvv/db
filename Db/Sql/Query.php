@@ -94,7 +94,7 @@ abstract class Query
             throw new \LogicException('Table not selected');
         }
         if (!$pk = $table->getMainTablePk()) {
-            throw new \LogicException('Can\'t determine PK field');
+            throw new \LogicException('Can\'t determine PK column');
         }
 
         return $pk;

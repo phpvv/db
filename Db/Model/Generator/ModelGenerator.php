@@ -144,20 +144,20 @@ class ModelGenerator
 
     protected function processObject(ObjectInfo $object)
     {
-        $type = $object->type();
-        $tableWoPfx = DataObject::trimPrefix($object->name());
+        $type = $object->getType();
+        $tableWoPfx = DataObject::trimPrefix($object->getName());
         $name = DataObject::camelCase($tableWoPfx);
         $className = ucfirst($name) . $type;
-        $relNs = $object->typePlural();
+        $relNs = $object->getTypePlural();
         $ns = "$this->ns\\$relNs";
         $fqcn = "$ns\\$className";
 
         echo "\t$fqcn\r\n";
 
-        // write fields
-        $fieldsConstContent = "\n";
-        $pkFields = [];
-        foreach ($object->columns() as $k => $v) {
+        // write columns
+        $columnConstContent = "\n";
+        $pkColumns = [];
+        foreach ($object->getColumns() as $k => $v) {
             $data = [];
             foreach ($v as $ck => $cv) {
                 if (!is_int($ck)) {
@@ -165,7 +165,7 @@ class ModelGenerator
                 }
 
                 if (!$data) {
-                    $data[] = "Field::T_$cv";
+                    $data[] = "Column::T_$cv";
                 } elseif (is_int($cv) || is_float($cv)) {
                     $data[] = $cv;
                 } elseif (is_bool($cv)) {
@@ -177,15 +177,15 @@ class ModelGenerator
                 }
             }
 
-            $fieldsConstContent .= "        '$k' => [" . implode(', ', $data) . "],\n";
+            $columnConstContent .= "        '$k' => [" . implode(', ', $data) . "],\n";
             if (!empty($v['pk'])) {
-                $pkFields[] = $k;
+                $pkColumns[] = $k;
             }
         }
 
         // write foreign keys
         $fkConstContent = "\n";
-        foreach ($object->foreignKeys() as $k => $v) {
+        foreach ($object->getForeignKeys() as $k => $v) {
             $row = [
                 "['" . implode("', '", array_values($v[0])) . "']",
                 "'$v[1]'",
@@ -198,8 +198,8 @@ class ModelGenerator
         // write table
         $this->dataObjectsGetterPhpdoc[$type] .= " * @property-read $relNs\\$className \$$name\n";
 
-        $pkConst = implode(', ', $pkFields);
-        $pkFieldsConst = implode("', '", $pkFields);
+        $pkConst = implode(', ', $pkColumns);
+        $pkColumnConst = implode("', '", $pkColumns);
         $alias = DataObject::nameToAlias($tableWoPfx, []);
 
         [$phpDoc, $advTopContent, $advBottomContent] = $this->parseClassAdvContent($fqcn);
@@ -209,17 +209,17 @@ class ModelGenerator
             $this->dfltTop
             namespace $ns;
 
-            use VV\Db\Model\Field;
+            use VV\Db\Model\Column;
             use $this->ns\\$type;
 
             {$phpDoc}class $className extends $type
             {
             $advTopContent    //region Auto-generated area
-                protected const NAME = '{$object->name()}';
+                protected const NAME = '{$object->getName()}';
                 protected const PK = '$pkConst';
-                protected const PK_FIELDS = ['$pkFieldsConst'];
+                protected const PK_COLUMNS = ['$pkColumnConst'];
                 protected const DFLT_ALIAS = '$alias';
-                protected const FIELDS = [$fieldsConstContent    ];
+                protected const COLUMNS = [$columnConstContent    ];
                 protected const FOREIGN_KEYS = [$fkConstContent    ];
                 //endregion$advBottomContent
             }

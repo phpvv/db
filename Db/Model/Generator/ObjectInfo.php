@@ -29,12 +29,6 @@ class ObjectInfo
     private array $foreignKeys = [];
     private string $typePlural;
 
-    /**
-     * ObjectInfo constructor.
-     *
-     * @param string $name
-     * @param string $type
-     */
     public function __construct(string $name, string $type, string $typePlural = null)
     {
         $this->name = $name;
@@ -45,7 +39,7 @@ class ObjectInfo
     /**
      * @return string
      */
-    public function name(): string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -53,7 +47,7 @@ class ObjectInfo
     /**
      * @return string
      */
-    public function type(): string
+    public function getType(): string
     {
         return $this->type;
     }
@@ -61,7 +55,7 @@ class ObjectInfo
     /**
      * @return string
      */
-    public function typePlural(): string
+    public function getTypePlural(): string
     {
         return $this->typePlural;
     }
@@ -69,7 +63,7 @@ class ObjectInfo
     /**
      * @return array[]
      */
-    public function columns(): array
+    public function getColumns(): array
     {
         return $this->columns;
     }
@@ -77,7 +71,7 @@ class ObjectInfo
     /**
      * @return array[]
      */
-    public function foreignKeys(): array
+    public function getForeignKeys(): array
     {
         return $this->foreignKeys;
     }
@@ -92,7 +86,7 @@ class ObjectInfo
         ?string $default,
         bool $notnull,
         bool $unsigned,
-        bool $inpk
+        bool $inPk
     ) {
         $this->columns[$name] = [
             $type,
@@ -103,7 +97,7 @@ class ObjectInfo
             $default,
             $notnull,
             $unsigned,
-            'pk' => $inpk,
+            'pk' => $inPk,
         ];
     }
 

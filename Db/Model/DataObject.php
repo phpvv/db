@@ -27,9 +27,9 @@ abstract class DataObject extends DbObject
 {
     public const DFLT_PREFIXES = ['tbl_', 'vw_', 't_', 'v_'];
     protected const DFLT_ALIAS = '';
-    protected const FIELDS = [];
+    protected const COLUMNS = [];
 
-    private ?FieldList $fields = null;
+    private ?ColumnList $columns = null;
 
     public function getDefaultAlias(): string
     {
@@ -37,15 +37,15 @@ abstract class DataObject extends DbObject
     }
 
     /**
-     * @return FieldList
+     * @return ColumnList
      */
-    public function getFields(): FieldList
+    public function getColumns(): ColumnList
     {
-        if ($this->fields === null) {
-            $this->fields = new FieldList(static::FIELDS);
+        if ($this->columns === null) {
+            $this->columns = new ColumnList(static::COLUMNS);
         }
 
-        return $this->fields;
+        return $this->columns;
     }
 
     /**
@@ -61,71 +61,101 @@ abstract class DataObject extends DbObject
     }
 
     /**
-     * @param string            $field
-     * @param string|int        $value
-     * @param array|string|null $columns
-     * @param int|null          $fetchMode
+     * Selects single row by (unique) $value of $column
      *
-     * @return mixed
+     * @param string            $column  Column for equality condition
+     * @param string|int        $value   Value for equality condition
+     * @param array|string|null $columns Column(s to SELECT
+     * @param int|null          $flags
+     *
+     * @return mixed Data of $columns or null if nothing was found.
+     *               If columns is string returns single value instead of array.
      */
-    public function fetchByField(
-        string $field,
+    public function fetchByColumn(
+        string $column,
         string|int $value,
         array|string $columns = null,
-        int $fetchMode = null
+        int $flags = null
     ): mixed {
-        return $this->fetchByFields([$field => $value], $columns, $fetchMode);
+        return $this->fetchByCondition(Sql::condition($column)->eq($value), $columns, $flags);
     }
 
     /**
+     * Selects single row by (unique) $condition
+     *
      * @param Predicate|array|string $condition
      * @param string|string[]|null   $columns
-     * @param int|null               $fetchMode
+     * @param int|null               $flags
      *
      * @return mixed
      */
-    public function fetchByFields(
+    public function fetchByCondition(
         Predicate|array|string $condition,
         array|string $columns = null,
-        int $fetchMode = null
+        int $flags = null
     ): mixed {
         $sql = $this->select(...(array)$columns)->where($condition);
         if ($columns && !is_array($columns)) {
-            return $sql->column(flags: $fetchMode);
+            return $sql->column(flags: $flags);
         }
 
-        return $sql->row($fetchMode);
+        return $sql->row($flags);
     }
 
     /**
-     * @param string                                       $valueField
-     * @param string                                       $keyField
-     * @param string|int|array|Expression|Predicate|null   $condition
+     * Checks if record exists by $column=$value
+     *
+     * @param string     $column
+     * @param string|int $value
+     *
+     * @return bool
+     */
+    public function checkByColumn(string $column, string|int $value): bool
+    {
+        return $this->checkByCondition([$column => $value]);
+    }
+
+    /**
+     *  Checks if record exists by $condition
+     *
+     * @param Condition|array|string $condition
+     *
+     * @return bool
+     */
+    public function checkByCondition(Condition|array|string $condition): bool
+    {
+        return (bool)$this->select('COUNT(*)')->where($condition)->column();
+    }
+
+    /**
+     * @param string                                       $valueColumn
+     * @param string                                       $keyColumn
+     * @param string|int|Expression|Predicate|array|null   $condition
      * @param string|Expression|Expression[]|string[]|null $orderBy
      *
      * @return array
      */
     public function assoc(
-        string $valueField,
-        string $keyField,
-        string|int|array|Expression|Predicate|null $condition = null,
+        string $valueColumn,
+        string $keyColumn,
+        string|int|Expression|Predicate|array $condition = null,
         array|Expression|string $orderBy = null
     ): array {
         if (!$orderBy) {
-            $orderBy = $keyField;
+            $orderBy = $keyColumn;
         }
 
-        $fields = [$keyField];
-        if ($valueField != $keyField) {
-            $fields[] = $valueField;
+        $columns = [$keyColumn];
+        if ($valueColumn != $keyColumn) {
+            $columns[] = $valueColumn;
         }
         if (!is_array($orderBy)) {
             $orderBy = [$orderBy];
         }
 
-        return $this->select(...$fields)
+        return $this->select(...$columns)
             ->where($condition)
             ->orderBy(...$orderBy)
-            ->rows(null, $keyField, $valueField);
+            ->rows(null, $keyColumn, $valueColumn);
     }
 }

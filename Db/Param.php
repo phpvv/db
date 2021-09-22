@@ -51,15 +51,15 @@ final class Param
     /**
      * Param constructor.
      *
-     * @param Model\Field|int $type
-     * @param mixed|null      $value
-     * @param string|null     $name
-     * @param int|null        $size
+     * @param Model\Column|int $type
+     * @param mixed|null       $value
+     * @param string|null      $name
+     * @param int|null         $size
      */
-    public function __construct(Model\Field|int $type, mixed $value = null, string $name = null, int $size = null)
+    public function __construct(Model\Column|int $type, mixed $value = null, string $name = null, int $size = null)
     {
-        if ($type instanceof Model\Field) {
-            $type = self::getTypeByField($type);
+        if ($type instanceof Model\Column) {
+            $type = self::getTypeByColumn($type);
         }
         $this->type = (int)$type;
 
@@ -351,15 +351,15 @@ final class Param
     }
 
     /**
-     * @param int|Model\Field $type
-     * @param mixed           $value
-     * @param string|null     $name
-     * @param int|null        $size
+     * @param int|Model\Column $type
+     * @param mixed            $value
+     * @param string|null      $name
+     * @param int|null         $size
      *
      * @return self
      */
     public static function getPointer(
-        Model\Field|int $type,
+        Model\Column|int $type,
         mixed &$value,
         string $name = null,
         int $size = null
@@ -387,12 +387,6 @@ final class Param
         return new self(self::T_STR, $value, $name, $size);
     }
 
-    /** @deprecated */
-    public static function chr(string $value = null, string $name = null, int $size = null): self
-    {
-        return self::str(...func_get_args());
-    }
-
     public static function bin(string $value = null, string $name = null, int $size = null): self
     {
         return new self(self::T_BIN_STR, $value, $name, $size);
@@ -409,16 +403,16 @@ final class Param
     }
 
     /**
-     * @param Model\Field $field
+     * @param Model\Column $column
      *
      * @return int
      */
-    public static function getTypeByField(Model\Field $field): int
+    public static function getTypeByColumn(Model\Column $column): int
     {
-        return match ($field->getType()) {
-            Model\Field::T_TEXT => self::T_TEXT,
-            Model\Field::T_BLOB => self::T_BLOB,
-            Model\Field::T_BIN => self::T_BIN_STR,
+        return match ($column->getType()) {
+            Model\Column::T_TEXT => self::T_TEXT,
+            Model\Column::T_BLOB => self::T_BLOB,
+            Model\Column::T_BIN => self::T_BIN_STR,
             default => self::T_STR,
         };
     }

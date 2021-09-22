@@ -30,7 +30,7 @@ abstract class Table extends DataObject
     public const DFLT_PREFIXES = ['tbl_', 't_'];
 
     protected const PK = '';
-    protected const PK_FIELDS = [];
+    protected const PK_COLUMNS = [];
     protected const FOREIGN_KEYS = [];
 
     private ?ForeignKeyList $foreignKeys = null;
@@ -40,9 +40,9 @@ abstract class Table extends DataObject
         return static::PK;
     }
 
-    public function getPkFields(): array
+    public function getPkColumns(): array
     {
-        return static::PK_FIELDS;
+        return static::PK_COLUMNS;
     }
 
     /**
@@ -116,23 +116,26 @@ abstract class Table extends DataObject
     }
 
     /**
+     * Selects single row by ID column(s)
+     *
      * @param string|int   $id
-     * @param string|array $fields
+     * @param string|array $columns
      * @param int|null     $fetchMode
      *
-     * @return mixed String if type of $fields is string and array if is array
+     * @return mixed Data of $columns or null if nothing was found.
+     *               If $columns is string returns single value instead of array.
      */
-    public function fetchById(string|int $id, string|array $fields = [], int $fetchMode = null): mixed
+    public function fetchById(string|int $id, string|array $columns = [], int $fetchMode = null): mixed
     {
         if ((string)$id === '') {
             throw new \InvalidArgumentException('ID is empty');
         }
 
-        return $this->fetchByField(static::PK, $id, $fields, $fetchMode) ?: null;
+        return $this->fetchByColumn(static::PK, $id, $columns, $fetchMode) ?: null;
     }
 
     /**
-     * Checks if there is record with $id
+     * Checks if record with $id exists
      *
      * @param string|int $id
      *
@@ -140,47 +143,22 @@ abstract class Table extends DataObject
      */
     public function checkById(string|int $id): bool
     {
-        return (bool)$this->fetchById($id, explode(',', static::PK));
-    }
-
-    /**
-     * Checks if there is record with this $field=$var
-     *
-     * @param string     $field
-     * @param string|int $value
-     *
-     * @return bool
-     */
-    public function checkByField(string $field, string|int $value): bool
-    {
-        return (bool)$this->fetchByField($field, $value, explode(',', static::PK));
-    }
-
-    /**
-     * Checks if there is record with this parameters
-     *
-     * @param Condition|array|string $condition
-     *
-     * @return bool
-     */
-    public function checkByFields(Condition|array|string $condition): bool
-    {
-        return (bool)$this->fetchByFields($condition, explode(',', static::PK));
+        return $this->checkByColumn(static::PK, $id);
     }
 
     /**
      * @inheritDoc
      */
     public function assoc(
-        string $valueField,
-        string $keyField = null,
-        $condition = null,
+        string $valueColumn,
+        string $keyColumn = null,
+        string|int|Expression|Predicate|array $condition = null,
         array|Expression|string $orderBy = null
     ): array {
-        if (!$keyField) {
-            $keyField = $this->getPk();
+        if (!$keyColumn) {
+            $keyColumn = $this->getPk();
         }
 
-        return parent::assoc($valueField, $keyField, $condition, $orderBy);
+        return parent::assoc($valueColumn, $keyColumn, $condition, $orderBy);
     }
 }

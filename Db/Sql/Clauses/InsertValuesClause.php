@@ -26,7 +26,7 @@ class InsertValuesClause extends ItemList
 {
 
     /**
-     * Add field(s)
+     * Add column(s)
      *
      * @param mixed|Param|Expression ...$values
      *

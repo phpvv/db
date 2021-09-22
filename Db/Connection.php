@@ -164,17 +164,17 @@ final class Connection
         $this->tryAutoConnect();
         $this->throwIfConnectionError();
 
-        $resultFieldsMap = null;
+        $resultColumnsMap = null;
         if ($query instanceof Query) {
             $params = [];
             if ($query instanceof Sql\SelectQuery) {
-                $resultFieldsMap = $query->getResultColumnsMap();
+                $resultColumnsMap = $query->getResultColumnsMap();
             }
 
             $query = $this->stringifyQuery($query, $params);
         }
 
-        $queryInfo = new QueryInfo($query, $resultFieldsMap);
+        $queryInfo = new QueryInfo($query, $resultColumnsMap);
 
         $driverPrepared = $this->driverConnection->prepare($queryInfo);
         $prepared = new Statement($driverPrepared, $this, $this->driverConnection, $queryInfo);

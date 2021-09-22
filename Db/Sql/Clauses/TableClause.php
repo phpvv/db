@@ -206,7 +206,7 @@ class TableClause extends ItemList
     }
 
     /**
-     * Returns name of Primary Key field of table with alias == $alias
+     * Returns name of Primary Key column of table with alias == $alias
      *
      * @param string $alias
      *
@@ -329,31 +329,31 @@ class TableClause extends ItemList
     //region join - parent
 
     /**
-     * Adds (INNER) JOIN on same table by parent-field
+     * Adds (INNER) JOIN on same table by parent-column
      *
      * @param string      $alias
      * @param string|null $onTable
-     * @param string|null $parentField Default - "parent_id"
+     * @param string|null $parentColumn Default - "parent_id"
      *
      * @return $this
      */
-    public function joinParent(string $alias, string $onTable = null, string $parentField = null): static
+    public function joinParent(string $alias, string $onTable = null, string $parentColumn = null): static
     {
-        return $this->addJoinParent($alias, $onTable, $parentField);
+        return $this->addJoinParent($alias, $onTable, $parentColumn);
     }
 
     /**
-     * Adds LEFT JOIN on same table by parent-field
+     * Adds LEFT JOIN on same table by parent-column
      *
      * @param string      $alias
      * @param string|null $onTable
-     * @param string|null $parentField Default - "parent_id"
+     * @param string|null $parentColumn Default - "parent_id"
      *
      * @return $this
      */
-    public function leftParent(string $alias, string $onTable = null, string $parentField = null): static
+    public function leftParent(string $alias, string $onTable = null, string $parentColumn = null): static
     {
-        return $this->addJoinParent($alias, $onTable, $parentField, Item::J_LEFT);
+        return $this->addJoinParent($alias, $onTable, $parentColumn, Item::J_LEFT);
     }
 
     /**
@@ -453,7 +453,7 @@ class TableClause extends ItemList
         $backItem = $this->getItemOrLast($backTableAlias);
         $backTableModel = $backItem->getTableModel();
         if (!$backTableModel) {
-            throw new \LogicException('Can\'t determine pk field of relation table');
+            throw new \LogicException('Can\'t determine pk column of relation table');
         }
 
         if (!$backTableAlias) {
@@ -463,24 +463,24 @@ class TableClause extends ItemList
         return $this->addJoin($table, "$backTableAlias.{$backTableModel->getPk()}", $alias, $joinType);
     }
 
-    protected function addJoinParent($alias, $parentTableAlias, $parentField, $joinType = null): static
+    protected function addJoinParent($alias, $parentTableAlias, $parentColumn, $joinType = null): static
     {
         $parentItem = $this->getItemOrLast($parentTableAlias);
         $parentTblMdl = $parentItem->getTableModel();
         if (!$parentTblMdl) {
-            throw new \LogicException('Can\'t determine pk field of relation table');
+            throw new \LogicException('Can\'t determine pk column of relation table');
         }
 
         if (!$parentTableAlias) {
             $parentTableAlias = $parentItem->getTable()->getAlias();
         }
-        if (!$parentField) {
-            $parentField = 'parent_id';
+        if (!$parentColumn) {
+            $parentColumn = 'parent_id';
         }
 
         $on = new ComparePredicate(
             DbObject::create("$alias.{$parentTblMdl->getPk()}"),
-            DbObject::create("$parentTableAlias.$parentField")
+            DbObject::create("$parentTableAlias.$parentColumn")
         );
 
         return $this->addJoin($parentTblMdl, $on, $alias, $joinType);
@@ -524,7 +524,7 @@ class TableClause extends ItemList
         if ($on instanceof Predicate) {
             return $condition->addPredicate($on);
         }
-        // custom on as array: ['f.foo = b.bar AND b.field = ?', ['fieldValue']]
+        // custom on as array: ['f.foo = b.bar AND b.column = ?', ['columnValue']]
         if (is_array($on)) {
             return $condition->expression($on[0])->custom(...array_slice($on, 1));
         }
@@ -538,55 +538,55 @@ class TableClause extends ItemList
             throw new \InvalidArgumentException('Invalid $on type');
         }
 
-        /** @var DbObject $rightField */
-        $rightField = null;
+        /** @var DbObject $rightColumn */
+        $rightColumn = null;
         if (str_starts_with($on, '.')) {
-            // $on == '.fk_field' (prev_table.fk_field)
-            $rightField = DbObject::create(substr($on, 1));
-            if ($rightField) {
+            // $on == '.fk_column' (prev_table.fk_column)
+            $rightColumn = DbObject::create(substr($on, 1));
+            if ($rightColumn) {
                 $prevAlias = $lastItem->getTable()->getAlias();
-                $rightField->setOwner($prevAlias);
+                $rightColumn->setOwner($prevAlias);
             }
         }
 
-        if (!$rightField) {
-            // check if $on == 'table_alias' or $on == 'table_alias.fk_field'
-            $rightField = (function () use ($item, $on) {
-                $rightField = DbObject::create($on);
-                if (!$rightField) {
+        if (!$rightColumn) {
+            // check if $on == 'table_alias' or $on == 'table_alias.fk_column'
+            $rightColumn = (function () use ($item, $on) {
+                $rightColumn = DbObject::create($on);
+                if (!$rightColumn) {
                     // not DbObject expression
                     return null;
                 }
 
-                if ($rightField->getOwner()) {
-                    // $on == 'table_alias.fk_field'
-                    return $rightField;
+                if ($rightColumn->getOwner()) {
+                    // $on == 'table_alias.fk_column'
+                    return $rightColumn;
                 }
 
                 // $on == 'table_alias'
                 $tableModel = $item->getTableModel();
                 if (!$tableModel) {
-                    throw new \LogicException('Can\'t determine previous table PK field');
+                    throw new \LogicException('Can\'t determine previous table PK column');
                 }
 
-                // target table field name = joined table PK field name
-                return  $rightField->createChild($tableModel->getPk());
+                // target table column name = joined table PK column name
+                return  $rightColumn->createChild($tableModel->getPk());
             })();
         }
 
-        if ($rightField) {
-            $name = ($tableModel = $item->getTableModel()) ? $tableModel->getPk() : $rightField->getName();
-            $leftField = DbObject::create($name, $item->getTable()->getAlias());
+        if ($rightColumn) {
+            $name = ($tableModel = $item->getTableModel()) ? $tableModel->getPk() : $rightColumn->getName();
+            $leftColumn = DbObject::create($name, $item->getTable()->getAlias());
         } else {
-            [$leftField, $rightField] = $this->parseCustomCompare($on);
+            [$leftColumn, $rightColumn] = $this->parseCustomCompare($on);
         }
 
-        if ($rightField && $leftField) {
-            if ($leftField->getPath() === $rightField->getPath()) {
-                throw new \LogicException('JOIN ON leftField == rightField');
+        if ($rightColumn && $leftColumn) {
+            if ($leftColumn->getPath() === $rightColumn->getPath()) {
+                throw new \LogicException('JOIN ON leftColumn == rightColumn');
             }
 
-            return $condition->expression($leftField)->eq($rightField);
+            return $condition->expression($leftColumn)->eq($rightColumn);
         }
 
         return $condition->expression($on)->custom();

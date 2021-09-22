@@ -35,7 +35,7 @@ final class Result implements \IteratorAggregate
     private int $flags = Db::FETCH_ASSOC;
     private bool $autoClose = false;
     private bool $used = false;
-    private array|bool|null $resultFieldsMap = false;
+    private array|bool|null $resultColumnsMap = false;
 
     /**
      * Result constructor.
@@ -121,8 +121,8 @@ final class Result implements \IteratorAggregate
             $iterator->next();
 
             // make sub arrays
-            if (is_array($row) && $resultFieldsMap = $this->getResultFieldsMap()) {
-                self::acceptRowResultFieldMap($row, $resultFieldsMap);
+            if (is_array($row) && $resultColumnsMap = $this->getResultColumnsMap()) {
+                self::acceptRowResultColumnsMap($row, $resultColumnsMap);
             }
 
             // decorate row
@@ -177,14 +177,14 @@ final class Result implements \IteratorAggregate
      * Returns array of all fetched rows
      *
      * @param int|null             $flags     One or more of VV\Db::FETCH_*
-     * @param string|int|null      $keyField  If passed then key of each row will be element of current row with same
+     * @param string|int|null      $keyColumn If passed then key of each row will be element of current row with same
      *                                        index
      * @param string|\Closure|null $decorator Applies for each row by passing current $row and $key as arguments.
      *                                        If it is string then each row will be element of row with this index
      *
      * @return array[] Array of rows
      */
-    public function rows(int $flags = null, $keyField = null, $decorator = null): array
+    public function rows(int $flags = null, string|int $keyColumn = null, string|\Closure $decorator = null): array
     {
         if (!$decorator) {
             $decorator = function () {
@@ -197,10 +197,10 @@ final class Result implements \IteratorAggregate
 
         $rows = [];
         while ($row = $this->fetch($flags)) {
-            if ((string)$keyField !== '') {
-                $key = $row[$keyField];
+            if ((string)$keyColumn !== '') {
+                $key = $row[$keyColumn];
                 if (count($row) > 1) {
-                    unset($row[$keyField]);
+                    unset($row[$keyColumn]);
                 }
             } else {
                 $key = false;
@@ -219,32 +219,32 @@ final class Result implements \IteratorAggregate
     }
 
     /**
-     * @param string|null $keyField
-     * @param string|null $valueField
+     * @param string|null $keyColumn
+     * @param string|null $valueColumn
      *
      * @return array
      */
-    public function assoc(string $keyField = null, string $valueField = null): array
+    public function assoc(string $keyColumn = null, string $valueColumn = null): array
     {
-        $valueField .= '';
-        $keyField .= '';
+        $valueColumn .= '';
+        $keyColumn .= '';
 
         return $this->rows(
             null,
             null,
-            function (&$row, &$k) use (&$valueField, &$keyField) {
-                if ($keyField === '' || $valueField === '') {
+            function (&$row, &$k) use (&$valueColumn, &$keyColumn) {
+                if ($keyColumn === '' || $valueColumn === '') {
                     $keys = array_keys($row);
-                    if ($keyField === '') {
-                        $keyField = $keys[0];
+                    if ($keyColumn === '') {
+                        $keyColumn = $keys[0];
                     }
-                    if ($valueField === '') {
-                        $valueField = empty($keys[1]) ? $keys[0] : $keys[1];
+                    if ($valueColumn === '') {
+                        $valueColumn = empty($keys[1]) ? $keys[0] : $keys[1];
                     }
                 }
 
-                $k = $row[$keyField];
-                $row = $row[$valueField];
+                $k = $row[$keyColumn];
+                $row = $row[$valueColumn];
             }
         );
     }
@@ -347,22 +347,22 @@ final class Result implements \IteratorAggregate
     /**
      * @return array|null
      */
-    protected function getResultFieldsMap(): ?array
+    protected function getResultColumnsMap(): ?array
     {
-        if ($this->resultFieldsMap === false) {
-            $this->resultFieldsMap = $this->prepared->getQueryInfo()->getResultFieldsMap() ?: null;
+        if ($this->resultColumnsMap === false) {
+            $this->resultColumnsMap = $this->prepared->getQueryInfo()->getResultColumnsMap() ?: null;
         }
 
-        return $this->resultFieldsMap;
+        return $this->resultColumnsMap;
     }
 
     /**
      * @param $row
-     * @param $resultFieldsMap
+     * @param array $resultColumnsMap
      */
-    public static function acceptRowResultFieldMap(&$row, $resultFieldsMap): void
+    public static function acceptRowResultColumnsMap(&$row, array $resultColumnsMap): void
     {
-        foreach ($resultFieldsMap as $key => $path) {
+        foreach ($resultColumnsMap as $key => $path) {
             $val = $row[$key];
             unset($row[$key]);
 

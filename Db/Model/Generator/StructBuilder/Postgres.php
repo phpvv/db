@@ -121,7 +121,7 @@ SQL;
                     default: $default,
                     notnull: $row['is_nullable'] == 'NO',
                     unsigned: false,
-                    inpk: in_array($name, $pks)
+                    inPk: in_array($name, $pks)
                 );
             }
 

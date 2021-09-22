@@ -26,7 +26,7 @@ class DeleteTablesClause extends ItemList
 {
 
     /**
-     * Add field(s)
+     * Add column(s)
      *
      * @param string|Expression ...$tables
      *
