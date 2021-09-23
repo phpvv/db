@@ -166,14 +166,18 @@ abstract class ModificatoryStringifier extends QueryStringifier
         return $this->stringifyParam($value, $params);
     }
 
-    protected function prepareParamValueToSave(mixed $value, ?Column $field): mixed
+    protected function prepareParamValueToSave(mixed $value, ?Column $column): mixed
     {
         if ($value instanceof \DateTimeInterface) {
-            if (!$field) {
+            if (!$column) {
                 throw new \InvalidArgumentException('Can\'t detect format for \DateTimeInterface');
             }
 
-            return $this->formatDateTimeForField($value, $field);
+            return $this->formatDateTimeForField($value, $column);
+        }
+
+        if (is_bool($value) && $column->isNumeric()) {
+            return (int)$value;
         }
 
         if ($value instanceof \Stringable) {

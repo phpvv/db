@@ -148,8 +148,13 @@ abstract class QueryStringifier
         }
 
         if (is_scalar($value) && $column) {
-            if ($column->isNumeric() && !is_numeric($value)) {
-                return null;
+            if ($column->isNumeric()) {
+                if (is_bool($value)) {
+                    return (int)$value;
+                }
+                if (!is_numeric($value)) {
+                    return null;
+                }
             }
             if ($column->getType() == Column::T_BOOL && !is_bool($value)) {
                 if ($value === 1 || $value === 0) {
