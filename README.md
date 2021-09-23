@@ -363,7 +363,7 @@ print_r($products);
 
 ### Create [`SelectQuery`](./Db/Sql/SelectQuery.php)
 
-There are several variants to create `SelectQuery` ([select.php](https://github.com/phpvv/db-examples/blob/master/examples/select.php)):
+There are several variants to create `SelectQuery` ([create-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/01.create-select-query.php)):
 
 ```php
 use App\Db\MainDb;
@@ -660,14 +660,49 @@ Query has some shortcuts methods:
 - `->where[Not]Between('width', 250, 350)`;
 - `->where[Not]Like('title', 'computer%', caseInsensitive: true)`.
 
-### GroupBy Clause
+### GroupBy and Having Clauses
 
-### Having Clause
+To set GROUP BY clause use `groupBy()` method that behaves like `columns()` (see [Columns Clause](#columns-clause)).
 
-Use method `having()` like `where()`
+To set condition for aggregate use `having()` method that behaves like `where()` (see [Where Clause](#where-clause)).
+
+Example ([group-by-having.php](https://github.com/phpvv/db-examples/blob/master/examples/select/07.group-by-having.php)):
+```php
+$query = $db->tbl->product->select('b.title brand', 'COUNT(*) cnt')
+    ->join($db->tbl->brand)
+    ->groupBy('b.title')
+    ->having('COUNT(*) > ', 1);
+```
 
 ### OrderBy Clause
 
+Simple order by columns ([order-by.php](https://github.com/phpvv/db-examples/blob/master/examples/select/08.order-by.php)):
+```php
+$query = $db->tbl->product->select('b.title brand', 'p.title product', 'price')
+    ->left($db->tbl->brand)
+    ->orderBy(      // ORDER BY
+        'b.title',  //     "b"."title" NULLS FIRST,
+        '-price'    //     "price" DESC NULLS LAST
+    );
+```
+
+Order by expression (CASE for example):
+```php
+$query = $db->tbl->product->select('p.title product', 'color_id')
+    ->orderBy(                  // ORDER BY
+        Sql::case('color_id')   //     CASE "color_id"
+            ->when(5)->then(1)  //         WHEN 5 THEN 1
+            ->when(1)->then(2)  //         WHEN 1 THEN 2
+            ->else(100)         //         ELSE 100 END
+    );
+```
+
+### Limit Clause
+
+Use `->limit($count, $offset)` ([limit.php](https://github.com/phpvv/db-examples/blob/master/examples/select/09.limit.php)):
+```php
+$query = $db->tbl->product->select()->orderBy('product_id')->limit(3, 2);
+```
 
 ## Insert
 
