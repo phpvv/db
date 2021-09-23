@@ -28,7 +28,7 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
     use CommonUtils;
 
     private ?Param $insertedIdParam = null;
-    private ?string $insertedIdField = null;
+    private ?string $insertedIdColumn = null;
 
     /**
      * @inheritDoc
@@ -50,8 +50,8 @@ class InsertStringifier extends \VV\Db\Sql\Stringifiers\InsertStringifier
         }
 
         $params[] = ($insertedIdClause->getParam() ?: Param::str())->setForInsertedId();
-        $field = $insertedIdClause->getPk() ?: $this->getInsertQuery()->getMainTablePk();
+        $column = $insertedIdClause->getPk() ?: $this->getInsertQuery()->getMainTablePk();
 
-        $this->addExtraReturning("$field _insertedid");
+        $this->addExtraReturning("$column _insertedid");
     }
 }

@@ -123,14 +123,14 @@ abstract class QueryStringifier
         return $this->conditionStringifier;
     }
 
-    public function decorateParamForCondition(mixed $param, mixed $field): mixed
+    public function decorateParamForCondition(mixed $param, mixed $columnName): mixed
     {
-        $fieldModel = $this->getColumnModel($field);
+        $columnModel = $this->getColumnModel($columnName);
         if ($param instanceof Param) {
-            return $param->setValue($this->decorateParamValueForCondition($param->getValue(), $fieldModel));
+            return $param->setValue($this->decorateParamValueForCondition($param->getValue(), $columnModel));
         }
 
-        return $this->decorateParamValueForCondition($param, $fieldModel);
+        return $this->decorateParamValueForCondition($param, $columnModel);
     }
 
     public function decorateParamValueForCondition(mixed $value, ?Column $column): mixed
@@ -140,7 +140,7 @@ abstract class QueryStringifier
                 throw new \InvalidArgumentException('Can\'t detect format for \DateTimeInterface');
             }
 
-            return $this->formatDateTimeForField($value, $column);
+            return $this->formatDateTimeForColumn($value, $column);
         }
 
         if ($value instanceof \Stringable) {
@@ -168,7 +168,7 @@ abstract class QueryStringifier
         return $value;
     }
 
-    public function formatDateTimeForField(\DateTimeInterface $dateTime, Column $column): string
+    public function formatDateTimeForColumn(\DateTimeInterface $dateTime, Column $column): string
     {
         $parts = [];
         if ($column->hasDate()) {
@@ -254,32 +254,32 @@ abstract class QueryStringifier
     abstract public function getQueryTableClause(): TableClause;
 
     /**
-     * @param mixed            $columnName
+     * @param mixed            $column
      * @param TableClause|null $tableClause
      *
      * @return Column|null
      */
-    protected function getColumnModel(mixed $columnName, TableClause $tableClause = null): ?Column
+    protected function getColumnModel(mixed $column, TableClause $tableClause = null): ?Column
     {
-        if (!$columnName) {
+        if (!$column) {
             return null;
         }
 
-        if ($columnName instanceof Column) {
-            return $columnName;
+        if ($column instanceof Column) {
+            return $column;
         }
 
-        if (!$columnName instanceof DbObject) {
-            $columnName = DbObject::create($columnName);
-            if (!$columnName) {
+        if (!$column instanceof DbObject) {
+            $column = DbObject::create($column);
+            if (!$column) {
                 return null;
             }
         }
 
-        $owner = $columnName->getOwner();
+        $owner = $column->getOwner();
         $table = ($tableClause ?? $this->getQueryTableClause())->getTableModelOrMain($owner?->getName());
         if ($table) {
-            return $table->getColumns()->get($columnName->getName());
+            return $table->getColumns()->get($column->getName());
         }
 
         return null;

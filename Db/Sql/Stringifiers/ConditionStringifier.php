@@ -108,7 +108,7 @@ class ConditionStringifier
     {
         $leftExpression = $compare->getLeftExpression();
         $rightExpression = $compare->getRightExpression();
-        $this->decorateParamsByModel($leftExpression, $rightExpression);
+        $this->decorateParamsByColumn($leftExpression, $rightExpression);
 
         $leftStr = $this->stringifyColumn($leftExpression, $params);
         $rightStr = $this->stringifyColumn($rightExpression, $params, true);
@@ -150,7 +150,7 @@ class ConditionStringifier
         $from = $between->getFromExpression();
         $till = $between->getTillExpression();
 
-        $this->decorateParamsByModel($expr, $from, $till);
+        $this->decorateParamsByColumn($expr, $from, $till);
 
         $expressionStr = $this->stringifyColumn($expr, $params);
         $fromStr = $this->stringifyColumn($from, $params, true);
@@ -174,9 +174,8 @@ class ConditionStringifier
         $exprStr = $this->stringifyColumn($expr = $in->getExpression(), $params);
 
         $inParams = $in->getParams();
-        $this->decorateParamsByModel($in->getExpression(), ...$inParams);
+        $this->decorateParamsByColumn($in->getExpression(), ...$inParams);
 
-        // build values clause: (?, ?, SOME_FUNC(field))
         $valuesArray = [];
         foreach ($inParams as $p) {
             if ($p instanceof Expression) {
@@ -313,26 +312,28 @@ class ConditionStringifier
         }
     }
 
-    private function decorateParamsByModel($field, &...$params): void
+    private function decorateParamsByColumn($column, &...$params): void
     {
-        if ($field instanceof DbObject) {
-            foreach ($params as &$p) {
-                if ($p instanceof SqlParam) {
-                    $val = $p->getParam();
-                } else {
-                    $val = $p;
-                }
-
-                $val = $this->getQueryStringifier()->decorateParamForCondition($val, $field);
-
-                if ($p instanceof SqlParam) {
-                    $p->setParam($val);
-                } else {
-                    $p = $val;
-                }
-            }
-            unset($p);
+        if (!$column instanceof DbObject) {
+            return;
         }
+
+        foreach ($params as &$p) {
+            if ($p instanceof SqlParam) {
+                $val = $p->getParam();
+            } else {
+                $val = $p;
+            }
+
+            $val = $this->getQueryStringifier()->decorateParamForCondition($val, $column);
+
+            if ($p instanceof SqlParam) {
+                $p->setParam($val);
+            } else {
+                $p = $val;
+            }
+        }
+        unset($p);
     }
 
     /**

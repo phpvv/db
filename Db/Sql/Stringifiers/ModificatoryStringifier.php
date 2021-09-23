@@ -116,36 +116,36 @@ abstract class ModificatoryStringifier extends QueryStringifier
 
     /**
      * @param mixed      $value
-     * @param mixed      $field
+     * @param mixed      $column
      * @param array|null $params
      *
      * @return string
      */
-    protected function stringifyValueToSave(mixed $value, mixed $field, ?array &$params): string
+    protected function stringifyValueToSave(mixed $value, mixed $column, ?array &$params): string
     {
         if ($value instanceof Expression) {
             $tmpParams = [];
             $str = $this->stringifyColumn($value, $tmpParams);
             if ($tmpParams) {
                 foreach ($tmpParams as $tmp) {
-                    $this->stringifyValueToSave($tmp, $field, $params);
+                    $this->stringifyValueToSave($tmp, $column, $params);
                 }
             }
 
             return $str;
         }
 
-        $fieldModel = $this->getColumnModel($field);
+        $columnModel = $this->getColumnModel($column);
 
         if (!$value instanceof Param) {
             if (Param::isFileValue($value)) {
                 // auto-detect file to blob
                 $value = Param::blob($value);
-            } elseif ($fieldModel && $value !== null) {
+            } elseif ($columnModel && $value !== null) {
                 // auto-detect large strings to b/clob
-                if ($fieldModel->getType() == Column::T_TEXT) {
+                if ($columnModel->getType() == Column::T_TEXT) {
                     $value = Param::text($value);
-                } elseif ($fieldModel->getType() == Column::T_BLOB) {
+                } elseif ($columnModel->getType() == Column::T_BLOB) {
                     $value = Param::blob($value);
                 }
             }
@@ -153,13 +153,13 @@ abstract class ModificatoryStringifier extends QueryStringifier
 
         if ($value instanceof Param) {
             /** @var Param $value */
-            $value->setValue($this->prepareParamValueToSave($value->getValue(), $fieldModel));
+            $value->setValue($this->prepareParamValueToSave($value->getValue(), $columnModel));
         } else {
-            $value = $this->prepareParamValueToSave($value, $fieldModel);
+            $value = $this->prepareParamValueToSave($value, $columnModel);
         }
 
         // get custom expression
-        if ($expr = $this->expressionValueToSave($value, $field)) {
+        if ($expr = $this->expressionValueToSave($value, $column)) {
             return $expr->embed($params);
         }
 
@@ -173,7 +173,7 @@ abstract class ModificatoryStringifier extends QueryStringifier
                 throw new \InvalidArgumentException('Can\'t detect format for \DateTimeInterface');
             }
 
-            return $this->formatDateTimeForField($value, $column);
+            return $this->formatDateTimeForColumn($value, $column);
         }
 
         if (is_bool($value) && $column->isNumeric()) {
@@ -202,9 +202,9 @@ abstract class ModificatoryStringifier extends QueryStringifier
         $set = [];
         $exprStringifier = $this->getExpressionStringifier();
         foreach ($dataset->getItems() as $item) {
-            $fieldStr = $exprStringifier->stringifyDbObject($field = $item->getColumn(), $params);
-            $valueStr = $this->stringifyValueToSave($item->getValue(), $field, $params);
-            $set[] = "$fieldStr=$valueStr";
+            $columnStr = $exprStringifier->stringifyDbObject($column = $item->getColumn(), $params);
+            $valueStr = $this->stringifyValueToSave($item->getValue(), $column, $params);
+            $set[] = "$columnStr=$valueStr";
         }
 
         return implode(', ', $set);
