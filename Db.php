@@ -36,7 +36,7 @@ abstract class Db
     public const FETCH_NUM = 0x02;
     public const FETCH_BOTH = self::FETCH_ASSOC | self::FETCH_NUM;
     public const FETCH_OBJ = 0x04;
-    public const FETCH_LOB_NOT_LOAD = 0x08; // only for oracle yet
+    public const FETCH_LOB_OBJECT = 0x08; // only for oracle yet
 
     /** @var Connection[] */
     private array $connections = [];
