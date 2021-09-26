@@ -363,7 +363,7 @@ print_r($products);
 
 ### Create [`SelectQuery`](./Db/Sql/SelectQuery.php)
 
-There are several variants to create `SelectQuery` ([create-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/01.create-select-query.php)):
+There are several variants to create `SelectQuery` ([create-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/01.create-select-query.php#L26-L37)):
 
 ```php
 use App\Db\MainDb;
@@ -374,29 +374,91 @@ $connection = $db->getConnection(); // or $db->getFreeConnection();
 
 $columns = ['product_id', 'b.title brand', 'title', 'price'];
 
-// from Connection directly
+// from `Connection` directly:
 $selectQuery = $connection->select(...$columns)->from('tbl_product');
-
-// from Db
+// from `Db`:
 $selectQuery = $db->select(...$columns)->from('tbl_product');
-
-// from Table
+// from `Table` (recommended):
 $selectQuery = $db->tbl->product->select(...$columns);
+```
+
+### Fetch query result
+
+#### From [`Result`](./Db/Result.php)
+
+Fetch single row or column ([execute-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/02.execute-select-query.php#L24-L31)):
+```php
+$query = $db->tbl->product->select('product_id', 'title')->whereId(10);
+
+$row = $query->result->row/*($flags)*/);
+$productId = $query->result->column/*($columnIndex[, $flags])*/);
+```
+
+Fetch all rows ([execute-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/02.execute-select-query.php#L36-L53)):
+```php
+$query = $db->tbl->product->select('product_id', 'title', 'b.title brand')->join($db->tbl->brand)->limit(3);
+
+$result = $query->result;
+while (['product_id' => $productId, 'title' => $title] = $result->fetch()) {
+    echo "$productId: $title\n";
+}
+// or
+$rowIterator = $query->result(Db::FETCH_NUM);
+foreach ($rowIterator as [$productId, $title, $brand]) {
+    echo "$productId: $brand $title\n";
+}
+// or
+$rows = $query->result->rows/*($flags)*/;
+// or
+$assoc = $query->result()->assoc/*(keyColumn: 'product_id'[, valueColumn: 'title'])*/;
+//
+```
+
+You can set fetch mode flags to `fetch()`, `row()`, `rows()`, `column()`:
+
+```php
+use VV\Db;
+
+$rows = $query->rows(
+    Db::FETCH_ASSOC   // column name as key; default fetch mode (if $flags === null)
+    | Db::FETCH_NUM   // column index as key
+    | Db::FETCH_LOB_OBJECT // return LOB object instead of LOB content (only for Oracle yet)
+);
+```
+
+Fetch result directly from query ([execute-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/02.execute-select-query.php#L58-L85)):
+```php
+$query = $db->tbl->product->select('product_id', 'title', 'brand_id')->limit(3);
+
+$assocRows = $query->rows;
+$numRows = $query->rows(Db::FETCH_NUM);
+
+$decoratedRows = $query->rows(decorator: function (&$row, &$key) {
+    $key = $row['product_id'] . '-' . $row['brand_id'];
+    $row = array_values($row);
+});
+
+$assoc = $query->rows(keyColumn: 'product_id', decorator: 'title');
+$assoc = $query->assoc;
+
+$assocRow = $query->row;
+$bothRow = $query->row(Db::FETCH_NUM | Db::FETCH_ASSOC);
+
+$productId = $query->column;
+$title = $query->column(1);
 ```
 
 ### Columns Clause
 
-Method `select(...)` (see above) returns [`SelectQuery`](./Db/Sql/SelectQuery.php) object. You can change columns using methods `SelectQuery::columns()` or `SelectQuery::addColumns()`:
+Method `select(...)` (see above) returns [`SelectQuery`](./Db/Sql/SelectQuery.php) object. You can change columns using methods `SelectQuery::columns()` or `SelectQuery::addColumns()` ([select.php](https://github.com/phpvv/db-examples/blob/master/examples/select/03.select.php#L23-L28)):
 
 ```php
 $query = $db->tbl->product->select()
     ->columns('product_id', 'brand_id')
     ->addColumns('title', 'price');
-
-print_r($query->rows);
 ```
 
-All these methods accepts `string` or [`Expression`](./Db/Sql/Expressions/Expression.php) interface as each column. So you can do something like this:
+All these methods accepts `string` or [`Expression`](./Db/Sql/Expressions/Expression.php) interface as each column. So you can do something like this ([select.php](https://github.com/phpvv/db-examples/blob/master/examples/select/03.select.php#L31-L48)):
 
 ```php
 $query = $db->tbl->product->select(
@@ -412,13 +474,11 @@ $query = $db->tbl->product->select(
         ->else(0)
         ->as('is_expensive'),
 );
-
-print_r($query->rows);
 ```
 
 ### From Clause
 
-To set table or view to query you can call `from()` method or create query directly from [`Table`](./Db/Model/Table.php) or [`View`](./Db/Model/View.php):
+To set table or view to query you can call `from()` method or create query directly from [`Table`](./Db/Model/Table.php) or [`View`](./Db/Model/View.php) ([from.php](https://github.com/phpvv/db-examples/blob/master/examples/select/04.from.php#L22-L29)):
 ```php
 $query = $db->tbl->product->select(/*...*/);
 // or
@@ -429,7 +489,7 @@ $query = $db->select(/*...*/)->from('tbl_product'); // not same as above regardi
 
 By default, alias of table (or view) consists of first letters of each word of table (or view) name without prefix (`tbl_`,`t_`, `vw_`, `v_`). For example: `tbl_order` -> `o`, `tbl_order_item` -> `oi`.
 
-To change table alias, call `mainTableAs()` method of query:
+To change table alias, call `mainTableAs()` method of query ([from.php](https://github.com/phpvv/db-examples/blob/master/examples/select/04.from.php#L32-L33)):
 ```php
 $query = $db->tbl->product->select(/*...*/)->mainTableAs('prod');
 ```
@@ -438,7 +498,7 @@ $query = $db->tbl->product->select(/*...*/)->mainTableAs('prod');
 
 To set JOIN clause use these methods: `join()`, `left()`, `right()`, `full()`.
 
-Example:
+Example ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L23-L28)):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)  // SELECT ... FROM "tbl_order_item" "oi"
     ->join($db->tbl->order)                    // JOIN "tbl_order" "o" ON "o"."order_id" = "oi"."order_id"
@@ -447,7 +507,7 @@ $query = $db->tbl->orderItem->select(/*...*/)  // SELECT ... FROM "tbl_order_ite
     ->where('o.state_id', 1);                  // WHERE "o"."state_id" = ?
 ```
 
-By default, table joins to previous table by primary key column. Default alias of table is first letters of each word of table name. You can change ON condition (second parameter) and alias (third parameter):
+By default, table joins to previous table by primary key column. Default alias of table is first letters of each word of table name. You can change ON condition (second parameter) and alias (third parameter) ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L31-L43)):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)
     ->join(
@@ -465,33 +525,33 @@ $query = $db->tbl->orderItem->select(/*...*/)
 
 #### ON condition shortcuts
 
-Specify alias of table to which join is needed:
+Specify alias of table to which join is needed ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L47-L49)):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)
     ->join($db->tbl->order)
     ->join($db->tbl->product, 'oi'); // join to tbl_order_item (not tbl_order) by product_id field
 ```
 
-Specify column of table to which join is needed:
+Specify column of table to which join is needed ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L53-L54)):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)
     ->join($db->tbl->order, '.foo_id'); // "o"."order_id" = "oi"."foo_id"
 ```
 
-Specify alias and column of table to which join is needed:
+Specify alias and column of table to which join is needed ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L58-L60)):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)
     ->join($db->tbl->order)
     ->join($db->tbl->product, 'oi.foo_id'); // "p"."product_id" = "oi"."foo_id"
 ```
 
-`joinParent()`:
+`joinParent()` ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L64-L65)):
 ```php
 $query = $db->tbl->productCategory->select(/*...*/)
     //->joinParent('pc2', 'pc', 'parent_id') // same as below
     ->joinParent('pc2'); // JOIN "tbl_product_category" "pc2" ON ("pc2"."category_id" = "pc"."parent_id")
 ```
-`joinBack()`:
+`joinBack()` ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L69-L70)):
 ```php
 $query = $db->tbl->order->select(/*...*/)
     ->joinBack($db->tbl->orderItem); // JOIN "tbl_order_item" "oi" ON ("oi"."item_id" = "o"."order_id")
@@ -499,7 +559,7 @@ $query = $db->tbl->order->select(/*...*/)
 
 ### Nested Columns
 
-Nest resulting columns manually:
+Nest resulting columns manually ([nested-columns.php](https://github.com/phpvv/db-examples/blob/master/examples/select/06.nested-columns.php#L22-L29)):
 ```php
 $query = $db->tbl->product->select('product_id', 'price', 'weight')
     ->addNestedColumns('brand', 'b.brand_id', 'b.title') // first argument is nesting path: string|string[]
@@ -543,7 +603,7 @@ Array
 )
 ```
 
-Nest resulting columns with join:
+Nest resulting columns with join ([nested-columns.php](https://github.com/phpvv/db-examples/blob/master/examples/select/06.nested-columns.php#L33-L50)):
 ```php
 $query = $db->tbl->orderItem->select('item_id', 'price', 'quantity')
     ->joinNestedColumns(
@@ -611,7 +671,7 @@ Array
 
 To set query condition use `where()` method. Each `where()` adds `AND` condition.
 Method accepts:
-- `Condition` as first argument:
+- `Condition` as first argument ([where.php](https://github.com/phpvv/db-examples/blob/master/examples/select/07.where.php#L23-L35)):
 ```php
 $query = $db->tbl->product->select(/*...*/)
     ->where(                                // WHERE
@@ -625,20 +685,23 @@ $query = $db->tbl->product->select(/*...*/)
     );
 
 ```
-- `Expression|string` as first argument and (binding) value to compare as second argument:
+- `Expression|string` as first argument and (binding) value (or `Expression`) to compare as second argument ([where.php](https://github.com/phpvv/db-examples/blob/master/examples/select/07.where.php#L37-L46)):
 ```php
 $query = $db->tbl->product->select(/*...*/)
     ->where('color_id', 5)      // same: `->where('color_id =', 5)`
-    ->where('price <=', 2000)   // supported operators: = | != | <> | < | > | <= | >=
+    ->where(
+        'price <=', // supported operators: = | != | <> | < | > | <= | >=
+        $db->tbl->product->select('AVG(price)') // HEAVING clause described below
+    )
     ->where('title !=', null);
 ```
-- `string` as custom SQL as first argument and (binding) array of values as second argument:
+- `string` as custom SQL as first argument and (binding) array of values as second argument ([where.php](https://github.com/phpvv/db-examples/blob/master/examples/select/07.where.php#L49-L54)):
 ```php
 $query = $db->tbl->product->select(/*...*/)
     ->where('`width` BETWEEN ? AND ?', [250, 350])  // custom sql with binding parameters
     ->where('state=1');                             // custom sql w/o binding parameters
 ```
-- array as first argument ($expression => $param):
+- array as first argument ($expression => $parameter) ([where.php](https://github.com/phpvv/db-examples/blob/master/examples/select/07.where.php#L57-L68)):
 ```php
 $query = $db->tbl->product->select(/*...*/)
     ->where([
@@ -666,7 +729,7 @@ To set GROUP BY clause use `groupBy()` method that behaves like `columns()` (see
 
 To set condition for aggregate use `having()` method that behaves like `where()` (see [Where Clause](#where-clause)).
 
-Example ([group-by-having.php](https://github.com/phpvv/db-examples/blob/master/examples/select/07.group-by-having.php)):
+Example ([group-by-having.php](https://github.com/phpvv/db-examples/blob/master/examples/select/08.group-by-having.php#L22-L28)):
 ```php
 $query = $db->tbl->product->select('b.title brand', 'COUNT(*) cnt')
     ->join($db->tbl->brand)
@@ -676,7 +739,7 @@ $query = $db->tbl->product->select('b.title brand', 'COUNT(*) cnt')
 
 ### OrderBy Clause
 
-Simple order by columns ([order-by.php](https://github.com/phpvv/db-examples/blob/master/examples/select/08.order-by.php)):
+Simple order by columns ([order-by.php](https://github.com/phpvv/db-examples/blob/master/examples/select/09.order-by.php#L23-L31)):
 ```php
 $query = $db->tbl->product->select('b.title brand', 'p.title product', 'price')
     ->left($db->tbl->brand)
@@ -686,7 +749,7 @@ $query = $db->tbl->product->select('b.title brand', 'p.title product', 'price')
     );
 ```
 
-Order by expression (CASE for example):
+Order by expression (CASE for example) ([order-by.php](https://github.com/phpvv/db-examples/blob/master/examples/select/09.order-by.php#L33-L42)):
 ```php
 $query = $db->tbl->product->select('p.title product', 'color_id')
     ->orderBy(                  // ORDER BY
@@ -699,20 +762,140 @@ $query = $db->tbl->product->select('p.title product', 'color_id')
 
 ### Limit Clause
 
-Use `->limit($count, $offset)` ([limit.php](https://github.com/phpvv/db-examples/blob/master/examples/select/09.limit.php)):
+Use `->limit($count, $offset)` ([limit.php](https://github.com/phpvv/db-examples/blob/master/examples/select/10.limit.php#L21-L24)):
 ```php
 $query = $db->tbl->product->select()->orderBy('product_id')->limit(3, 2);
 ```
 
 ## Insert
 
-*Coming soon...*
+### Create [`InsertQuery`](./Db/Sql/InsertQuery.php)
+
+There are several variants to create `InsertQuery` ([create-insert-query.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/01.create-insert-query.php#L24-L35)):
+
+```php
+use App\Db\MainDb;
+
+$db = MainDb::instance();
+$connection = $db->getConnection(); // or $db->getFreeConnection();
+// $connection = new \VV\Db\Connection(...);
+
+// from Connection directly:
+$insertQuery = $connection->insert()->into('tbl_order');
+// from Db:
+$insertQuery = $db->insert()->into('tbl_order');
+// from Table (recommended):
+$insertQuery = $db->tbl->order->insert();
+// $insertQuery = $connection->insert()->from($db->tbl->order);
+```
+
+Last variant is preferable due to adjusting type of inserted value to column type:
+```php
+$db->tbl->foo->insert([
+    'int_column' => true, // inserts `1` (or `0` for `false`)
+    'bool_column' => 1, // inserts `true` for `1` and `false` for `0` (exception for other numbers)
+    'date_column' => new \DateTimeImmutable(), // inserts date only: `Y-m-d`
+    'time_column' => new \DateTimeImmutable(), // inserts time only: `H:i:s`
+    'timestamp_column' => new \DateTimeImmutable(), // inserts date and time: `Y-m-d H:i:s`
+    'timestamp_tz_column' => new \DateTimeImmutable(), // inserts date and time with time zone: `Y-m-d H:i:s P`
+]);
+```
+
+### Execute [`InsertQuery`](./Db/Sql/InsertQuery.php)
+
+Just execute:
+```php
+$result = $query->exec();
+```
+
+Get inserted ID (autoincrement) or affected rows ([execute-insert-query.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/02.execute-insert-query.php#L28-L32)):
+```php
+$result = $query->initInsertedId()->exec();
+$id = $result->insertedId();
+$affectedRows = $result->affectedRows();
+```
+
+Execute query and return inserted ID or affected rows ([execute-insert-query.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/02.execute-insert-query.php#L35-L38)):
+```php
+$id = $query->insertedId();             // executes Insert
+$affectedRows = $query->affectedRows(); // executes Insert too
+```
+
+### Insert single row
+
+Regular insert query ([insert-single-row.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.insert-single-row.php#L22-L27)):
+```php
+$query = $db->tbl->order->insert()
+    ->columns('user_id', 'comment')
+    ->values(1, 'my comment');
+```
+
+Insert assignment list ([insert-single-row.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.insert-single-row.php#L29-L38)):
+```php
+$query = $db->tbl->order->insert()
+    // ->set([
+    //     'user_id' => 1,
+    //     'comment' => 'my comment',
+    // ])
+    ->set('user_id', 1)
+    ->set('comment', 'my comment');
+```
+
+Shortcut ([insert-single-row.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.insert-single-row.php#L40-L44)):
+```php
+$insertedId = $db->tbl->order->insert([
+    'user_id' => 1,
+    'date_created' => new \DateTime(),
+]);
+```
+
+### Insert multiple rows
+
+Insert values list ([insert-multiple-rows.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/04.insert-multiple-rows.php#L33-L46)):
+```php
+$query = $db->tbl->orderItem->insert()->columns('order_id', 'product_id', 'price', 'quantity');
+foreach ($valuesList as $values) {
+    $query->values(...$values);
+}
+```
+
+Insert from Select ([insert-multiple-rows.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/04.insert-multiple-rows.php#L52-L67)):
+```php
+// copy order
+$newOrderId = $db->tbl->order->insert([
+    'user_id' => $userId,
+    'date_created' => new \DateTime(),
+]);
+
+$query = $db->tbl->orderItem->insert()
+    ->columns('order_id', 'product_id', 'price', 'quantity')
+    ->values(
+        $db->tbl->orderItem
+            ->select((string)$newOrderId, 'product_id', 'price', 'quantity')
+            ->where('order_id', $orderId)
+    );
+```
+
+Insert values list executing statement per N rows ([insert-multiple-rows.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/04.insert-multiple-rows.php#L71-L78)):
+```php
+$query = $db->tbl->orderItem->insert()
+    ->columns('order_id', 'product_id', 'price', 'quantity')
+    ->execPer(1000);
+foreach ($valuesList as $values) {
+    $query->values(...$values);
+}
+$query->execPerFinish(); // exec last
+```
 
 ## Update
 
 *Coming soon...*
 
 ## Delete
+
+*Coming soon...*
+
+## Transaction
 
 *Coming soon...*
 
