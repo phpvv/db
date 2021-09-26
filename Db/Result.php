@@ -18,12 +18,13 @@ use VV\Db;
 /**
  * Class Result
  *
- * @property-read int    $affectedRows Returns number of rows affected during statement execution
+ * @property-read string     $column
+ * @property-read array      $row
+ * @property-read array      $rows
+ * @property-read array      $assoc
  *
- * @property-read string $column
- * @property-read array  $row
- * @property-read array  $rows
- * @property-read array  $assoc
+ * @property-read int|string $insertedId
+ * @property-read int        $affectedRows Returns number of rows affected during statement execution
  */
 final class Result implements \IteratorAggregate
 {
@@ -219,31 +220,29 @@ final class Result implements \IteratorAggregate
     }
 
     /**
-     * @param string|null $keyColumn
-     * @param string|null $valueColumn
+     * @param string|int|null $keyColumn
+     * @param string|int|null $valueColumn
      *
      * @return array
      */
-    public function assoc(string $keyColumn = null, string $valueColumn = null): array
+    public function assoc(string|int $keyColumn = null, string|int $valueColumn = null): array
     {
         $valueColumn .= '';
         $keyColumn .= '';
 
         return $this->rows(
-            null,
-            null,
-            function (&$row, &$k) use (&$valueColumn, &$keyColumn) {
-                if ($keyColumn === '' || $valueColumn === '') {
+            decorator: function (&$row, &$key) use (&$valueColumn, &$keyColumn) {
+                if ($keyColumn == '' || $valueColumn == '') {
                     $keys = array_keys($row);
-                    if ($keyColumn === '') {
+                    if ($keyColumn == '') {
                         $keyColumn = $keys[0];
                     }
-                    if ($valueColumn === '') {
-                        $valueColumn = empty($keys[1]) ? $keys[0] : $keys[1];
+                    if ($valueColumn == '') {
+                        $valueColumn = $keys[1] ?? $keys[0];
                     }
                 }
 
-                $k = $row[$keyColumn];
+                $key = $row[$keyColumn];
                 $row = $row[$valueColumn];
             }
         );
@@ -357,7 +356,7 @@ final class Result implements \IteratorAggregate
     }
 
     /**
-     * @param $row
+     * @param       $row
      * @param array $resultColumnsMap
      */
     public static function acceptRowResultColumnsMap(&$row, array $resultColumnsMap): void
