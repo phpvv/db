@@ -198,7 +198,7 @@ abstract class ModificatoryQuery extends Query
             throw new \LogicException('Statement execution outside current transaction');
         }
 
-        return $this->query();
+        return $this->getConnectionOrThrow()->query($this);
     }
 
     /**

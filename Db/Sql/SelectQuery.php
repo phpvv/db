@@ -32,8 +32,9 @@ use VV\Db\Sql\Predicates\Predicate;
  * @package VV\Db\Sql
  *
  * @property-read Result $result
- * @property-read mixed  $column
+ * @property-read mixed  $cell
  * @property-read array  $row
+ * @property-read array  $column
  * @property-read array  $rows
  * @property-read array  $assoc
  *
@@ -65,26 +66,17 @@ class SelectQuery extends Query implements Expressions\Expression
 
     public function __get($var)
     {
-        switch ($var) {
-            // call method wo params
-            case 'result':
-                return $this->result();
-            case 'row':
-                return $this->row();
-            case 'rows':
-                return $this->rows();
-            case 'assoc':
-                return $this->assoc();
-            case 'column':
-                return $this->column();
-
-            case 'forUpdate':
-                return $this->forUpdate();
-            case 'distinct':
-                return $this->distinct();
-        }
-
-        throw new \LogicException("Undefined property $var");
+        return match ($var) {
+            'result' => $this->result(),
+            'cell' => $this->cell(),
+            'row' => $this->row(),
+            'column' => $this->column(),
+            'rows' => $this->rows(),
+            'assoc' => $this->assoc(),
+            'forUpdate' => $this->forUpdate(),
+            'distinct' => $this->distinct(),
+            default => throw new \LogicException("Undefined property $var"),
+        };
     }
 
     /**
@@ -480,26 +472,26 @@ class SelectQuery extends Query implements Expressions\Expression
     }
 
     /**
-     * @param null $flags
-     * @param null $decorator
-     * @param null $fetchSize
+     * @param int|null             $flags
+     * @param string|\Closure|null $decorator
+     * @param int|null             $fetchSize
      *
      * @return Result
      */
-    public function result($flags = null, $decorator = null, $fetchSize = null): Result
+    public function result(int $flags = null, string|\Closure $decorator = null, int $fetchSize = null): Result
     {
-        return $this->query($flags, $decorator, $fetchSize);
+        return $this->getConnectionOrThrow()->query($this, null, $flags, $decorator, $fetchSize);
     }
 
     /**
-     * @param int      $index
+     * @param int      $columnIndex
      * @param int|null $flags
      *
      * @return mixed
      */
-    public function column(int $index = 0, int $flags = null): mixed
+    public function cell(int $columnIndex = 0, int $flags = null): mixed
     {
-        return $this->query()->column($index, $flags);
+        return $this->result()->cell($columnIndex, $flags);
     }
 
     /**
@@ -509,19 +501,32 @@ class SelectQuery extends Query implements Expressions\Expression
      */
     public function row(int $flags = null): ?array
     {
-        return $this->query()->row($flags);
+        return $this->result()->row($flags);
     }
 
     /**
-     * @param int|null             $flags
-     * @param string|null          $keyColumn
-     * @param string|\Closure|null $decorator
+     * Returns first column with $index
+     *
+     * @param int      $index
+     * @param int|null $flags One or more of VV\Db::FETCH_*
+     *
+     * @return array
+     */
+    public function column(int $index = 0, int $flags = null): array
+    {
+        return $this->result()->column($index, $flags);
+    }
+
+    /**
+     * @param int|null                 $flags
+     * @param string|int|null          $keyColumn
+     * @param string|int|\Closure|null $decorator
      *
      * @return array[]
      */
-    public function rows(int $flags = null, string $keyColumn = null, string|\Closure $decorator = null): array
+    public function rows(int $flags = null, string|int $keyColumn = null, string|int|\Closure $decorator = null): array
     {
-        return $this->query()->rows($flags, $keyColumn, $decorator);
+        return $this->result()->rows($flags, $keyColumn, $decorator);
     }
 
     /**
@@ -532,7 +537,7 @@ class SelectQuery extends Query implements Expressions\Expression
      */
     public function assoc(string $keyColumn = null, string $valueColumn = null): array
     {
-        return $this->query()->assoc($keyColumn, $valueColumn);
+        return $this->result()->assoc($keyColumn, $valueColumn);
     }
 
     /**

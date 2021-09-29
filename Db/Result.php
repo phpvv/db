@@ -18,8 +18,9 @@ use VV\Db;
 /**
  * Class Result
  *
- * @property-read string     $column
+ * @property-read mixed      $cell
  * @property-read array      $row
+ * @property-read array      $column
  * @property-read array      $rows
  * @property-read array      $assoc
  *
@@ -53,8 +54,9 @@ final class Result implements \IteratorAggregate
     public function __get($var)
     {
         return match ($var) {
-            'column' => $this->column(),
+            'cell' => $this->cell(),
             'row' => $this->row(),
+            'column' => $this->column(),
             'rows' => $this->rows(),
             'assoc' => $this->assoc(),
             'insertedId' => $this->insertedId(),
@@ -78,11 +80,11 @@ final class Result implements \IteratorAggregate
     }
 
     /**
-     * @param string|\Closure|null $decorator
+     * @param string|int|\Closure|null $decorator
      *
      * @return $this
      */
-    public function setDecorator(string|\Closure|null $decorator): self
+    public function setDecorator(string|int|\Closure|null $decorator): self
     {
         if (is_scalar($decorator)) {
             $decorator = function (&$row) use ($decorator) {
@@ -140,21 +142,21 @@ final class Result implements \IteratorAggregate
     }
 
     /**
-     * Returns first cell of first row
+     * Returns first (or $columnIndex) cell of first row
      *
-     * @param int      $index
-     * @param int|null $flags One or more of VV\Db::FETCH_*
+     * @param int      $columnIndex Index of column whose cell is needed
+     * @param int|null $flags       One or more of VV\Db::FETCH_*
      *
      * @return mixed
      */
-    public function column(int $index = 0, int $flags = null): mixed
+    public function cell(int $columnIndex = 0, int $flags = null): mixed
     {
         $row = $this->row($flags | Db::FETCH_NUM);
         if (!$row) {
             return null;
         }
 
-        return $row[$index];
+        return $row[$columnIndex];
     }
 
     /**
@@ -175,19 +177,32 @@ final class Result implements \IteratorAggregate
     }
 
     /**
+     * Returns first column with $index
+     *
+     * @param int      $index
+     * @param int|null $flags One or more of VV\Db::FETCH_*
+     *
+     * @return array
+     */
+    public function column(int $index = 0, int $flags = null): array
+    {
+        return $this->rows($flags | Db::FETCH_NUM, decorator: $index);
+    }
+
+    /**
      * Returns array of all fetched rows
      *
-     * @param int|null             $flags     One or more of VV\Db::FETCH_*
-     * @param string|int|null      $keyColumn If passed then key of each row will be element of current row with same
-     *                                        index
-     * @param string|\Closure|null $decorator Applies for each row by passing current $row and $key as arguments.
-     *                                        If it is string then each row will be element of row with this index
+     * @param int|null                 $flags     One or more of VV\Db::FETCH_*
+     * @param string|int|null          $keyColumn If passed then key of each row will be element of current row with
+     *                                            same index
+     * @param string|int|\Closure|null $decorator Applies for each row by passing current $row and $key as arguments.
+     *                                            If it is string then each row will be element of row with this index
      *
      * @return array[] Array of rows
      */
-    public function rows(int $flags = null, string|int $keyColumn = null, string|\Closure $decorator = null): array
+    public function rows(int $flags = null, string|int $keyColumn = null, string|int|\Closure $decorator = null): array
     {
-        if (!$decorator) {
+        if ($decorator === null) {
             $decorator = function () {
             };
         } elseif (is_scalar($decorator)) {

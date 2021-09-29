@@ -96,7 +96,7 @@ abstract class DataObject extends DbObject
     ): mixed {
         $sql = $this->select(...(array)$columns)->where($condition);
         if ($columns && !is_array($columns)) {
-            return $sql->column(flags: $flags);
+            return $sql->cell(flags: $flags);
         }
 
         return $sql->row($flags);
@@ -124,7 +124,7 @@ abstract class DataObject extends DbObject
      */
     public function checkByCondition(Condition|array|string $condition): bool
     {
-        return (bool)$this->select('COUNT(*)')->where($condition)->column();
+        return (bool)$this->select('COUNT(*)')->where($condition)->cell();
     }
 
     /**

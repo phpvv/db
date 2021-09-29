@@ -236,17 +236,5 @@ abstract class Query
         return $res;
     }
 
-    /**
-     * @param int|null             $flags
-     * @param string|\Closure|null $decorator
-     * @param int|null             $fetchSize
-     *
-     * @return Result
-     */
-    protected function query(int $flags = null, string|\Closure $decorator = null, int $fetchSize = null): Result
-    {
-        return $this->getConnectionOrThrow()->query($this, null, $flags, $decorator, $fetchSize);
-    }
-
     abstract protected function getNonEmptyClausesMap(): array;
 }
