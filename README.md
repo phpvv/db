@@ -386,15 +386,15 @@ $selectQuery = $db->tbl->product->select(...$columns);
 
 #### From [`Result`](./Db/Result.php)
 
-Fetch single row or column ([execute-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/02.execute-select-query.php#L24-L31)):
+Fetch single row or cell ([execute-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/02.execute-select-query.php#L24-L31)):
 ```php
 $query = $db->tbl->product->select('product_id', 'title')->whereId(10);
 
 $row = $query->result->row/*($flags)*/);
-$productId = $query->result->column/*($columnIndex[, $flags])*/);
+$productId = $query->result->cell/*($columnIndex[, $flags])*/);
 ```
 
-Fetch all rows ([execute-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/02.execute-select-query.php#L36-L53)):
+Fetch all rows or column ([execute-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/02.execute-select-query.php#L36-L53)):
 ```php
 $query = $db->tbl->product->select('product_id', 'title', 'b.title brand')->join($db->tbl->brand)->limit(3);
 
@@ -444,8 +444,11 @@ $assoc = $query->assoc;
 $assocRow = $query->row;
 $bothRow = $query->row(Db::FETCH_NUM | Db::FETCH_ASSOC);
 
-$productId = $query->column;
-$title = $query->column(1);
+$productIdList = $query->column;
+$titleList = $query->column(1);
+
+$productId = $query->cell;
+$title = $query->cell(1);
 ```
 
 ### Columns Clause
@@ -841,7 +844,7 @@ $query = $db->tbl->order->insert()
     ->set('comment', 'my comment');
 ```
 
-Shortcut ([insert-single-row.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.insert-single-row.php#L40-L44)):
+Shortcut (executes query) ([insert-single-row.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.insert-single-row.php#L40-L44)):
 ```php
 $insertedId = $db->tbl->order->insert([
     'user_id' => 1,
@@ -889,7 +892,97 @@ $query->execPerFinish(); // exec last
 
 ## Update
 
-*Coming soon...*
+### Create [`UpdateQuery`](./Db/Sql/UpdateQuery.php)
+
+There are several variants to create `UpdateQuery` ([create-update-query.php](https://github.com/phpvv/db-examples/blob/master/examples/update/01.create-update-query.php#L24-L36)):
+
+```php
+use App\Db\MainDb;
+
+$db = MainDb::instance();
+$connection = $db->getConnection(); // or $db->getFreeConnection();
+// $connection = new \VV\Db\Connection(...);
+
+// from Connection directly:
+$updateQuery = $connection->update()->into('tbl_order');
+// from Db:
+$updateQuery = $db->update()->into('tbl_order');
+// from Table (recommended):
+$updateQuery = $db->tbl->order->update();
+// $updateQuery = $connection->update()->from($db->tbl->order);
+```
+
+Last variant is preferable due to adjusting type of updated value to column type:
+```php
+$db->tbl->foo->update([
+    'int_column' => true, // sets `1` (or `0` for `false`)
+    'bool_column' => 1, // sets `true` for `1` and `false` for `0` (exception for other numbers)
+    'date_column' => new \DateTimeImmutable(), // sets date only: `Y-m-d`
+    'time_column' => new \DateTimeImmutable(), // sets time only: `H:i:s`
+    'timestamp_column' => new \DateTimeImmutable(), // sets date and time: `Y-m-d H:i:s`
+    'timestamp_tz_column' => new \DateTimeImmutable(), // sets date and time with time zone: `Y-m-d H:i:s P`
+]);
+```
+
+### Execute [`UpdateQuery`](./Db/Sql/UpdateQuery.php)
+
+Just execute:
+```php
+$result = $query->exec();
+```
+
+Get affected rows ([execute-update-query.php](https://github.com/phpvv/db-examples/blob/master/examples/update/02.execute-update-query.php#L28-L32)):
+```php
+$affectedRows = $result->affectedRows();
+```
+
+Execute query and return affected rows ([execute-update-query.php](https://github.com/phpvv/db-examples/blob/master/examples/update/02.execute-update-query.php#L35-L38)):
+```php
+$affectedRows = $query->affectedRows();
+```
+
+### SET and WHERE clauses
+
+Method `set()` accepts column name as first argument and value (or `Expression`) as second argument or array `column => value`.
+WHERE clause is required for `UpdateQuery`. To set condition use `where()` method or its shortcuts (see [select query where clause](#where-clause)).
+To update all rows just set something like this: `->where('1=1')`.
+
+Example ([update-set-where.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update-set-where.php#L34-L41)):
+```php
+$query = $db->tbl->order->update()
+    // ->set([
+    //     'amount' => 1000,
+    //     'state_id' => 1,
+    // ])
+    ->set('amount', rand(10_00, 10000_00) * 0.01)
+    ->set('state_id', rand(1, 3))
+    ->whereId(2);
+```
+
+Shortcut (executes query) ([update-set-where.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update-set-where.php#L34-L43)):
+```php
+$affectedRows = $db->tbl->order->update(
+    [
+        'amount' => rand(1_00, 10_000_00) * 0.01,
+        'state_id' => rand(1, 3),
+    ],
+    3
+    // ['order_id' => 3]
+    // Sql::condition()->and('order_id')->eq(3)
+);
+```
+
+Update with [`Expression`](./Db/Sql/Expressions/Expression.php) (`SelectQuery`, `CaseExpression`, ...) ([update-set-where.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update-set-where.php#L47-L57)): 
+```php
+$query = $db->tbl->order->update()
+    ->set(
+        'amount',
+        $db->tbl->orderItem
+            ->select('SUM(price * quantity)')
+            ->where('order_id=o.order_id')
+    )
+    ->where('amount', null);
+```
 
 ## Delete
 
