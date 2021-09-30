@@ -21,10 +21,11 @@ composer require phpvv/db-oci
 [big-select.php](https://github.com/phpvv/db-examples/blob/master/examples/big-select.php) in [DB Examples Project](https://github.com/phpvv/db-examples):
 
 ```php
+use App\Db\MainDb;
 use VV\Db\Param;
 use VV\Db\Sql;
 
-$db = \App\Db\MainDb::instance();
+$db = MainDb::instance();
 
 $categoryId = 102;
 $stateParam = Param::int(value: 1, name: 'state');
@@ -169,64 +170,60 @@ Array
 [big-transaction.php](https://github.com/phpvv/db-examples/blob/master/examples/big-transaction.php) in [DB Examples Project](https://github.com/phpvv/db-examples):
 
 ```php
+use App\Db\MainDb;
 use VV\Db\Param;
 
-$db = \App\Db\Main::instance();
+$db = MainDb::instance();
 
 $userId = 1;
 $cart = [
     // productId => quantity
-    10 => 1,
-    20 => 2,
-    40 => 3,
+    10 => rand(1, 2),
+    20 => rand(1, 3),
+    40 => rand(1, 5),
 ];
 
 
-$productIter = $db->tbl->product->select('product_id', 'price')
+$productIterator = $db->tbl->product->select('product_id', 'price')
     ->whereIdIn(...array_keys($cart))
     ->result(\VV\Db::FETCH_NUM);
 
-$txn = $db->startTransaction();
+$transaction = $db->startTransaction();
 try {
     $orderId = $db->tbl->order->insert()
-        ->set(['user_id' => $userId])
-        ->insertedId($txn);
-
-    $totalAmount = 0;
-    $productIterExtended = (function () use ($productIter, $cart, &$totalAmount) {
-        foreach ($productIter as [$productId, $price]) {
-            yield [$productId, $price, $quantity = $cart[$productId]];
-            $totalAmount += $price * $quantity;
-        }
-    })();
+        ->set([
+            'user_id' => $userId,
+            'date_created' => new \DateTime(),
+        ])
+        ->insertedId($transaction);
 
     // variants:
-    switch (2) {
+    switch (3) {
         case 1:
-            // don't care about performance
-            foreach ($productIterExtended as [$productId, $price, $quantity]) {
+            // build and execute queries for each item
+            foreach ($productIterator as [$productId, $price]) {
                 $db->tbl->orderItem->insert()
                     ->set([
                         'order_id' => $orderId,
                         'product_id' => $productId,
                         'price' => $price,
-                        'quantity' => $quantity,
+                        'quantity' => $cart[$productId],
                     ])
-                    ->exec($txn);
+                    ->exec($transaction);
             }
             break;
         case 2:
-            // multi values insert in one query
+            // build and execute one query for all items
             $insertItemQuery = $db->tbl->orderItem->insert()
-                ->fields('order_id', 'product_id', 'price', 'quantity');
+                ->columns('order_id', 'product_id', 'price', 'quantity');
 
-            foreach ($productIterExtended as [$productId, $price, $quantity]) {
-                $insertItemQuery->values($orderId, $productId, $price, $quantity);
+            foreach ($productIterator as [$productId, $price]) {
+                $insertItemQuery->values($orderId, $productId, $price, $cart[$productId]);
             }
-            $insertItemQuery->exec($txn);
+            $insertItemQuery->exec($transaction);
             break;
         case 3:
-            // prepared query
+            // prepare query and execute it for each item
             $prepared = $db->tbl->orderItem->insert()
                 ->set([
                     'order_id' => Param::int($orderId),
@@ -235,33 +232,36 @@ try {
                     'quantity' => $quantityParam = Param::str(size: 16),
                 ]);
 
-            foreach ($productIterExtended as [$productId, $price, $quantity]) {
+            foreach ($productIterator as [$productId, $price]) {
                 $productIdParam->setValue($productId);
                 $priceParam->setValue($price);
-                $quantityParam->setValue($quantity);
+                $quantityParam->setValue($cart[$productId]);
 
-                $prepared->exec($txn);
+                $prepared->exec($transaction);
             }
             break;
     }
 
     $db->tbl->order->update()
-        ->set(['amount' => $totalAmount])
+        ->set(
+            'amount',
+            $db->tbl->orderItem->select('SUM(price * quantity)')->where('order_id=o.order_id')
+        )
         ->whereId($orderId)
-        // ->exec() // throws an exception that you are trying to execute statement outside of transaction started for current connection
-        ->exec($txn);
+        // ->exec() // throws an exception that you are trying to execute statement
+                    // outside of transaction started for current connection
+        ->exec($transaction);
 
     // you can execute important statement in transaction free connection
     $db->tbl->log->insert()
         ->set(['title' => "new order #$orderId"])
-        ->setConnection($db->getTransactionFreeConnection()) // set new connection for query
-        ->exec();
+        ->exec($db->getFreeConnection());
 
     // throw new \RuntimeException('Test transactionFreeConnection()');
 
-    $txn->commit();
+    $transaction->commit();
 } catch (\Throwable $e) {
-    $txn->rollback();
+    $transaction->rollback();
     /** @noinspection PhpUnhandledExceptionInspection */
     throw $e;
 }
@@ -359,7 +359,7 @@ print_r($products);
 ```
 
 
-## Select
+## SELECT
 
 ### Create [`SelectQuery`](./Db/Sql/SelectQuery.php)
 
@@ -382,7 +382,7 @@ $selectQuery = $db->select(...$columns)->from('tbl_product');
 $selectQuery = $db->tbl->product->select(...$columns);
 ```
 
-### Fetch query result
+### Fetch Query Result
 
 #### From [`Result`](./Db/Result.php)
 
@@ -451,7 +451,7 @@ $productId = $query->cell;
 $title = $query->cell(1);
 ```
 
-### Columns Clause
+### SELECT Clause
 
 Method `select(...)` (see above) returns [`SelectQuery`](./Db/Sql/SelectQuery.php) object. You can change columns using methods `SelectQuery::columns()` or `SelectQuery::addColumns()` ([select.php](https://github.com/phpvv/db-examples/blob/master/examples/select/03.select.php#L23-L28)):
 
@@ -479,7 +479,7 @@ $query = $db->tbl->product->select(
 );
 ```
 
-### From Clause
+### FROM Clause
 
 To set table or view to query you can call `from()` method or create query directly from [`Table`](./Db/Model/Table.php) or [`View`](./Db/Model/View.php) ([from.php](https://github.com/phpvv/db-examples/blob/master/examples/select/04.from.php#L22-L29)):
 ```php
@@ -497,7 +497,7 @@ To change table alias, call `mainTableAs()` method of query ([from.php](https://
 $query = $db->tbl->product->select(/*...*/)->mainTableAs('prod');
 ```
 
-### Join Clause
+### JOIN Clause
 
 To set JOIN clause use these methods: `join()`, `left()`, `right()`, `full()`.
 
@@ -526,7 +526,7 @@ $query = $db->tbl->orderItem->select(/*...*/)
     );
 ```
 
-#### ON condition shortcuts
+#### ON Condition Shortcuts
 
 Specify alias of table to which join is needed ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L47-L49)):
 ```php
@@ -670,7 +670,7 @@ Array
 )
 ```
 
-### Where Clause
+### WHERE Clause
 
 To set query condition use `where()` method. Each `where()` adds `AND` condition.
 Method accepts:
@@ -717,7 +717,7 @@ $query = $db->tbl->product->select(/*...*/)
     ]);
 ```
 
-#### Where shortcuts
+#### WHERE Shortcuts
 
 Query has some shortcuts methods:
 - `->whereId(1)` (for `$db->tbl->product->select()` - `product_id = ?`);
@@ -726,7 +726,7 @@ Query has some shortcuts methods:
 - `->where[Not]Between('width', 250, 350)`;
 - `->where[Not]Like('title', 'computer%', caseInsensitive: true)`.
 
-### GroupBy and Having Clauses
+### GROUP BY and HAVING Clauses
 
 To set GROUP BY clause use `groupBy()` method that behaves like `columns()` (see [Columns Clause](#columns-clause)).
 
@@ -740,7 +740,7 @@ $query = $db->tbl->product->select('b.title brand', 'COUNT(*) cnt')
     ->having('COUNT(*) > ', 1);
 ```
 
-### OrderBy Clause
+### ORDER BY Clause
 
 Simple order by columns ([order-by.php](https://github.com/phpvv/db-examples/blob/master/examples/select/09.order-by.php#L23-L31)):
 ```php
@@ -763,14 +763,14 @@ $query = $db->tbl->product->select('p.title product', 'color_id')
     );
 ```
 
-### Limit Clause
+### LIMIT Clause
 
 Use `->limit($count, $offset)` ([limit.php](https://github.com/phpvv/db-examples/blob/master/examples/select/10.limit.php#L21-L24)):
 ```php
 $query = $db->tbl->product->select()->orderBy('product_id')->limit(3, 2);
 ```
 
-## Insert
+## INSERT
 
 ### Create [`InsertQuery`](./Db/Sql/InsertQuery.php)
 
@@ -789,7 +789,7 @@ $insertQuery = $connection->insert()->into('tbl_order');
 $insertQuery = $db->insert()->into('tbl_order');
 // from Table (recommended):
 $insertQuery = $db->tbl->order->insert();
-// $insertQuery = $connection->insert()->from($db->tbl->order);
+// $insertQuery = $connection->insert()->into($db->tbl->order);
 ```
 
 Last variant is preferable due to adjusting type of inserted value to column type:
@@ -824,7 +824,7 @@ $id = $query->insertedId();             // executes Insert
 $affectedRows = $query->affectedRows(); // executes Insert too
 ```
 
-### Insert single row
+### Insert Single Row
 
 Regular insert query ([insert-single-row.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.insert-single-row.php#L22-L27)):
 ```php
@@ -852,7 +852,7 @@ $insertedId = $db->tbl->order->insert([
 ]);
 ```
 
-### Insert multiple rows
+### Insert Multiple Rows
 
 Insert values list ([insert-multiple-rows.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/04.insert-multiple-rows.php#L33-L46)):
 ```php
@@ -890,7 +890,7 @@ foreach ($valuesList as $values) {
 $query->execPerFinish(); // exec last
 ```
 
-## Update
+## UPDATE
 
 ### Create [`UpdateQuery`](./Db/Sql/UpdateQuery.php)
 
@@ -904,12 +904,12 @@ $connection = $db->getConnection(); // or $db->getFreeConnection();
 // $connection = new \VV\Db\Connection(...);
 
 // from Connection directly:
-$updateQuery = $connection->update()->into('tbl_order');
+$updateQuery = $connection->update()->table('tbl_order');
 // from Db:
-$updateQuery = $db->update()->into('tbl_order');
+$updateQuery = $db->update()->table('tbl_order');
 // from Table (recommended):
 $updateQuery = $db->tbl->order->update();
-// $updateQuery = $connection->update()->from($db->tbl->order);
+// $updateQuery = $connection->update()->table($db->tbl->order);
 ```
 
 Last variant is preferable due to adjusting type of updated value to column type:
@@ -931,23 +931,23 @@ Just execute:
 $result = $query->exec();
 ```
 
-Get affected rows ([execute-update-query.php](https://github.com/phpvv/db-examples/blob/master/examples/update/02.execute-update-query.php#L28-L32)):
+Get affected rows ([execute-update-query.php](https://github.com/phpvv/db-examples/blob/master/examples/update/02.execute-update-query.php#L28-L29)):
 ```php
 $affectedRows = $result->affectedRows();
 ```
 
-Execute query and return affected rows ([execute-update-query.php](https://github.com/phpvv/db-examples/blob/master/examples/update/02.execute-update-query.php#L35-L38)):
+Execute query and return affected rows ([execute-update-query.php](https://github.com/phpvv/db-examples/blob/master/examples/update/02.execute-update-query.php#L32-L33)):
 ```php
 $affectedRows = $query->affectedRows();
 ```
 
-### SET and WHERE clauses
+### SET and WHERE Clauses
 
 Method `set()` accepts column name as first argument and value (or `Expression`) as second argument or array `column => value`.
 WHERE clause is required for `UpdateQuery`. To set condition use `where()` method or its shortcuts (see [select query where clause](#where-clause)).
 To update all rows just set something like this: `->where('1=1')`.
 
-Example ([update-set-where.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update-set-where.php#L34-L41)):
+Example ([update.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update.php#L34-L41)):
 ```php
 $query = $db->tbl->order->update()
     // ->set([
@@ -959,7 +959,7 @@ $query = $db->tbl->order->update()
     ->whereId(2);
 ```
 
-Shortcut (executes query) ([update-set-where.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update-set-where.php#L34-L43)):
+Shortcut (executes query) ([update.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update.php#L34-L43)):
 ```php
 $affectedRows = $db->tbl->order->update(
     [
@@ -972,7 +972,7 @@ $affectedRows = $db->tbl->order->update(
 );
 ```
 
-Update with [`Expression`](./Db/Sql/Expressions/Expression.php) (`SelectQuery`, `CaseExpression`, ...) ([update-set-where.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update-set-where.php#L47-L57)): 
+Update with [`Expression`](./Db/Sql/Expressions/Expression.php) (`SelectQuery`, `CaseExpression`, ...) ([update.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update.php#L47-L57)): 
 ```php
 $query = $db->tbl->order->update()
     ->set(
@@ -984,13 +984,126 @@ $query = $db->tbl->order->update()
     ->where('amount', null);
 ```
 
-## Delete
+## DELETE
 
-*Coming soon...*
+### Create [`DeleteQuery`](./Db/Sql/DeleteQuery.php)
+
+There are several variants to create `DeleteQuery` ([create-delete-query.php](https://github.com/phpvv/db-examples/blob/master/examples/delete/01.create-delete-query.php#L24-L36)):
+
+```php
+use App\Db\MainDb;
+
+$db = MainDb::instance();
+$connection = $db->getConnection(); // or $db->getFreeConnection();
+// $connection = new \VV\Db\Connection(...);
+
+// from Connection directly:
+$deleteQuery = $connection->delete()->into('tbl_order');
+// from Db:
+$deleteQuery = $db->delete()->into('tbl_order');
+// from Table (recommended):
+$deleteQuery = $db->tbl->order->delete();
+// $deleteQuery = $connection->delete()->from($db->tbl->order);
+```
+
+### Execute [`DeleteQuery`](./Db/Sql/DeleteQuery.php)
+
+See [execute UpdateQuery section](#execute-updatequery):
+```php
+$result = $query->exec();
+$affectedRows = $result->affectedRows();
+// or
+$affectedRows = $query->affectedRows();
+```
+
+### WHERE Clause
+
+WHERE clause is required for `DeleteQuery`. To set condition use `where()` method or its shortcuts (see [WHERE clause section](#where-clause)).
+To delete all rows just set something like this: `->where('1=1')`.
+
+Example ([delete.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/02.delete.php#L22-L32)):
+```php
+$query = $db->tbl->orderItem->delete()
+    ->where(
+        'price > ',
+        $db->tbl->orderItem
+            ->select('AVG(price)')
+            ->mainTableAs('oi2')
+            ->where('oi2.order_id=oi.order_id')
+    );
+```
 
 ## Transaction
 
-*Coming soon...*
+To start transaction for connection use `startTransaction()`:
+```php
+$transaction = $connection->startTransaction();
+// or
+$transaction = $db->startTransaction();
+```
+To commit or rollback changes use `Transaction`s `commit()` or `rollback()` methods:
+```php
+try {
+    // ...
+    $transaction->commit();
+} catch (\Throwable $e) {
+    $transaction->rollback();
+    // ...
+}
+```
+
+
+To execute query inside transaction pass `Transaction` object to method `exec($transaction)`
+(or `affectedRows($transaction)`, or `insertedId($transaction)`).
+Query execution for `Connection` with started transaction without passing `Transaction` to `exec()` throws exception.
+To overcome this use transaction free connection (`$db->getFreeConnection()`).
+
+Example ([copy-order.php](https://github.com/phpvv/db-examples/blob/master/examples/transaction/01.copy-order.php#L46-L88)):
+```php
+$transaction = $db->startTransaction();
+try {
+    $newOrderId = $db->tbl->order->insert()
+        ->set([
+            'user_id' => $userId,
+            'date_created' => new \DateTime(),
+        ])
+        ->insertedId($transaction);
+
+    echo "new Order ID: $newOrderId\n";
+
+    $affectedRows = $db->tbl->orderItem->insert()
+        ->columns('order_id', 'product_id', 'price', 'quantity')
+        ->values(
+            $db->tbl->orderItem
+                ->select((string)$newOrderId, 'product_id', 'price', 'quantity')
+                ->where('order_id', $orderId)
+        )
+        ->affectedRows($transaction);
+
+    echo "copied Order items: $affectedRows\n";
+
+    $db->tbl->order->update()
+        ->set(
+            'amount',
+            $db->tbl->orderItem->select('SUM(price * quantity)')->where('order_id=o.order_id')
+        )
+        ->whereId($newOrderId)
+        ->exec($transaction);
+
+    // you can execute important statement in transaction free connection
+    $db->tbl->log->insert()
+        ->set(['title' => "new order copy #$newOrderId"])
+        ->exec($db->getFreeConnection());
+
+    // throw new \RuntimeException('Test transactionFreeConnection()');
+
+    $transaction->commit();
+} catch (\Throwable $e) {
+    $transaction->rollback();
+    /** @noinspection PhpUnhandledExceptionInspection */
+    throw $e;
+}
+```
 
 ## Condition
 
