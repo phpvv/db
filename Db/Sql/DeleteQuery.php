@@ -62,20 +62,6 @@ class DeleteQuery extends ModificatoryQuery
     }
 
     /**
-     * Clears delTablesClause property and returns previous value
-     *
-     * @return DeleteTablesClause
-     */
-    public function clearDeleteTablesClause(): DeleteTablesClause
-    {
-        try {
-            return $this->getDeleteTablesClause();
-        } finally {
-            $this->setDeleteTablesClause(null);
-        }
-    }
-
-    /**
      * Creates default delTablesClause
      *
      * @return DeleteTablesClause

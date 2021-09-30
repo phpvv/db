@@ -167,20 +167,6 @@ abstract class Query
     }
 
     /**
-     * Clears tableClause property and returns previous value
-     *
-     * @return TableClause
-     */
-    public function clearTableClause(): TableClause
-    {
-        try {
-            return $this->getTableClause();
-        } finally {
-            $this->setTableClause(null);
-        }
-    }
-
-    /**
      * @return TableClause
      */
     public function createTableClause(): TableClause

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace VV\Db\Sql\Stringifiers\Mysql;
 
 use VV\Db\Sql\Clauses\DeleteTablesClause;
+use VV\Db\Sql\Clauses\TableClause;
 use VV\Db\Sql\DeleteQuery;
 
 /**
@@ -49,5 +50,10 @@ class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier
         }
 
         return $str;
+    }
+
+    protected function useAliasForTable(TableClause $table): bool
+    {
+        return true;
     }
 }

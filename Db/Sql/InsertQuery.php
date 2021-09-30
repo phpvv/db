@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql;
 
+use VV\Db\Connection;
 use VV\Db\Model\Table;
 use VV\Db\Param;
 use VV\Db\Result;
@@ -143,20 +144,6 @@ class InsertQuery extends ModificatoryQuery
     }
 
     /**
-     * Clears columnsClause property and returns previous value
-     *
-     * @return Clauses\InsertColumnsClause|null
-     */
-    public function clearColumnsClause(): ?Clauses\InsertColumnsClause
-    {
-        try {
-            return $this->getColumnsClause();
-        } finally {
-            $this->setColumnsClause(null);
-        }
-    }
-
-    /**
      * Creates default columnsClause
      *
      * @return Clauses\InsertColumnsClause
@@ -192,20 +179,6 @@ class InsertQuery extends ModificatoryQuery
         $this->valuesClause = $valuesClause;
 
         return $this;
-    }
-
-    /**
-     * Clears valuesClause property and returns previous value
-     *
-     * @return Clauses\InsertValuesClause
-     */
-    public function clearValuesClause(): Clauses\InsertValuesClause
-    {
-        try {
-            return $this->getValuesClause();
-        } finally {
-            $this->setValuesClause(null);
-        }
     }
 
     /**
@@ -324,10 +297,6 @@ class InsertQuery extends ModificatoryQuery
 
     /**
      * Executes(!) query and returns insertedId
-     *
-     * @param Transaction|null $transaction
-     *
-     * @return mixed
      */
     public function insertedId(Transaction $transaction = null): mixed
     {
@@ -406,7 +375,7 @@ class InsertQuery extends ModificatoryQuery
         try {
             return $this->exec();
         } finally {
-            $this->clearValuesClause();
+            $this->setValuesClause(null);
         }
     }
 }

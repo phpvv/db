@@ -187,20 +187,6 @@ trait QueryWhereTrait
     }
 
     /**
-     * Clears whereClause property and returns previous value
-     *
-     * @return Condition
-     */
-    public function clearWhereClause(): Condition
-    {
-        try {
-            return $this->getWhereClause();
-        } finally {
-            $this->setWhereClause(null);
-        }
-    }
-
-    /**
      * @return Condition
      */
     public function createWhereClause(): Condition

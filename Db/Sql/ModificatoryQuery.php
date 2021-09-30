@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql;
 
+use VV\Db\Connection;
 use VV\Db\Param;
 use VV\Db\Result;
 use VV\Db\Sql\Clauses\ColumnsClause;
@@ -67,10 +68,6 @@ abstract class ModificatoryQuery extends Query
 
     /**
      * Add `RETURNING column1, column2, ...` clause (only for postgres)
-     *
-     * @param string|array|Expression ...$columns
-     *
-     * @return $this
      */
     public function returning(string|array|Expression ...$columns): static
     {
@@ -80,9 +77,7 @@ abstract class ModificatoryQuery extends Query
     }
 
     /**
-     * Returns returnIntoClause
-     *
-     * @return ReturnIntoClause
+     * Returns ReturnIntoClause
      */
     public function getReturnIntoClause(): ReturnIntoClause
     {
@@ -94,11 +89,7 @@ abstract class ModificatoryQuery extends Query
     }
 
     /**
-     * Sets returnIntoClause
-     *
-     * @param ReturnIntoClause|null $returnIntoClause
-     *
-     * @return $this
+     * Sets ReturnIntoClause
      */
     public function setReturnIntoClause(?ReturnIntoClause $returnIntoClause): static
     {
@@ -108,23 +99,7 @@ abstract class ModificatoryQuery extends Query
     }
 
     /**
-     * Clears returnIntoClause property and returns previous value
-     *
-     * @return ReturnIntoClause
-     */
-    public function clearReturnIntoClause(): ReturnIntoClause
-    {
-        try {
-            return $this->getReturnIntoClause();
-        } finally {
-            $this->setReturnIntoClause(null);
-        }
-    }
-
-    /**
-     * Creates default returnIntoClause
-     *
-     * @return ReturnIntoClause
+     * Creates ReturnIntoClause
      */
     public function createReturnIntoClause(): ReturnIntoClause
     {
@@ -132,9 +107,7 @@ abstract class ModificatoryQuery extends Query
     }
 
     /**
-     * Returns returningClause
-     *
-     * @return ColumnsClause
+     * Returns ReturningClause
      */
     public function getReturningClause(): ColumnsClause
     {
@@ -146,11 +119,7 @@ abstract class ModificatoryQuery extends Query
     }
 
     /**
-     * Sets returningClause
-     *
-     * @param ColumnsClause|null $returningClause
-     *
-     * @return $this
+     * Sets ReturningClause
      */
     public function setReturningClause(?ColumnsClause $returningClause): static
     {
@@ -160,23 +129,7 @@ abstract class ModificatoryQuery extends Query
     }
 
     /**
-     * Clears returningClause property and returns previous value
-     *
-     * @return ColumnsClause
-     */
-    public function clearReturningClause(): ColumnsClause
-    {
-        try {
-            return $this->getReturningClause();
-        } finally {
-            $this->setReturningClause(null);
-        }
-    }
-
-    /**
-     * Creates default returningClause
-     *
-     * @return ColumnsClause
+     * Creates ReturningClause
      */
     public function createReturningClause(): ColumnsClause
     {
@@ -185,10 +138,6 @@ abstract class ModificatoryQuery extends Query
 
     /**
      * Executes query
-     *
-     * @param Transaction|null $transaction
-     *
-     * @return Result
      */
     public function exec(Transaction $transaction = null): Result
     {
@@ -202,9 +151,7 @@ abstract class ModificatoryQuery extends Query
     }
 
     /**
-     * @param Transaction|null $transaction
-     *
-     * @return int
+     * Executes(!) query and returns number of affected rows
      */
     public function affectedRows(Transaction $transaction = null): int
     {

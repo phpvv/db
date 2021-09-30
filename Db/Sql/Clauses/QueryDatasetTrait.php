@@ -64,20 +64,6 @@ trait QueryDatasetTrait
     }
 
     /**
-     * Clears datasetClause property and returns previous value
-     *
-     * @return DatasetClause
-     */
-    public function clearDatasetClause(): DatasetClause
-    {
-        try {
-            return $this->getDatasetClause();
-        } finally {
-            $this->setDatasetClause(null);
-        }
-    }
-
-    /**
      * @return DatasetClause
      */
     public function createDatasetClause(): DatasetClause

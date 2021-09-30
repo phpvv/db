@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace VV\Db\Sql\Stringifiers\Postgres;
 
+use VV\Db\Sql\Clauses\TableClause;
 use VV\Db\Sql\ModificatoryQuery;
 
 /**
@@ -30,5 +31,10 @@ class DeleteStringifier extends \VV\Db\Sql\Stringifiers\DeleteStringifier
     public function getSupportedClausesIds(): int
     {
         return parent::getSupportedClausesIds() | ModificatoryQuery::C_RETURNING;
+    }
+
+    protected function useAliasForTable(TableClause $table): bool
+    {
+        return true;
     }
 }

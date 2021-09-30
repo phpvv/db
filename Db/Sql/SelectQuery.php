@@ -569,20 +569,6 @@ class SelectQuery extends Query implements Expressions\Expression
     }
 
     /**
-     * Clears columnsClause property and returns previous value
-     *
-     * @return ColumnsClause
-     */
-    public function clearColumnsClause(): ColumnsClause
-    {
-        try {
-            return $this->getColumnsClause();
-        } finally {
-            $this->setColumnsClause(null);
-        }
-    }
-
-    /**
      * Creates default columnsClause
      *
      * @return ColumnsClause
@@ -618,20 +604,6 @@ class SelectQuery extends Query implements Expressions\Expression
         $this->groupByClause = $groupByClause;
 
         return $this;
-    }
-
-    /**
-     * Clears groupByClause property and returns previous value
-     *
-     * @return GroupByClause
-     */
-    public function clearGroupByClause(): GroupByClause
-    {
-        try {
-            return $this->getGroupByClause();
-        } finally {
-            $this->setGroupByClause(null);
-        }
     }
 
     /**
@@ -673,20 +645,6 @@ class SelectQuery extends Query implements Expressions\Expression
     }
 
     /**
-     * Clears havingClause property and returns previous value
-     *
-     * @return Condition
-     */
-    public function clearHavingClause(): Condition
-    {
-        try {
-            return $this->getHavingClause();
-        } finally {
-            $this->setHavingClause(null);
-        }
-    }
-
-    /**
      * Creates default havingClause
      *
      * @return Condition
@@ -725,20 +683,6 @@ class SelectQuery extends Query implements Expressions\Expression
     }
 
     /**
-     * Clears orderByClause property and returns previous value
-     *
-     * @return OrderByClause
-     */
-    public function clearOrderByClause(): OrderByClause
-    {
-        try {
-            return $this->getOrderByClause();
-        } finally {
-            $this->setOrderByClause(null);
-        }
-    }
-
-    /**
      * Creates default orderByClause
      *
      * @return OrderByClause
@@ -774,20 +718,6 @@ class SelectQuery extends Query implements Expressions\Expression
         $this->limitClause = $limitClause;
 
         return $this;
-    }
-
-    /**
-     * Clears limitClause property and returns previous value
-     *
-     * @return LimitClause
-     */
-    public function clearLimitClause(): LimitClause
-    {
-        try {
-            return $this->getLimitClause();
-        } finally {
-            $this->setLimitClause(null);
-        }
     }
 
     /**
