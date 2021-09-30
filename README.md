@@ -18,7 +18,7 @@ composer require phpvv/db-oci
 ```
 
 ## Big Select Example
-[big-select.php](https://github.com/phpvv/db-examples/blob/master/examples/big-select.php) in [DB Examples Project](https://github.com/phpvv/db-examples):
+[big-select.php](https://github.com/phpvv/db-playground/blob/master/examples/big-select.php) in [DB Playground](https://github.com/phpvv/db-playground):
 
 ```php
 use App\Db\MainDb;
@@ -167,7 +167,7 @@ Array
 
 ## Big Transaction Example
 
-[big-transaction.php](https://github.com/phpvv/db-examples/blob/master/examples/big-transaction.php) in [DB Examples Project](https://github.com/phpvv/db-examples):
+[big-transaction.php](https://github.com/phpvv/db-playground/blob/master/examples/big-transaction.php) in [DB Playground](https://github.com/phpvv/db-playground):
 
 ```php
 use App\Db\MainDb;
@@ -272,7 +272,7 @@ try {
 
 ### Using only `Connection` without schema model representation
 
-Example ([connection.php](https://github.com/phpvv/db-examples/blob/master/examples/connection.php)):
+Example ([connection.php](https://github.com/phpvv/db-playground/blob/master/examples/connection.php)):
 
 ```php
 use APP\DB\MAIN as CONF;
@@ -302,7 +302,7 @@ print_r($result->rows);
 #### Configuration
 
 At start, it is needed to create somewhere `class <MyNameOf>Db extends \VV\Db` and implement one abstract method `createConnection()`.
-Example ([App/Db/MainDb.php](https://github.com/phpvv/db-examples/blob/master/App/Db/MainDb.php)):
+Example ([App/Db/MainDb.php](https://github.com/phpvv/db-playground/blob/master/App/Db/MainDb.php)):
 
 ```php
 namespace App\Db;
@@ -329,7 +329,7 @@ class MainDb extends \VV\Db {
 
 #### Model Generation
 
-Just run this code ([gen-db-model.php](https://github.com/phpvv/db-examples/blob/master/examples/gen-db-model.php)):
+Just run this code ([gen-db-model.php](https://github.com/phpvv/db-playground/blob/master/examples/gen-db-model.php)):
 
 ```php
 use App\Db\MainDb;
@@ -341,7 +341,7 @@ DB schema representation classes will be created in the `App\Db\MainDb` folder.
 
 #### Usage
 
-Example ([db-model.php](https://github.com/phpvv/db-examples/blob/master/examples/db-model.php)):
+Example ([db-model.php](https://github.com/phpvv/db-playground/blob/master/examples/db-model.php)):
 
 ```php
 use App\Db\MainDb;
@@ -363,7 +363,7 @@ print_r($products);
 
 ### Create [`SelectQuery`](./Db/Sql/SelectQuery.php)
 
-There are several variants to create `SelectQuery` ([create-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/01.create-select-query.php#L26-L37)):
+There are several variants to create `SelectQuery` ([create-select-query.php](https://github.com/phpvv/db-playground/blob/master/examples/select/01.create-select-query.php#L26-L37)):
 
 ```php
 use App\Db\MainDb;
@@ -386,7 +386,7 @@ $selectQuery = $db->tbl->product->select(...$columns);
 
 #### From [`Result`](./Db/Result.php)
 
-Fetch single row or cell ([execute-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/02.execute-select-query.php#L24-L31)):
+Fetch single row or cell ([execute-select-query.php](https://github.com/phpvv/db-playground/blob/master/examples/select/02.execute-select-query.php#L24-L31)):
 ```php
 $query = $db->tbl->product->select('product_id', 'title')->whereId(10);
 
@@ -394,7 +394,7 @@ $row = $query->result->row/*($flags)*/);
 $productId = $query->result->cell/*($columnIndex[, $flags])*/);
 ```
 
-Fetch all rows or column ([execute-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/02.execute-select-query.php#L36-L53)):
+Fetch all rows or column ([execute-select-query.php](https://github.com/phpvv/db-playground/blob/master/examples/select/02.execute-select-query.php#L36-L53)):
 ```php
 $query = $db->tbl->product->select('product_id', 'title', 'b.title brand')->join($db->tbl->brand)->limit(3);
 
@@ -426,7 +426,7 @@ $rows = $query->rows(
 );
 ```
 
-Fetch result directly from query ([execute-select-query.php](https://github.com/phpvv/db-examples/blob/master/examples/select/02.execute-select-query.php#L58-L85)):
+Fetch result directly from query ([execute-select-query.php](https://github.com/phpvv/db-playground/blob/master/examples/select/02.execute-select-query.php#L58-L85)):
 ```php
 $query = $db->tbl->product->select('product_id', 'title', 'brand_id')->limit(3);
 
@@ -453,7 +453,7 @@ $title = $query->cell(1);
 
 ### SELECT Clause
 
-Method `select(...)` (see above) returns [`SelectQuery`](./Db/Sql/SelectQuery.php) object. You can change columns using methods `SelectQuery::columns()` or `SelectQuery::addColumns()` ([select.php](https://github.com/phpvv/db-examples/blob/master/examples/select/03.select.php#L23-L28)):
+Method `select(...)` (see above) returns [`SelectQuery`](./Db/Sql/SelectQuery.php) object. You can change columns using methods `SelectQuery::columns()` or `SelectQuery::addColumns()` ([select.php](https://github.com/phpvv/db-playground/blob/master/examples/select/03.select.php#L23-L28)):
 
 ```php
 $query = $db->tbl->product->select()
@@ -461,7 +461,7 @@ $query = $db->tbl->product->select()
     ->addColumns('title', 'price');
 ```
 
-All these methods accepts `string` or [`Expression`](./Db/Sql/Expressions/Expression.php) interface as each column. So you can do something like this ([select.php](https://github.com/phpvv/db-examples/blob/master/examples/select/03.select.php#L31-L48)):
+All these methods accepts `string` or [`Expression`](./Db/Sql/Expressions/Expression.php) interface as each column. So you can do something like this ([select.php](https://github.com/phpvv/db-playground/blob/master/examples/select/03.select.php#L31-L48)):
 
 ```php
 $query = $db->tbl->product->select(
@@ -481,7 +481,7 @@ $query = $db->tbl->product->select(
 
 ### FROM Clause
 
-To set table or view to query you can call `from()` method or create query directly from [`Table`](./Db/Model/Table.php) or [`View`](./Db/Model/View.php) ([from.php](https://github.com/phpvv/db-examples/blob/master/examples/select/04.from.php#L22-L29)):
+To set table or view to query you can call `from()` method or create query directly from [`Table`](./Db/Model/Table.php) or [`View`](./Db/Model/View.php) ([from.php](https://github.com/phpvv/db-playground/blob/master/examples/select/04.from.php#L22-L29)):
 ```php
 $query = $db->tbl->product->select(/*...*/);
 // or
@@ -492,7 +492,7 @@ $query = $db->select(/*...*/)->from('tbl_product'); // not same as above regardi
 
 By default, alias of table (or view) consists of first letters of each word of table (or view) name without prefix (`tbl_`,`t_`, `vw_`, `v_`). For example: `tbl_order` -> `o`, `tbl_order_item` -> `oi`.
 
-To change table alias, call `mainTableAs()` method of query ([from.php](https://github.com/phpvv/db-examples/blob/master/examples/select/04.from.php#L32-L33)):
+To change table alias, call `mainTableAs()` method of query ([from.php](https://github.com/phpvv/db-playground/blob/master/examples/select/04.from.php#L32-L33)):
 ```php
 $query = $db->tbl->product->select(/*...*/)->mainTableAs('prod');
 ```
@@ -501,7 +501,7 @@ $query = $db->tbl->product->select(/*...*/)->mainTableAs('prod');
 
 To set JOIN clause use these methods: `join()`, `left()`, `right()`, `full()`.
 
-Example ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L23-L28)):
+Example ([join.php](https://github.com/phpvv/db-playground/blob/master/examples/select/05.join.php#L23-L28)):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)  // SELECT ... FROM "tbl_order_item" "oi"
     ->join($db->tbl->order)                    // JOIN "tbl_order" "o" ON "o"."order_id" = "oi"."order_id"
@@ -510,7 +510,7 @@ $query = $db->tbl->orderItem->select(/*...*/)  // SELECT ... FROM "tbl_order_ite
     ->where('o.state_id', 1);                  // WHERE "o"."state_id" = ?
 ```
 
-By default, table joins to previous table by primary key column. Default alias of table is first letters of each word of table name. You can change ON condition (second parameter) and alias (third parameter) ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L31-L43)):
+By default, table joins to previous table by primary key column. Default alias of table is first letters of each word of table name. You can change ON condition (second parameter) and alias (third parameter) ([join.php](https://github.com/phpvv/db-playground/blob/master/examples/select/05.join.php#L31-L43)):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)
     ->join(
@@ -528,33 +528,33 @@ $query = $db->tbl->orderItem->select(/*...*/)
 
 #### ON Condition Shortcuts
 
-Specify alias of table to which join is needed ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L47-L49)):
+Specify alias of table to which join is needed ([join.php](https://github.com/phpvv/db-playground/blob/master/examples/select/05.join.php#L47-L49)):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)
     ->join($db->tbl->order)
     ->join($db->tbl->product, 'oi'); // join to tbl_order_item (not tbl_order) by product_id field
 ```
 
-Specify column of table to which join is needed ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L53-L54)):
+Specify column of table to which join is needed ([join.php](https://github.com/phpvv/db-playground/blob/master/examples/select/05.join.php#L53-L54)):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)
     ->join($db->tbl->order, '.foo_id'); // "o"."order_id" = "oi"."foo_id"
 ```
 
-Specify alias and column of table to which join is needed ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L58-L60)):
+Specify alias and column of table to which join is needed ([join.php](https://github.com/phpvv/db-playground/blob/master/examples/select/05.join.php#L58-L60)):
 ```php
 $query = $db->tbl->orderItem->select(/*...*/)
     ->join($db->tbl->order)
     ->join($db->tbl->product, 'oi.foo_id'); // "p"."product_id" = "oi"."foo_id"
 ```
 
-`joinParent()` ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L64-L65)):
+`joinParent()` ([join.php](https://github.com/phpvv/db-playground/blob/master/examples/select/05.join.php#L64-L65)):
 ```php
 $query = $db->tbl->productCategory->select(/*...*/)
     //->joinParent('pc2', 'pc', 'parent_id') // same as below
     ->joinParent('pc2'); // JOIN "tbl_product_category" "pc2" ON ("pc2"."category_id" = "pc"."parent_id")
 ```
-`joinBack()` ([join.php](https://github.com/phpvv/db-examples/blob/master/examples/select/05.join.php#L69-L70)):
+`joinBack()` ([join.php](https://github.com/phpvv/db-playground/blob/master/examples/select/05.join.php#L69-L70)):
 ```php
 $query = $db->tbl->order->select(/*...*/)
     ->joinBack($db->tbl->orderItem); // JOIN "tbl_order_item" "oi" ON ("oi"."item_id" = "o"."order_id")
@@ -562,7 +562,7 @@ $query = $db->tbl->order->select(/*...*/)
 
 ### Nested Columns
 
-Nest resulting columns manually ([nested-columns.php](https://github.com/phpvv/db-examples/blob/master/examples/select/06.nested-columns.php#L22-L29)):
+Nest resulting columns manually ([nested-columns.php](https://github.com/phpvv/db-playground/blob/master/examples/select/06.nested-columns.php#L22-L29)):
 ```php
 $query = $db->tbl->product->select('product_id', 'price', 'weight')
     ->addNestedColumns('brand', 'b.brand_id', 'b.title') // first argument is nesting path: string|string[]
@@ -606,7 +606,7 @@ Array
 )
 ```
 
-Nest resulting columns with join ([nested-columns.php](https://github.com/phpvv/db-examples/blob/master/examples/select/06.nested-columns.php#L33-L50)):
+Nest resulting columns with join ([nested-columns.php](https://github.com/phpvv/db-playground/blob/master/examples/select/06.nested-columns.php#L33-L50)):
 ```php
 $query = $db->tbl->orderItem->select('item_id', 'price', 'quantity')
     ->joinNestedColumns(
@@ -674,7 +674,7 @@ Array
 
 To set query condition use `where()` method. Each `where()` adds `AND` condition.
 Method accepts:
-- `Condition` as first argument ([where.php](https://github.com/phpvv/db-examples/blob/master/examples/select/07.where.php#L23-L35)):
+- `Condition` as first argument ([where.php](https://github.com/phpvv/db-playground/blob/master/examples/select/07.where.php#L23-L35)):
 ```php
 $query = $db->tbl->product->select(/*...*/)
     ->where(                                // WHERE
@@ -688,7 +688,7 @@ $query = $db->tbl->product->select(/*...*/)
     );
 
 ```
-- `Expression|string` as first argument and (binding) value (or `Expression`) to compare as second argument ([where.php](https://github.com/phpvv/db-examples/blob/master/examples/select/07.where.php#L37-L46)):
+- `Expression|string` as first argument and (binding) value (or `Expression`) to compare as second argument ([where.php](https://github.com/phpvv/db-playground/blob/master/examples/select/07.where.php#L37-L46)):
 ```php
 $query = $db->tbl->product->select(/*...*/)
     ->where('color_id', 5)      // same: `->where('color_id =', 5)`
@@ -698,13 +698,13 @@ $query = $db->tbl->product->select(/*...*/)
     )
     ->where('title !=', null);
 ```
-- `string` as custom SQL as first argument and (binding) array of values as second argument ([where.php](https://github.com/phpvv/db-examples/blob/master/examples/select/07.where.php#L49-L54)):
+- `string` as custom SQL as first argument and (binding) array of values as second argument ([where.php](https://github.com/phpvv/db-playground/blob/master/examples/select/07.where.php#L49-L54)):
 ```php
 $query = $db->tbl->product->select(/*...*/)
     ->where('`width` BETWEEN ? AND ?', [250, 350])  // custom sql with binding parameters
     ->where('state=1');                             // custom sql w/o binding parameters
 ```
-- array as first argument ($expression => $parameter) ([where.php](https://github.com/phpvv/db-examples/blob/master/examples/select/07.where.php#L57-L68)):
+- array as first argument ($expression => $parameter) ([where.php](https://github.com/phpvv/db-playground/blob/master/examples/select/07.where.php#L57-L68)):
 ```php
 $query = $db->tbl->product->select(/*...*/)
     ->where([
@@ -732,7 +732,7 @@ To set GROUP BY clause use `groupBy()` method that behaves like `columns()` (see
 
 To set condition for aggregate use `having()` method that behaves like `where()` (see [Where Clause](#where-clause)).
 
-Example ([group-by-having.php](https://github.com/phpvv/db-examples/blob/master/examples/select/08.group-by-having.php#L22-L28)):
+Example ([group-by-having.php](https://github.com/phpvv/db-playground/blob/master/examples/select/08.group-by-having.php#L22-L28)):
 ```php
 $query = $db->tbl->product->select('b.title brand', 'COUNT(*) cnt')
     ->join($db->tbl->brand)
@@ -742,7 +742,7 @@ $query = $db->tbl->product->select('b.title brand', 'COUNT(*) cnt')
 
 ### ORDER BY Clause
 
-Simple order by columns ([order-by.php](https://github.com/phpvv/db-examples/blob/master/examples/select/09.order-by.php#L23-L31)):
+Simple order by columns ([order-by.php](https://github.com/phpvv/db-playground/blob/master/examples/select/09.order-by.php#L23-L31)):
 ```php
 $query = $db->tbl->product->select('b.title brand', 'p.title product', 'price')
     ->left($db->tbl->brand)
@@ -752,7 +752,7 @@ $query = $db->tbl->product->select('b.title brand', 'p.title product', 'price')
     );
 ```
 
-Order by expression (CASE for example) ([order-by.php](https://github.com/phpvv/db-examples/blob/master/examples/select/09.order-by.php#L33-L42)):
+Order by expression (CASE for example) ([order-by.php](https://github.com/phpvv/db-playground/blob/master/examples/select/09.order-by.php#L33-L42)):
 ```php
 $query = $db->tbl->product->select('p.title product', 'color_id')
     ->orderBy(                  // ORDER BY
@@ -765,7 +765,7 @@ $query = $db->tbl->product->select('p.title product', 'color_id')
 
 ### LIMIT Clause
 
-Use `->limit($count, $offset)` ([limit.php](https://github.com/phpvv/db-examples/blob/master/examples/select/10.limit.php#L21-L24)):
+Use `->limit($count, $offset)` ([limit.php](https://github.com/phpvv/db-playground/blob/master/examples/select/10.limit.php#L21-L24)):
 ```php
 $query = $db->tbl->product->select()->orderBy('product_id')->limit(3, 2);
 ```
@@ -774,7 +774,7 @@ $query = $db->tbl->product->select()->orderBy('product_id')->limit(3, 2);
 
 ### Create [`InsertQuery`](./Db/Sql/InsertQuery.php)
 
-There are several variants to create `InsertQuery` ([create-insert-query.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/01.create-insert-query.php#L24-L35)):
+There are several variants to create `InsertQuery` ([create-insert-query.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/01.create-insert-query.php#L24-L35)):
 
 ```php
 use App\Db\MainDb;
@@ -811,14 +811,14 @@ Just execute:
 $result = $query->exec();
 ```
 
-Get inserted ID (autoincrement) or affected rows ([execute-insert-query.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/02.execute-insert-query.php#L28-L32)):
+Get inserted ID (autoincrement) or affected rows ([execute-insert-query.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/02.execute-insert-query.php#L28-L32)):
 ```php
 $result = $query->initInsertedId()->exec();
 $id = $result->insertedId();
 $affectedRows = $result->affectedRows();
 ```
 
-Execute query and return inserted ID or affected rows ([execute-insert-query.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/02.execute-insert-query.php#L35-L38)):
+Execute query and return inserted ID or affected rows ([execute-insert-query.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/02.execute-insert-query.php#L35-L38)):
 ```php
 $id = $query->insertedId();             // executes Insert
 $affectedRows = $query->affectedRows(); // executes Insert too
@@ -826,14 +826,14 @@ $affectedRows = $query->affectedRows(); // executes Insert too
 
 ### Insert Single Row
 
-Regular insert query ([insert-single-row.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.insert-single-row.php#L22-L27)):
+Regular insert query ([insert-single-row.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/03.insert-single-row.php#L22-L27)):
 ```php
 $query = $db->tbl->order->insert()
     ->columns('user_id', 'comment')
     ->values(1, 'my comment');
 ```
 
-Insert assignment list ([insert-single-row.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.insert-single-row.php#L29-L38)):
+Insert assignment list ([insert-single-row.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/03.insert-single-row.php#L29-L38)):
 ```php
 $query = $db->tbl->order->insert()
     // ->set([
@@ -844,7 +844,7 @@ $query = $db->tbl->order->insert()
     ->set('comment', 'my comment');
 ```
 
-Shortcut (executes query) ([insert-single-row.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.insert-single-row.php#L40-L44)):
+Shortcut (executes query) ([insert-single-row.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/03.insert-single-row.php#L40-L44)):
 ```php
 $insertedId = $db->tbl->order->insert([
     'user_id' => 1,
@@ -854,7 +854,7 @@ $insertedId = $db->tbl->order->insert([
 
 ### Insert Multiple Rows
 
-Insert values list ([insert-multiple-rows.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/04.insert-multiple-rows.php#L33-L46)):
+Insert values list ([insert-multiple-rows.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/04.insert-multiple-rows.php#L33-L46)):
 ```php
 $query = $db->tbl->orderItem->insert()->columns('order_id', 'product_id', 'price', 'quantity');
 foreach ($valuesList as $values) {
@@ -862,7 +862,7 @@ foreach ($valuesList as $values) {
 }
 ```
 
-Insert from Select ([insert-multiple-rows.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/04.insert-multiple-rows.php#L52-L67)):
+Insert from Select ([insert-multiple-rows.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/04.insert-multiple-rows.php#L52-L67)):
 ```php
 // copy order
 $newOrderId = $db->tbl->order->insert([
@@ -879,7 +879,7 @@ $query = $db->tbl->orderItem->insert()
     );
 ```
 
-Insert values list executing statement per N rows ([insert-multiple-rows.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/04.insert-multiple-rows.php#L71-L78)):
+Insert values list executing statement per N rows ([insert-multiple-rows.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/04.insert-multiple-rows.php#L71-L78)):
 ```php
 $query = $db->tbl->orderItem->insert()
     ->columns('order_id', 'product_id', 'price', 'quantity')
@@ -894,7 +894,7 @@ $query->execPerFinish(); // exec last
 
 ### Create [`UpdateQuery`](./Db/Sql/UpdateQuery.php)
 
-There are several variants to create `UpdateQuery` ([create-update-query.php](https://github.com/phpvv/db-examples/blob/master/examples/update/01.create-update-query.php#L24-L36)):
+There are several variants to create `UpdateQuery` ([create-update-query.php](https://github.com/phpvv/db-playground/blob/master/examples/update/01.create-update-query.php#L24-L36)):
 
 ```php
 use App\Db\MainDb;
@@ -931,12 +931,12 @@ Just execute:
 $result = $query->exec();
 ```
 
-Get affected rows ([execute-update-query.php](https://github.com/phpvv/db-examples/blob/master/examples/update/02.execute-update-query.php#L28-L29)):
+Get affected rows ([execute-update-query.php](https://github.com/phpvv/db-playground/blob/master/examples/update/02.execute-update-query.php#L28-L29)):
 ```php
 $affectedRows = $result->affectedRows();
 ```
 
-Execute query and return affected rows ([execute-update-query.php](https://github.com/phpvv/db-examples/blob/master/examples/update/02.execute-update-query.php#L32-L33)):
+Execute query and return affected rows ([execute-update-query.php](https://github.com/phpvv/db-playground/blob/master/examples/update/02.execute-update-query.php#L32-L33)):
 ```php
 $affectedRows = $query->affectedRows();
 ```
@@ -947,7 +947,7 @@ Method `set()` accepts column name as first argument and value (or `Expression`)
 WHERE clause is required for `UpdateQuery`. To set condition use `where()` method or its shortcuts (see [select query where clause](#where-clause)).
 To update all rows just set something like this: `->where('1=1')`.
 
-Example ([update.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update.php#L34-L41)):
+Example ([update.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/03.update.php#L34-L41)):
 ```php
 $query = $db->tbl->order->update()
     // ->set([
@@ -959,7 +959,7 @@ $query = $db->tbl->order->update()
     ->whereId(2);
 ```
 
-Shortcut (executes query) ([update.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update.php#L34-L43)):
+Shortcut (executes query) ([update.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/03.update.php#L34-L43)):
 ```php
 $affectedRows = $db->tbl->order->update(
     [
@@ -972,7 +972,7 @@ $affectedRows = $db->tbl->order->update(
 );
 ```
 
-Update with [`Expression`](./Db/Sql/Expressions/Expression.php) (`SelectQuery`, `CaseExpression`, ...) ([update.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/03.update.php#L47-L57)): 
+Update with [`Expression`](./Db/Sql/Expressions/Expression.php) (`SelectQuery`, `CaseExpression`, ...) ([update.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/03.update.php#L47-L57)): 
 ```php
 $query = $db->tbl->order->update()
     ->set(
@@ -988,7 +988,7 @@ $query = $db->tbl->order->update()
 
 ### Create [`DeleteQuery`](./Db/Sql/DeleteQuery.php)
 
-There are several variants to create `DeleteQuery` ([create-delete-query.php](https://github.com/phpvv/db-examples/blob/master/examples/delete/01.create-delete-query.php#L24-L36)):
+There are several variants to create `DeleteQuery` ([create-delete-query.php](https://github.com/phpvv/db-playground/blob/master/examples/delete/01.create-delete-query.php#L24-L36)):
 
 ```php
 use App\Db\MainDb;
@@ -1021,7 +1021,7 @@ $affectedRows = $query->affectedRows();
 WHERE clause is required for `DeleteQuery`. To set condition use `where()` method or its shortcuts (see [WHERE clause section](#where-clause)).
 To delete all rows just set something like this: `->where('1=1')`.
 
-Example ([delete.php](https://github.com/phpvv/db-examples/blob/master/examples/insert/02.delete.php#L22-L32)):
+Example ([delete.php](https://github.com/phpvv/db-playground/blob/master/examples/insert/02.delete.php#L22-L32)):
 ```php
 $query = $db->tbl->orderItem->delete()
     ->where(
@@ -1058,7 +1058,7 @@ To execute query inside transaction pass `Transaction` object to method `exec($t
 Query execution for `Connection` with started transaction without passing `Transaction` to `exec()` throws exception.
 To overcome this use transaction free connection (`$db->getFreeConnection()`).
 
-Example ([copy-order.php](https://github.com/phpvv/db-examples/blob/master/examples/transaction/01.copy-order.php#L46-L88)):
+Example ([copy-order.php](https://github.com/phpvv/db-playground/blob/master/examples/transaction/01.copy-order.php#L46-L88)):
 ```php
 $transaction = $db->startTransaction();
 try {
@@ -1107,8 +1107,71 @@ try {
 
 ## Condition
 
-*Coming soon...*
+Create condition:
+```php
+use VV\Db\Sql;
+use VV\Db\Sql\Condition;
+
+$condition = new Condition();
+// or
+$condition = Sql::condition();
+```
+
+To add new predicate to condition at first you need set target expression via "connector" methods `and($expression)` or `or($expression)`.
+Then call "comparison" method like `eq($value)`, `like($value)`, `in($value1, $value2)` and other:
+
+```php
+$condition = Sql::condition()
+    ->and('foo')->gte(100)
+    ->and/*('foo')*/->lte(1000) // if target expression of next predicate is same as previous one
+                                // you may omit argument for "connector" method     
+    ->and(
+        (new Condition())
+            ->or('bar')->eq(1)
+            ->or('bar')->isNull()
+        // Sql::condition('bar')->eq(1)->or->isNull()
+    )
+```
+
+### Comparison Methods
+
+`eq($param)` - `= ?`  
+`ne($param)` - `!= ?`  
+`lt($param)` - `< ?`  
+`lte($param)` - `<= ?`  
+`gt($param)` - `> ?`  
+`gte($param)` - `>= ?`  
+`compare($param, $operator)` - `$operator ?`  
+`between($from, $till)` - `BETWEEN ? AND ?`  
+`in(...$params)` - `IN (?, ?, ?, ...)`  
+`isNull()` - `IS NULL`  
+`isNotNull()` - `IS NOT NULL`  
+`like($pattern, $caseInsensitive = false)` - `LIKE ?`  
+`startsWith($prefix, $caseInsensitive = false)` - `LIKE ?%`  
+`endsWith($suffix, $caseInsensitive = false)` - `LIKE %?`  
+`contains($string, $caseInsensitive = false)` - `LIKE %?%`  
+`exists($db->select(...)->where(...)` - `EXISTS (SELECT ... FROM ... WHERE ...)`  
+`and('MY_FUNC(foo, ?, ?)')->custom($param1, $param2)` - `MY_FUNC(foo, ?, ?)`  
 
 ## Case Expression
 
-*Coming soon...*
+```php
+$db->select(
+        Sql::case('foo')
+            ->when(1)->then('first')
+            ->when(2)->then('second')
+            ->when(3)->then('third')
+            ->else('N-th')
+            ->as('placement'),
+   )
+   ->from('bar');
+```
+
+```php
+Sql::case()
+    ->when(['foo <' => 10])
+        ->then('low')
+    ->when(Sql::condition('foo')->between(10, 100))
+        ->then('middle')
+    ->else('high');
+```
