@@ -298,14 +298,14 @@ class InsertQuery extends ModificatoryQuery
     /**
      * Executes(!) query and returns insertedId
      */
-    public function insertedId(Transaction $transaction = null): mixed
+    public function insertedId(Connection|Transaction $connection = null): int|string
     {
         $insertedIdClause = $this->getInsertedIdClause();
         if ($insertedIdClause->isEmpty()) {
             $insertedIdClause->set();
         }
 
-        return $this->exec($transaction)->insertedId();
+        return $this->exec($connection)->insertedId();
     }
 
     /**

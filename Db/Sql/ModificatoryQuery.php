@@ -139,10 +139,13 @@ abstract class ModificatoryQuery extends Query
     /**
      * Executes query
      */
-    public function exec(Transaction $transaction = null): Result
+    public function exec(Connection|Transaction $connection = null): Result
     {
-        if ($transaction) {
-            $this->setConnection($transaction->getConnection());
+        if ($connection) {
+            if ($connection instanceof Transaction) {
+                $connection = $connection->getConnection();
+            }
+            $this->setConnection($connection);
         } elseif ($this->getConnection()->isInTransaction()) {
             throw new \LogicException('Statement execution outside current transaction');
         }
@@ -153,9 +156,9 @@ abstract class ModificatoryQuery extends Query
     /**
      * Executes(!) query and returns number of affected rows
      */
-    public function affectedRows(Transaction $transaction = null): int
+    public function affectedRows(Connection|Transaction $connection = null): int
     {
-        return $this->exec($transaction)->affectedRows();
+        return $this->exec($connection)->affectedRows();
     }
 
     protected function getNonEmptyClausesMap(): array
