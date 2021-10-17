@@ -51,7 +51,8 @@ class SelectStringifier extends QueryStringifier
                | SelectQuery::C_HAVING
                | SelectQuery::C_LIMIT
                | SelectQuery::C_DISTINCT
-               | SelectQuery::C_FOR_UPDATE;
+               | SelectQuery::C_FOR_UPDATE
+               | SelectQuery::C_COMBINING;
     }
 
     /**
@@ -76,6 +77,15 @@ class SelectStringifier extends QueryStringifier
     public function stringifyRaw(?array &$params): string
     {
         $query = $this->getSelectQuery();
+        if (!$query->getCombiningClause()->isEmpty()) {
+            return $this->stringifyCombiningQuery($query);
+        }
+
+        return $this->stringifySingleSelectQuery($query);
+    }
+
+    protected function stringifySingleSelectQuery(SelectQuery $query): string
+    {
         $sql = $this->stringifySelectClause($query, $params)
                . $this->stringifyFromClause($query->getTableClause(), $params)
                . $this->stringifyWhereClause($query->getWhereClause(), $params)
@@ -90,6 +100,47 @@ class SelectStringifier extends QueryStringifier
 
         if ($fuc = $query->getForUpdateClause()) {
             $this->applyForUpdateClause($sql, $fuc);
+        }
+
+        return $sql;
+    }
+
+    protected function stringifyCombiningQuery(SelectQuery $query): string
+    {
+        $checkAllEmpty = [
+            'ColumnsClause' => $query->getColumnsClause()->isAsterisk(),
+            'TableClause' => $query->getTableClause()->isEmpty(),
+            'WhereClause' => $query->getWhereClause()->isEmpty(),
+            'GroupByClause' => $query->getGroupByClause()->isEmpty(),
+            'HavingClause' => $query->getHavingClause()->isEmpty(),
+        ];
+
+        foreach ($checkAllEmpty as $clauseName => $isEmpty) {
+            if (!$isEmpty) {
+                throw new \LogicException("$clauseName is not allowed for entire combined query");
+            }
+        }
+
+        $combiningClause = $query->getCombiningClause();
+
+        $sql = '';
+        foreach ($combiningClause->getItems() as $item) {
+            if ($sql) {
+                $sql .= " {$item->getConnector()} ";
+                if ($item->isAll()) {
+                    $sql .= 'ALL ';
+                }
+            }
+
+            $unionStr = (new static($item->getQuery(), $this->getFactory()))->stringifyRaw($params);
+            $sql .= "($unionStr)";
+        }
+
+        $sql .= $this->stringifyOrderByClause($query->getOrderByClause(), $params);
+
+        $limit = $query->getLimitClause();
+        if (!$limit->isEmpty()) {
+            $this->applyLimitClause($sql, $limit->getCount(), $limit->getOffset());
         }
 
         return $sql;

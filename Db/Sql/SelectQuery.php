@@ -17,6 +17,7 @@ use VV\Db\Model\Table;
 use VV\Db\Result;
 use VV\Db\Sql;
 use VV\Db\Sql\Clauses\ColumnsClause;
+use VV\Db\Sql\Clauses\CombiningClause;
 use VV\Db\Sql\Clauses\GroupByClause;
 use VV\Db\Sql\Clauses\LimitClause;
 use VV\Db\Sql\Clauses\OrderByClause;
@@ -54,7 +55,8 @@ class SelectQuery extends Query implements Expressions\Expression
         C_HAVING = 0x20,
         C_LIMIT = 0x40,
         C_DISTINCT = 0x80,
-        C_FOR_UPDATE = 0x0100;
+        C_FOR_UPDATE = 0x0100,
+        C_COMBINING = 0x0200;
 
     private ?ColumnsClause $columnsClause = null;
     private ?GroupByClause $groupByClause = null;
@@ -63,6 +65,7 @@ class SelectQuery extends Query implements Expressions\Expression
     private ?LimitClause $limitClause = null;
     private bool $distinctFlag = false;
     private string|bool $forUpdateClause = false;
+    private ?CombiningClause $combiningClause = null;
 
     public function __get($var)
     {
@@ -374,29 +377,15 @@ class SelectQuery extends Query implements Expressions\Expression
     }
 
     /**
-     * Adds ORDER BY clause to sql
+     * Add from clause in sql
      *
-     * @param string[]|Expression[] $columns
-     *
-     * @return $this
-     */
-    public function orderBy(...$columns): static
-    {
-        $clause = $this->createOrderByClause()->add(...$columns);
-
-        return $this->setOrderByClause($clause);
-    }
-
-    /**
-     * Appends ORDER BY clause
-     *
-     * @param string[]|Expression[] $columns
+     * @param array|string $index
      *
      * @return $this
      */
-    public function addOrderBy(...$columns): static
+    public function useIndex(array|string $index): static
     {
-        $this->getOrderByClause()->add(...$columns);
+        $this->getTableClause()->useIndex($index);
 
         return $this;
     }
@@ -430,20 +419,6 @@ class SelectQuery extends Query implements Expressions\Expression
     }
 
     /**
-     * Add from clause in sql
-     *
-     * @param array|string $index
-     *
-     * @return $this
-     */
-    public function useIndex(array|string $index): static
-    {
-        $this->getTableClause()->useIndex($index);
-
-        return $this;
-    }
-
-    /**
      * Add `HAVING` clause
      *
      * @param string|int|Expression|Predicate|array|null $expression
@@ -457,6 +432,34 @@ class SelectQuery extends Query implements Expressions\Expression
     }
 
     /**
+     * Adds ORDER BY clause to sql
+     *
+     * @param string[]|Expression[] $columns
+     *
+     * @return $this
+     */
+    public function orderBy(...$columns): static
+    {
+        $clause = $this->createOrderByClause()->add(...$columns);
+
+        return $this->setOrderByClause($clause);
+    }
+
+    /**
+     * Appends ORDER BY clause
+     *
+     * @param string[]|Expression[] $columns
+     *
+     * @return $this
+     */
+    public function addOrderBy(...$columns): static
+    {
+        $this->getOrderByClause()->add(...$columns);
+
+        return $this;
+    }
+
+    /**
      * Add `LIMIT`
      *
      * @param int $count
@@ -467,6 +470,66 @@ class SelectQuery extends Query implements Expressions\Expression
     public function limit(int $count, int $offset = 0): static
     {
         $this->getLimitClause()->set($count, $offset);
+
+        return $this;
+    }
+
+    /**
+     * Makes this query a combined query with UNION of $queries
+     */
+    public function union(self ...$queries): static
+    {
+        $this->getCombiningClause()->add(CombiningClause::CONN_UNION, false, ...$queries);
+
+        return $this;
+    }
+
+    /**
+     * Makes this query a combined query with UNION ALL of $queries
+     */
+    public function unionAll(self ...$queries): static
+    {
+        $this->getCombiningClause()->add(CombiningClause::CONN_UNION, true, ...$queries);
+
+        return $this;
+    }
+
+    /**
+     * Makes this query a combined query with INTERSECT of $queries
+     */
+    public function intersect(self ...$queries): static
+    {
+        $this->getCombiningClause()->add(CombiningClause::CONN_INTERSECT, false, ...$queries);
+
+        return $this;
+    }
+
+    /**
+     * Makes this query a combined query with INTERSECT ALL of $queries
+     */
+    public function intersectAll(self ...$queries): static
+    {
+        $this->getCombiningClause()->add(CombiningClause::CONN_INTERSECT, true, ...$queries);
+
+        return $this;
+    }
+
+    /**
+     * Makes this query a combined query with EXCEPT of $queries
+     */
+    public function except(self ...$queries): static
+    {
+        $this->getCombiningClause()->add(CombiningClause::CONN_EXCEPT, false, ...$queries);
+
+        return $this;
+    }
+
+    /**
+     * Makes this query a combined query with EXCEPT ALL of $queries
+     */
+    public function exceptAll(self ...$queries): static
+    {
+        $this->getCombiningClause()->add(CombiningClause::CONN_EXCEPT, true, ...$queries);
 
         return $this;
     }
@@ -713,7 +776,7 @@ class SelectQuery extends Query implements Expressions\Expression
      *
      * @return $this
      */
-    public function setLimitClause(LimitClause $limitClause = null): static
+    public function setLimitClause(?LimitClause $limitClause): static
     {
         $this->limitClause = $limitClause;
 
@@ -728,6 +791,44 @@ class SelectQuery extends Query implements Expressions\Expression
     public function createLimitClause(): LimitClause
     {
         return new LimitClause();
+    }
+
+    /**
+     * Returns combiningClause
+     *
+     * @return CombiningClause
+     */
+    public function getCombiningClause(): CombiningClause
+    {
+        if (!$this->combiningClause) {
+            $this->setCombiningClause($this->createCombiningClause());
+        }
+
+        return $this->combiningClause;
+    }
+
+    /**
+     * Sets combiningClause
+     *
+     * @param CombiningClause|null $combiningClause
+     *
+     * @return $this
+     */
+    public function setCombiningClause(?CombiningClause $combiningClause): static
+    {
+        $this->combiningClause = $combiningClause;
+
+        return $this;
+    }
+
+    /**
+     * Creates default combiningClause
+     *
+     * @return CombiningClause
+     */
+    public function createCombiningClause(): CombiningClause
+    {
+        return new CombiningClause();
     }
 
     /**
@@ -791,6 +892,7 @@ class SelectQuery extends Query implements Expressions\Expression
             self::C_LIMIT => $this->getLimitClause(),
             self::C_DISTINCT => $this->isDistinct(),
             self::C_FOR_UPDATE => $this->getForUpdateClause(),
+            self::C_COMBINING => $this->getCombiningClause(),
         ];
     }
 

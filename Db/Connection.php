@@ -97,7 +97,7 @@ final class Connection
         $this->throwIfConnected();
 
         if ($this->connectionError) {
-            throw new ConnectionError('Connection Error found for instance', null, $this->connectionError);
+            throw new ConnectionError('Connection Error found for instance', previous: $this->connectionError);
         }
 
         if (!$this->getHost()) {

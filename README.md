@@ -770,6 +770,21 @@ Use `->limit($count, $offset)` ([limit.php](https://github.com/phpvv/db-playgrou
 $query = $db->tbl->product->select()->orderBy('product_id')->limit(3, 2);
 ```
 
+### UNION, INTERSECT, EXCEPT Clauses
+
+Use `->union[All](...$queries)`, `->intersect[All](...$queries)`, `->except[All](...$queries)` ([union-intersect-except](https://github.com/phpvv/db-playground/blob/master/examples/select/11.union-intersect-except.php#L21-L29)):
+```php
+$query = $db->select()
+    ->unionAll(
+        $db->tbl->product->select('product_id', 'title')->orderBy('product_id')->limit(2),
+        $db->tbl->product->select('product_id', 'title')->orderBy('-product_id')->limit(2),
+    )
+    ->except(
+        $db->tbl->product->select('product_id', 'title')->orderBy('product_id')->limit(5, 1),
+    )
+    ->orderBy('product_id');
+```
+
 ## INSERT
 
 ### Create [`InsertQuery`](./Db/Sql/InsertQuery.php)
