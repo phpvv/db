@@ -78,13 +78,13 @@ class SelectStringifier extends QueryStringifier
     {
         $query = $this->getSelectQuery();
         if (!$query->getCombiningClause()->isEmpty()) {
-            return $this->stringifyCombiningQuery($query);
+            return $this->stringifyCombiningQuery($query, $params);
         }
 
-        return $this->stringifySingleSelectQuery($query);
+        return $this->stringifySingleSelectQuery($query, $params);
     }
 
-    protected function stringifySingleSelectQuery(SelectQuery $query): string
+    protected function stringifySingleSelectQuery(SelectQuery $query, ?array &$params): string
     {
         $sql = $this->stringifySelectClause($query, $params)
                . $this->stringifyFromClause($query->getTableClause(), $params)
@@ -105,7 +105,7 @@ class SelectStringifier extends QueryStringifier
         return $sql;
     }
 
-    protected function stringifyCombiningQuery(SelectQuery $query): string
+    protected function stringifyCombiningQuery(SelectQuery $query, ?array &$params): string
     {
         $checkAllEmpty = [
             'ColumnsClause' => $query->getColumnsClause()->isAsterisk(),
